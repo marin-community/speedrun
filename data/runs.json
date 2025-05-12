@@ -1,0 +1,90 @@
+[
+  {
+    "run_name": "llama_150m_run",
+    "model_size": 154146816,
+    "total_training_time": 51.92430918297396,
+    "total_training_flops": 9.138678416203416e+17,
+    "submitted_by": "unknown",
+    "results_filepath": "/Users/nikilravi/Desktop/Projects/marin/experiments/speedrun/llama_150m_run/speedrun_results.json",
+    "wandb_link": "https://wandb.ai/stanford-mercury/marin/runs/150M_llama_dclm_baseline-7b3186",
+    "eval_paloma_c4_en_bpb": 1.1830110549926758,
+    "run_timestamp": "2025-04-13 06:38:30 UTC"
+  },
+  {
+    "run_name": "llama_300m",
+    "model_size": 299649024,
+    "total_training_time": 107.62992760399925,
+    "total_training_flops": 3.7885734516607734e+18,
+    "submitted_by": "unknown",
+    "results_filepath": "/Users/nikilravi/Desktop/Projects/marin/experiments/speedrun/llama_300m/speedrun_results.json",
+    "wandb_link": "https://wandb.ai/stanford-mercury/marin/runs/300M_llama-7e3b0f",
+    "eval_paloma_c4_en_bpb": 1.1648558378219604,
+    "run_timestamp": "2025-04-30 10:51:52 UTC"
+  },
+  {
+    "run_name": "llama_30m",
+    "model_size": 33784832,
+    "total_training_time": 28.785769938999124,
+    "total_training_flops": 5.066295509263846e+17,
+    "submitted_by": "unknown",
+    "results_filepath": "/Users/nikilravi/Desktop/Projects/marin/experiments/speedrun/llama_30m/speedrun_results.json",
+    "wandb_link": "https://wandb.ai/stanford-mercury/marin/runs/30M_llama_fineweb-e509d3",
+    "eval_paloma_c4_en_bpb": 1.528401494026184,
+    "run_timestamp": "2025-04-28 05:02:00 UTC"
+  },
+  {
+    "run_name": "llama_50m_fineweb_edu",
+    "model_size": 50873856,
+    "total_training_time": 33.7434039600339,
+    "total_training_flops": 5.938839096965967e+17,
+    "submitted_by": "unknown",
+    "results_filepath": "/Users/nikilravi/Desktop/Projects/marin/experiments/speedrun/llama_50m_fineweb_edu/speedrun_results.json",
+    "wandb_link": "https://wandb.ai/stanford-mercury/marin/runs/50M_llama_fineweb_edu-cde96c",
+    "eval_paloma_c4_en_bpb": 1.3861894607543943,
+    "run_timestamp": "2025-04-14 11:12:39 UTC"
+  },
+  {
+    "run_name": "llama_50m_fineweb_edu_10xC",
+    "model_size": 50873856,
+    "total_training_time": 31.16087598900208,
+    "total_training_flops": 5.484314174064366e+17,
+    "submitted_by": "unknown",
+    "results_filepath": "/Users/nikilravi/Desktop/Projects/marin/experiments/speedrun/llama_50m_fineweb_edu_10xC/speedrun_results.json",
+    "wandb_link": "https://wandb.ai/stanford-mercury/marin/runs/50M_llama_fineweb_edu_10xC-5f74d4",
+    "eval_paloma_c4_en_bpb": 1.3530292510986328,
+    "run_timestamp": "2025-04-28 07:58:33 UTC"
+  },
+  {
+    "run_name": "llama_75m_fineweb_edu",
+    "model_size": 73273344,
+    "total_training_time": 41.133451255947875,
+    "total_training_flops": 7.239487421046826e+17,
+    "submitted_by": "unknown",
+    "results_filepath": "/Users/nikilravi/Desktop/Projects/marin/experiments/speedrun/llama_75m_fineweb_edu/speedrun_results.json",
+    "wandb_link": "https://wandb.ai/stanford-mercury/marin/runs/75M_llama_fineweb_edu-ca427c",
+    "eval_paloma_c4_en_bpb": 1.309715986251831,
+    "run_timestamp": "2025-04-14 11:10:59 UTC"
+  },
+  {
+    "run_name": "llama_75m_fineweb_edu_adamax",
+    "model_size": 73273344,
+    "total_training_time": 37.48842341299974,
+    "total_training_flops": 6.597962520687954e+17,
+    "submitted_by": "unknown",
+    "results_filepath": "/Users/nikilravi/Desktop/Projects/marin/experiments/speedrun/llama_75m_fineweb_edu_adamax/speedrun_results.json",
+    "wandb_link": "https://wandb.ai/stanford-mercury/marin/runs/75M_llama_adamax-380097",
+    "eval_paloma_c4_en_bpb": 1.4074413776397705,
+    "run_timestamp": "2025-04-28 08:58:16 UTC"
+  },
+  {
+    "run_name": "llama_75m_fineweb_edu_z_loss",
+    "model_size": 73273344,
+    "total_training_time": 39.52621171500084,
+    "total_training_flops": 6.956613261840148e+17,
+    "submitted_by": "unknown",
+    "results_filepath": "/Users/nikilravi/Desktop/Projects/marin/experiments/speedrun/llama_75m_fineweb_edu_z_loss/speedrun_results.json",
+    "wandb_link": "https://wandb.ai/stanford-mercury/marin/runs/75M_llama_fineweb_edu_z_loss-25a11c",
+    "eval_paloma_c4_en_bpb": 1.3088222742080688,
+    "run_timestamp": "2025-04-30 10:14:33 UTC"
+  }
+]
