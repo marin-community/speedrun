@@ -85,7 +85,7 @@
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Rank</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100" data-sort="run_name" data-default-direction="asc">Run Name <span class="sort-icon">▼</span></th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Author</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100" data-sort="run_completion_timestamp" data-default-direction="desc">Timestamp (UTC) <span class="sort-icon">▼</span></th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100" data-sort="run_completion_timestamp" data-default-direction="desc">Date Added<span class="sort-icon">▼</span></th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100" data-sort="model_size" data-default-direction="asc">Model Size* <span class="sort-icon">▼</span></th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100" data-sort="training_time" data-default-direction="asc">Training Time <span class="sort-icon">▼</span></th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100" data-sort="training_hardware_flops" data-default-direction="asc">Total FLOPs* <span class="sort-icon">▼</span></th>
@@ -106,17 +106,50 @@
     <script>
         async function fetchLeaderboard() {
             try {
-                const response = await fetch('./data/runs.json');
-                const data = await response.json();
-                console.log('Loaded data:', data);
-
-                return data.map(entry => ({
-                    ...entry,
-                    model_size: parseFloat(entry.model_size) || 0,
-                    training_hardware_flops: parseFloat(entry.training_hardware_flops) || 0,
-                    training_time: parseFloat(entry.training_time) || 0,
-                    eval_paloma_c4_en_bpb: parseFloat(entry.eval_paloma_c4_en_bpb) || null
-                }));
+                const response = await fetch('./data/runs.json', {
+                    method: 'GET',
+                    headers: {
+                        'Accept': 'application/json',
+                        'Cache-Control': 'no-cache'
+                    }
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const text = await response.text();
+                console.log('Raw response:', text);
+                
+                let data;
+                try {
+                    data = JSON.parse(text);
+                } catch (parseError) {
+                    console.error('JSON parse error:', parseError);
+                    throw new Error('Failed to parse JSON response');
+                }
+                
+                console.log('Parsed data:', data);
+                
+                if (!Array.isArray(data)) {
+                    console.error('Data is not an array:', data);
+                    throw new Error('Invalid data format');
+                }
+                
+                return data.map(entry => {
+                    const processed = {
+                        run_name: entry.run_name || '',
+                        author: entry.author || {},
+                        run_completion_timestamp: entry.run_completion_timestamp || '',
+                        model_size: parseFloat(entry.model_size) || 0,
+                        training_hardware_flops: parseFloat(entry.training_hardware_flops) || 0,
+                        training_time: parseFloat(entry.training_time) || 0,
+                        eval_paloma_c4_en_bpb: parseFloat(entry.eval_paloma_c4_en_bpb) || null,
+                        results_filepath: entry.results_filepath || '',
+                        wandb_link: entry.wandb_link || null
+                    };
+                    return processed;
+                });
             } catch (error) {
                 console.error("Error fetching leaderboard data:", error);
                 return [];
@@ -365,7 +398,9 @@
 
         function formatDate(timestamp) {
             if (!timestamp) return 'N/A';
-            const date = new Date(timestamp);
+            const formattedTimestamp = timestamp.replace(" UTC", "").replace(" ", "T") + "Z";
+            const date = new Date(formattedTimestamp);
+            if (isNaN(date.getTime())) return 'N/A';
             return date.toISOString().split('T')[0];
         }
 
