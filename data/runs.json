@@ -1,112 +1,155 @@
 [
   {
     "run_name": "llama_150m_run",
-    "model_size": 154146816,
-    "total_training_time": 51.92430918297396,
-    "total_training_flops": 9.138678416203416e+17,
-    "submitted_by": "unknown",
     "results_filepath": "experiments/speedrun/llama_150m_run",
-    "wandb_link": "https://wandb.ai/marin-community/marin/runs/150M_llama_dclm_baseline-7b3186",
-    "eval_paloma_c4_en_bpb": 1.1830110549926758,
-    "run_timestamp": "2025-04-13 06:38:30 UTC"
+    "author": {
+      "name": "Nikil Ravi",
+      "affiliation": "Stanford University",
+      "url": "https://www.linkedin.com/in/nikilravi/"
+    },
+    "model_size": 154147328,
+    "training_hardware_flops": 5.023080333462528e+18,
+    "training_time": 285.4022916740073,
+    "model_flops": 8.95011054944256e+17,
+    "eval_paloma_c4_en_bpb": 1.236505389213562,
+    "wandb_link": "https://wandb.ai/marin-community/marin/runs/llama_150m_run-37ce8d",
+    "run_completion_timestamp": "2025-05-19 06:12:35 UTC",
+    "description": "150M param model based on Llama architecture."
   },
   {
     "run_name": "llama_300m",
-    "model_size": 299649024,
-    "total_training_time": 107.62992760399925,
-    "total_training_flops": 3.7885734516607734e+18,
-    "submitted_by": "unknown",
     "results_filepath": "experiments/speedrun/llama_300m",
-    "wandb_link": "https://wandb.ai/marin-community/marin/runs/300M_llama-7e3b0f",
-    "eval_paloma_c4_en_bpb": 1.1648558378219604,
-    "run_timestamp": "2025-04-30 10:51:52 UTC"
+    "author": {
+      "name": "Nikil Ravi",
+      "affiliation": "Stanford University",
+      "url": "https://www.linkedin.com/in/nikilravi/"
+    },
+    "model_size": 299649792,
+    "training_hardware_flops": 3.927858153468445e+19,
+    "training_time": 1115.86879359899,
+    "model_flops": 8.313235618922496e+18,
+    "eval_paloma_c4_en_bpb": 1.103714942932129,
+    "wandb_link": "https://wandb.ai/marin-community/marin/runs/llama_300m_run-e76a8f",
+    "run_completion_timestamp": "2025-05-19 06:26:05 UTC",
+    "description": "300M param model based on Llama architecture."
   },
   {
     "run_name": "llama_30m",
-    "model_size": 33784832,
-    "total_training_time": 28.785769938999124,
-    "total_training_flops": 5.066295509263846e+17,
-    "submitted_by": "unknown",
     "results_filepath": "experiments/speedrun/llama_30m",
-    "wandb_link": "https://wandb.ai/marin-community/marin/runs/30M_llama_fineweb-e509d3",
-    "eval_paloma_c4_en_bpb": 1.528401494026184,
-    "run_timestamp": "2025-04-28 05:02:00 UTC"
+    "author": {
+      "name": "Nikil Ravi",
+      "affiliation": "Stanford University",
+      "url": "https://www.linkedin.com/in/nikilravi/"
+    },
+    "model_size": 33784960,
+    "training_hardware_flops": 1.964721860534394e+18,
+    "training_time": 111.63192389399967,
+    "model_flops": 8.6953760391168e+16,
+    "eval_paloma_c4_en_bpb": 1.5263875722885132,
+    "wandb_link": "https://wandb.ai/marin-community/marin/runs/llama_30m_run-52f00d",
+    "run_completion_timestamp": "2025-05-19 08:43:36 UTC",
+    "description": "30M parameter model based on Llama architecture."
   },
   {
-    "run_name": "llama_50m_fineweb_edu",
-    "model_size": 50873856,
-    "total_training_time": 79.40072505176067,
-    "total_training_flops": 1548314138509333.2,
-    "submitted_by": "unknown",
-    "results_filepath": "experiments/speedrun/llama_50m_fineweb_edu",
-    "wandb_link": "https://wandb.ai/marin-community/marin/runs/50M_llama_fineweb_edu_speedrun_gpu-05054f",
-    "eval_paloma_c4_en_bpb": 1.7266783714294434,
-    "run_timestamp": "2025-05-14 22:12:06 UTC"
+    "run_name": "llama_50m_10xC",
+    "results_filepath": "experiments/speedrun/llama_50m_10xC",
+    "author": {
+      "name": "Nikil Ravi",
+      "affiliation": "Stanford University",
+      "url": "https://www.linkedin.com/in/nikilravi/"
+    },
+    "model_size": 50874048,
+    "training_hardware_flops": 2.2640986686823854e+19,
+    "training_time": 1286.4196981149917,
+    "model_flops": 1.7510581665792e+18,
+    "eval_paloma_c4_en_bpb": 1.3528554439544678,
+    "wandb_link": "https://wandb.ai/marin-community/marin/runs/llama_50m_10xC-a0bf1c",
+    "run_completion_timestamp": "2025-05-19 06:25:51 UTC",
+    "description": "50M parameter trained for 10 times Chinchilla-optimal number of tokens."
   },
   {
-    "run_name": "llama_50m_fineweb_edu_10xC",
-    "model_size": 50873856,
-    "total_training_time": 31.16087598900208,
-    "total_training_flops": 5.484314174064366e+17,
-    "submitted_by": "unknown",
-    "results_filepath": "experiments/speedrun/llama_50m_fineweb_edu_10xC",
-    "wandb_link": "https://wandb.ai/marin-community/marin/runs/50M_llama_fineweb_edu_10xC-5f74d4",
-    "eval_paloma_c4_en_bpb": 1.3530292510986328,
-    "run_timestamp": "2025-04-28 07:58:33 UTC"
+    "run_name": "llama_50m_gpu",
+    "results_filepath": "experiments/speedrun/llama_50m_gpu",
+    "author": {
+      "name": "Herumb Shandilya",
+      "affiliation": "Stanford University",
+      "url": "https://www.x.com/krypticmouse"
+    },
+    "model_size": 50874048,
+    "training_hardware_flops": 1.4999205700146406e+18,
+    "training_time": 1201.859431101475,
+    "model_flops": 1.66350525825024e+17,
+    "eval_paloma_c4_en_bpb": 1.4032597541809082,
+    "wandb_link": "https://wandb.ai/marin-community/marin/runs/llama_50m_gpu_4xA100_run-625275",
+    "run_completion_timestamp": "2025-05-19 08:02:06 UTC",
+    "description": "50m model based on Llama architecture."
   },
   {
-    "run_name": "llama_50m_fineweb_edu_gpu",
-    "model_size": 50873856,
-    "total_training_time": 64.05159703688696,
-    "total_training_flops": 1.9984098275508732e+16,
-    "submitted_by": "unknown",
-    "results_filepath": "experiments/speedrun/llama_50m_fineweb_edu_gpu",
-    "wandb_link": "https://wandb.ai/marin-community/marin/runs/50M_llama_fineweb_edu_gpu_test_1-479539",
-    "eval_paloma_c4_en_bpb": 1.72667396068573,
-    "run_timestamp": "2025-05-14 07:22:17 UTC"
+    "run_name": "llama_75m",
+    "results_filepath": "experiments/speedrun/llama_75m",
+    "author": {
+      "name": "Nikil Ravi",
+      "affiliation": "Stanford University",
+      "url": "https://www.linkedin.com/in/nikilravi/"
+    },
+    "model_size": 73273600,
+    "training_hardware_flops": 8.089714419511836e+18,
+    "training_time": 459.6428647449907,
+    "model_flops": 8.43291058765824e+17,
+    "eval_paloma_c4_en_bpb": 1.2788727283477783,
+    "wandb_link": "https://wandb.ai/marin-community/marin/runs/llama_75m-57f46a",
+    "run_completion_timestamp": "2025-05-19 10:30:03 UTC",
+    "description": "75M parameter model based on Llama architecture."
   },
   {
-    "run_name": "llama_75m_fineweb_edu",
-    "model_size": 73273344,
-    "total_training_time": 117.07639898266643,
-    "total_training_flops": 4565979560323991.0,
-    "submitted_by": "unknown",
-    "results_filepath": "experiments/speedrun/llama_75m_fineweb_edu",
-    "wandb_link": "https://wandb.ai/marin-community/marin/runs/75M_llama_fineweb_edu_speedrun_gpu-55a899",
-    "eval_paloma_c4_en_bpb": 1.6041038036346436,
-    "run_timestamp": "2025-05-14 21:52:06 UTC"
+    "run_name": "llama_75m_adamax",
+    "results_filepath": "experiments/speedrun/llama_75m_adamax",
+    "author": {
+      "name": "Nikil Ravi",
+      "affiliation": "Stanford University",
+      "url": "https://www.linkedin.com/in/nikilravi/"
+    },
+    "model_size": 73273600,
+    "training_hardware_flops": 7.925062938443093e+18,
+    "training_time": 450.2876669569939,
+    "model_flops": 8.43291058765824e+17,
+    "eval_paloma_c4_en_bpb": 1.4082849025726318,
+    "wandb_link": "https://wandb.ai/marin-community/marin/runs/llama_75m_adamax-befc25",
+    "run_completion_timestamp": "2025-05-19 06:15:45 UTC",
+    "description": "75M parameter model with Adamax optimizer"
   },
   {
-    "run_name": "llama_75m_fineweb_edu_adamax",
-    "model_size": 73273344,
-    "total_training_time": 37.48842341299974,
-    "total_training_flops": 6.597962520687954e+17,
-    "submitted_by": "unknown",
-    "results_filepath": "experiments/speedrun/llama_75m_fineweb_edu_adamax",
-    "wandb_link": "https://wandb.ai/marin-community/marin/runs/75M_llama_adamax-380097",
-    "eval_paloma_c4_en_bpb": 1.4074413776397705,
-    "run_timestamp": "2025-04-28 08:58:16 UTC"
+    "run_name": "llama_75m_z_loss",
+    "results_filepath": "experiments/speedrun/llama_75m_z_loss",
+    "author": {
+      "name": "Nikil Ravi",
+      "affiliation": "Stanford University",
+      "url": "https://www.linkedin.com/in/nikilravi/"
+    },
+    "model_size": 73273600,
+    "training_hardware_flops": 4.2987671792206807e+18,
+    "training_time": 244.24813518299322,
+    "model_flops": 4.21645529382912e+17,
+    "eval_paloma_c4_en_bpb": 1.3093523979187012,
+    "wandb_link": "https://wandb.ai/marin-community/marin/runs/llama_75m_z_loss-5aac14",
+    "run_completion_timestamp": "2025-05-19 06:04:11 UTC",
+    "description": "75M param model with z-loss"
   },
   {
-    "run_name": "llama_75m_fineweb_edu_gpu",
-    "model_size": 73273344,
-    "total_training_time": 92.29938950715587,
-    "total_training_flops": 5.759481905246526e+16,
-    "submitted_by": "unknown",
-    "results_filepath": "experiments/speedrun/llama_75m_fineweb_edu_gpu",
-    "wandb_link": "https://wandb.ai/marin-community/marin/runs/75M_llama_fineweb_edu_gpu_test_1-81a601",
-    "eval_paloma_c4_en_bpb": 1.6050434112548828,
-    "run_timestamp": "2025-05-14 06:58:47 UTC"
-  },
-  {
-    "run_name": "llama_75m_fineweb_edu_z_loss",
-    "model_size": 73273344,
-    "total_training_time": 39.52621171500084,
-    "total_training_flops": 6.956613261840148e+17,
-    "submitted_by": "unknown",
-    "results_filepath": "experiments/speedrun/llama_75m_fineweb_edu_z_loss",
-    "wandb_link": "https://wandb.ai/marin-community/marin/runs/75M_llama_fineweb_edu_z_loss-25a11c",
-    "eval_paloma_c4_en_bpb": 1.3088222742080688,
-    "run_timestamp": "2025-04-30 10:14:33 UTC"
+    "run_name": "moe_300m_activated",
+    "results_filepath": "experiments/speedrun/moe_300m_activated",
+    "author": {
+      "name": "Jason Wang",
+      "affiliation": "Stanford University",
+      "url": "https://www.linkedin.com/in/jason-wang-468117193/"
+    },
+    "model_size": 905104128,
+    "training_hardware_flops": 1.964634513547195e+20,
+    "training_time": 5581.348049849986,
+    "model_flops": 4.36257008123904e+18,
+    "eval_paloma_c4_en_bpb": 1.136897087097168,
+    "wandb_link": "https://wandb.ai/stanford-mercury/marin/runs/300M_moe-2-53b029",
+    "run_completion_timestamp": "2025-05-14 23:45:07 UTC",
+    "description": "300M activated parameter MoE model based on the Mixtral architecture. Has 32 experts and only activates 4 of them."
   }
 ]
