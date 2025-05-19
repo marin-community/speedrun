@@ -53,17 +53,21 @@
                     <thead class="bg-gray-50">
                         <tr>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Rank</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100" data-sort="run_name">Run Name ↕</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100" data-sort="run_timestamp">Timestamp (UTC) ↕</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100" data-sort="model_size">Model Size ↕</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100" data-sort="total_training_time">Training Time ↕</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100" data-sort="total_training_flops">Total FLOPs ↕</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100" data-sort="eval_paloma_c4_en_bpb">C4-EN BPB ↕</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100" data-sort="run_name" data-default-direction="asc">Run Name <span class="sort-icon">▼</span></th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Author</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100" data-sort="run_completion_timestamp" data-default-direction="desc">Timestamp (UTC) <span class="sort-icon">▼</span></th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100" data-sort="model_size" data-default-direction="asc">Model Size* <span class="sort-icon">▼</span></th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100" data-sort="training_time" data-default-direction="asc">Training Time <span class="sort-icon">▼</span></th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100" data-sort="training_hardware_flops" data-default-direction="asc">Total FLOPs <span class="sort-icon">▼</span></th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100" data-sort="eval_paloma_c4_en_bpb" data-default-direction="asc">C4-EN BPB <span class="sort-icon">▼</span></th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">W&B Run</th>
                         </tr>
                     </thead>
                     <tbody class="bg-white divide-y divide-gray-200" id="leaderboard-body"></tbody>
                 </table>
+                <div class="px-6 py-4 text-xs text-gray-500">
+                    * Model size here refers to the total number of trainable parameters
+                </div>
             </div>
         </main>
     </div>
@@ -77,12 +81,9 @@
 
                 return data.map(entry => ({
                     ...entry,
-                    timestamp: entry.run_timestamp,
                     model_size: parseFloat(entry.model_size) || 0,
-                    total_training_flops: parseFloat(entry.total_training_flops) || 0,
-                    total_training_time: parseFloat(entry.total_training_time) || 0,
-                    submitted_by: entry.submitted_by || "unknown",
-                    wandb_link: entry.wandb_link || "N/A",
+                    training_hardware_flops: parseFloat(entry.training_hardware_flops) || 0,
+                    training_time: parseFloat(entry.training_time) || 0,
                     eval_paloma_c4_en_bpb: parseFloat(entry.eval_paloma_c4_en_bpb) || null
                 }));
             } catch (error) {
@@ -124,23 +125,23 @@
         }
 
         function computeParetoFrontier(entries) {
-            if (!entries.length) return [];
-            const validEntries = entries.filter(e =>
-                e.total_training_flops > 0 &&
-                Number.isFinite(e.eval_paloma_c4_en_bpb) &&
+            const validEntries = entries.filter(e => 
+                Number.isFinite(e.training_hardware_flops) && 
+                e.training_hardware_flops > 0 && 
+                Number.isFinite(e.eval_paloma_c4_en_bpb) && 
                 e.eval_paloma_c4_en_bpb > 0
             );
-            if (!validEntries.length) return [];
-            const sorted = [...validEntries].sort((a, b) => a.total_training_flops - b.total_training_flops);
-            const frontier = [];
-            let minBPB = Infinity;
-            for (const entry of sorted) {
-                if (entry.eval_paloma_c4_en_bpb <= minBPB) {
-                    frontier.push(entry);
-                    minBPB = entry.eval_paloma_c4_en_bpb;
-                }
-            }
-            return frontier;
+
+            return validEntries.filter(entry => {
+                const flops = entry.training_hardware_flops;
+                const bpb = entry.eval_paloma_c4_en_bpb;
+
+                return !validEntries.some(other => 
+                    other.training_hardware_flops <= flops &&
+                    other.eval_paloma_c4_en_bpb < bpb &&
+                    (other.training_hardware_flops < flops || other.eval_paloma_c4_en_bpb < bpb)
+                );
+            });
         }
 
         let paretoChart = null;
@@ -154,7 +155,7 @@
             if (updateTimeout) clearTimeout(updateTimeout);
             updateTimeout = setTimeout(() => {
                 const validEntries = entries.filter(
-                    e => Number.isFinite(e.total_training_flops) && e.total_training_flops > 0 &&
+                    e => Number.isFinite(e.training_hardware_flops) && e.training_hardware_flops > 0 &&
                          Number.isFinite(e.eval_paloma_c4_en_bpb) && e.eval_paloma_c4_en_bpb > 0
                 );
                 if (!validEntries.length) {
@@ -168,73 +169,82 @@
                 }
 
                 const chartData = validEntries.map(entry => ({
-                    x: entry.total_training_flops / 1e18,
+                    x: entry.training_hardware_flops / 1e18, // Convert to ExaFLOPs
                     y: entry.eval_paloma_c4_en_bpb,
                     run_name: entry.run_name
                 }));
+                
+                // Calculate axis ranges with padding
+                const xValues = chartData.map(d => d.x);
+                const yValues = chartData.map(d => d.y);
+                
+                // Calculate x-axis limits with 15% padding
+                const xAxisMin = Math.max(0, Math.min(...xValues) * 0.85);
+                const xAxisMax = Math.max(...xValues) * 1.15;
+                
+                // Fixed y-axis range
+                const yAxisMin = 1.0;
+                const yAxisMax = 1.6;
 
                 const paretoEntries = computeParetoFrontier(validEntries);
-                const paretoData = paretoEntries.map(entry => ({
-                    x: entry.total_training_flops / 1e18,
-                    y: entry.eval_paloma_c4_en_bpb
-                }));
+                // Sort pareto points by x-value for proper line drawing
+                const paretoData = paretoEntries
+                    .map(entry => ({
+                        x: entry.training_hardware_flops / 1e18,
+                        y: entry.eval_paloma_c4_en_bpb
+                    }))
+                    .sort((a, b) => a.x - b.x);
 
                 // Calculate data ranges for axis scaling
-                const flopsValues = validEntries.map(e => e.total_training_flops / 1e18);
+                const flopsValues = validEntries.map(e => e.training_hardware_flops / 1e18);
                 const bpbValues = validEntries.map(e => e.eval_paloma_c4_en_bpb);
-                const minFlops = flopsValues.length ? Math.min(...flopsValues) : 0.1;
-                const maxFlops = flopsValues.length ? Math.max(...flopsValues) : 1;
-                const minBPB = bpbValues.length ? Math.min(...bpbValues) : 0.1;
-                const maxBPB = bpbValues.length ? Math.max(...bpbValues) : 2;
+                const minFlops = Math.min(...flopsValues);
+                const maxFlops = Math.max(...flopsValues);
+                const minBPB = Math.min(...bpbValues);
+                const maxBPB = Math.max(...bpbValues);
 
-        // Calculate more optimal axis limits with adaptive padding
-        const bpbRange = maxBPB - minBPB;
-        const flopsRange = maxFlops - minFlops;
+                // Calculate padding for better visualization
+                const flopsRange = maxFlops - minFlops;
+                const bpbRange = maxBPB - minBPB;
+                const yPadding = bpbRange * 0.1;
+                const xPadding = flopsRange * 0.1;
 
-        // Use smaller padding for y-axis (BPB) to reduce vertical whitespace
-        const yPadding = Math.max(bpbRange * 0.05, 0.001);
-        const xPadding = Math.max(flopsRange * 0.1, 0.01);
+                const xMin = minFlops * 0.8;
+                const xMax = maxFlops * 1.2;
+                const yMin = Math.max(1.0, minBPB - yPadding);
+                const yMax = maxBPB + yPadding;
 
-        const xMin = Math.max(minFlops - xPadding, 0.01);
-        const xMax = maxFlops + xPadding;
-        const yMin = Math.max(minBPB - yPadding, 0.01);
-        const yMax = maxBPB + yPadding;
+                if (paretoChart) {
+                    paretoChart.destroy();
+                }
 
-        if (paretoChart) {
-            paretoChart.destroy();
-            paretoChart = null;
-        }
-
-        const ctx = document.getElementById('pareto-chart').getContext('2d');
-        paretoChart = new Chart(ctx, {
+                const ctx = document.getElementById('pareto-chart').getContext('2d');
+                paretoChart = new Chart(ctx, {
                     type: 'scatter',
                     data: {
                         datasets: [
                             {
-                                label: 'Runs',
+                                label: 'All Runs',
                                 data: chartData,
-                                backgroundColor: validEntries.map(entry =>
-                                    selectedRuns.size > 0 && !selectedRuns.has(entry.run_name) ?
-                                        'rgba(200, 200, 200, 0.3)' : 'rgba(75, 192, 192, 0.6)'
+                                backgroundColor: chartData.map(point => 
+                                    selectedRuns.has(point.run_name) ? 'rgba(255, 255, 0, 0.5)' : 'rgba(54, 162, 235, 0.5)'
                                 ),
-                                borderColor: validEntries.map(entry =>
-                                    selectedRuns.size > 0 && !selectedRuns.has(entry.run_name) ?
-                                        'rgba(200, 200, 200, 0.3)' : 'rgba(75, 192, 192, 1)'
+                                borderColor: chartData.map(point => 
+                                    selectedRuns.has(point.run_name) ? 'rgba(255, 255, 0, 1)' : 'rgba(54, 162, 235, 1)'
                                 ),
+                                borderWidth: 1,
                                 pointRadius: 6,
                                 pointHoverRadius: 8
                             },
                             {
                                 label: 'Pareto Frontier',
                                 data: paretoData,
-                                type: 'line',
+                                backgroundColor: 'rgba(255, 99, 132, 0.5)',
                                 borderColor: 'rgba(255, 99, 132, 1)',
-                                backgroundColor: 'rgba(255, 99, 132, 0.2)',
-                                fill: false,
-                                pointRadius: 8,
-                                pointHoverRadius: 10,
+                                borderWidth: 2,
                                 showLine: true,
-                                tension: 0.1
+                                fill: false,
+                                tension: 0
                             }
                         ]
                     },
@@ -242,37 +252,52 @@
                         animation: false,
                         responsive: true,
                         maintainAspectRatio: false,
-                        scales: {
-                            x: {
-                                title: { display: true, text: 'FLOPs Used (ExaFLOPs)' },
-                                type: 'logarithmic',
-                                position: 'bottom',
-                                min: xMin,
-                                max: xMax,
-                                ticks: { callback: function(value) { return Number(value).toFixed(2); } }
-                            },
-                            y: {
-                                title: { display: true, text: 'C4-EN BPB (lower is better)' },
-                                type: 'linear',
-                                min: yMin,
-                                max: yMax,
-                                ticks: { callback: function(value) { return Number(value).toFixed(3); } }
-                            }
-                        },
                         plugins: {
+                            legend: {
+                                position: 'top',
+                                display: true
+                            },
                             tooltip: {
                                 callbacks: {
                                     label: function(context) {
-                                        const entry = context.raw;
-                                        if (context.dataset.label === 'Pareto Frontier') {
-                                            return `Pareto Point: ${entry.x.toFixed(2)} EFLOPs, ${entry.y.toFixed(3)} BPB`;
+                                        const point = context.raw;
+                                        if (!point.run_name) {
+                                            return `${point.x.toFixed(1)} EF, ${point.y.toFixed(3)} BPB`;
                                         }
-                                        return `${entry.run_name}: ${entry.x.toFixed(2)} EFLOPs, ${entry.y.toFixed(3)} BPB`;
+                                        return `${point.run_name}: ${formatFlops(point.x * 1e18)} FLOPs, ${point.y.toFixed(3)} BPB`;
                                     }
                                 }
+                            }
+                        },
+                        scales: {
+                            x: {
+                                type: 'logarithmic',
+                                position: 'bottom',
+                                title: {
+                                    display: true,
+                                    text: 'Training FLOPs (ExaFLOPs)'
+                                },
+                                min: xAxisMin,
+                                max: xAxisMax,
+                                ticks: {
+                                    callback: function(value) {
+                                        return value.toFixed(1) + ' EF';
+                                    },
+                                    maxTicksLimit: 8 // Limit number of ticks for better readability
+                                }
                             },
-                            legend: { display: true }
-                        }
+                            y: {
+                                type: 'linear',
+                                position: 'left',
+                                title: {
+                                    display: true,
+                                    text: 'C4-EN BPB'
+                                },
+                                min: yAxisMin,
+                                max: yAxisMax
+                            }
+                        },
+                        legend: { display: true }
                     }
                 });
             }, 100);
@@ -282,51 +307,56 @@
             return [...entries].sort((a, b) => {
                 let aVal = a[field];
                 let bVal = b[field];
-                if (field === 'model_size' || field === 'total_training_flops' || field === 'total_training_time' || field === 'eval_paloma_c4_en_bpb') {
-                    aVal = parseFloat(aVal) || Infinity;
-                    bVal = parseFloat(bVal) || Infinity;
+
+                if (field === 'run_completion_timestamp') {
+                    aVal = new Date(aVal);
+                    bVal = new Date(bVal);
                 }
-                if (direction === 'asc') {
-                    return aVal > bVal ? 1 : -1;
-                } else {
-                    return aVal < bVal ? 1 : -1;
-                }
+
+                if (aVal === null || aVal === undefined) return 1;
+                if (bVal === null || bVal === undefined) return -1;
+
+                return direction === 'asc' ? 
+                    (aVal < bVal ? -1 : aVal > bVal ? 1 : 0) :
+                    (aVal > bVal ? -1 : aVal < bVal ? 1 : 0);
             });
         }
 
-        function updateLeaderboard(entries) {
+        async function updateLeaderboard(entries) {
             allEntries = entries;
             const sortedEntries = sortEntries(entries, currentSort.field, currentSort.direction);
             updateStats(entries);
             updateParetoChart(entries);
             const tbody = document.getElementById('leaderboard-body');
             tbody.innerHTML = '';
+
             sortedEntries.forEach((entry, index) => {
                 const row = document.createElement('tr');
-                if (selectedRuns.size > 0 && selectedRuns.has(entry.run_name)) {
-                    row.className = 'bg-yellow-100';
-                } else {
-                    row.className = index % 2 === 0 ? 'bg-white' : 'bg-gray-50';
-                }
-                row.innerHTML = `
-                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${index + 1}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-blue-600 hover:text-blue-800 cursor-pointer">
-                        <a href="https://github.com/stanford-crfm/marin/tree/main/experiments/speedrun/${entry.run_name}" target="_blank">${entry.run_name}</a>
-                    </td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${entry.run_timestamp || 'N/A'}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${formatModelSize(entry.model_size)}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${entry.total_training_time.toFixed(1)}m</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${formatFlops(entry.total_training_flops)}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${formatMetric(entry.eval_paloma_c4_en_bpb)}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        ${entry.wandb_link ? `<a href="${entry.wandb_link}" target="_blank" class="text-blue-600 hover:text-blue-800">View Run</a>` : 'N/A'}
-                    </td>
-                `;
+                row.className = selectedRuns.has(entry.run_name) ? 'bg-blue-50' : (index % 2 === 0 ? 'bg-white' : 'bg-gray-50');
+
+                const authorLink = entry.author.url ? 
+                    `<a href="${entry.author.url}" target="_blank" class="text-blue-600 hover:text-blue-900">${entry.author.name}</a>` : 
+                    entry.author.name;
+                const authorInfo = `${authorLink}<br><span class="text-gray-500 text-xs">${entry.author.affiliation}</span>`;
+
+                const cells = [
+                    `<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${index + 1}</td>`,
+                    `<td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${entry.run_name}</td>`,
+                    `<td class="px-6 py-4 whitespace-nowrap text-sm">${authorInfo}</td>`,
+                    `<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${entry.run_completion_timestamp || 'N/A'}</td>`,
+                    `<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${formatModelSize(entry.model_size)}</td>`,
+                    `<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${formatMetric(entry.training_time)}m</td>`,
+                    `<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${formatFlops(entry.training_hardware_flops)}</td>`,
+                    `<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${formatMetric(entry.eval_paloma_c4_en_bpb)}</td>`,
+                    `<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        ${entry.wandb_link ? `<a href="${entry.wandb_link}" target="_blank" class="text-blue-600 hover:text-blue-900">View Run</a>` : 'N/A'}
+                    </td>`
+                ];
+
+                row.innerHTML = cells.join('');
                 tbody.appendChild(row);
             });
         }
-
-
 
         document.getElementById('clear-selection').addEventListener('click', () => {
             selectedRuns.clear();
@@ -335,23 +365,36 @@
             updateLeaderboard(allEntries);
         });
 
-        document.querySelectorAll('th[data-sort]').forEach(th => {
-            th.addEventListener('click', () => {
-                const field = th.dataset.sort;
+        document.querySelectorAll('th[data-sort]').forEach(header => {
+            // Set initial sort direction based on data attribute
+            const defaultDirection = header.dataset.defaultDirection || 'asc';
+            if (header.dataset.sort === 'eval_paloma_c4_en_bpb') {
+                currentSort.field = 'eval_paloma_c4_en_bpb';
+                currentSort.direction = 'asc';
+                header.classList.add('active');
+                header.dataset.direction = 'asc';
+            }
+
+            header.addEventListener('click', () => {
+                const field = header.dataset.sort;
                 if (currentSort.field === field) {
                     currentSort.direction = currentSort.direction === 'asc' ? 'desc' : 'asc';
                 } else {
                     currentSort.field = field;
-                    currentSort.direction = 'asc';
+                    currentSort.direction = defaultDirection;
                 }
-                // Update sort indicators
-                document.querySelectorAll('th[data-sort]').forEach(header => {
-                    if (header === th) {
-                        header.textContent = header.textContent.replace(' ↕', currentSort.direction === 'asc' ? ' ↓' : ' ↑');
+
+                // Update all headers
+                document.querySelectorAll('th[data-sort]').forEach(h => {
+                    if (h.dataset.sort === currentSort.field) {
+                        h.classList.add('active');
+                        h.dataset.direction = currentSort.direction;
                     } else {
-                        header.textContent = header.textContent.replace(/ [↑↓]/, ' ↕');
+                        h.classList.remove('active');
+                        delete h.dataset.direction;
                     }
                 });
+
                 updateLeaderboard(allEntries);
             });
         });
@@ -413,9 +456,9 @@
 
                 selectedRuns.clear();
                 const chartData = allEntries
-                    .filter(e => Number.isFinite(e.total_training_flops) && e.total_training_flops > 0 && Number.isFinite(e.eval_paloma_c4_en_bpb) && e.eval_paloma_c4_en_bpb > 0)
+                    .filter(e => Number.isFinite(e.training_hardware_flops) && e.training_hardware_flops > 0 && Number.isFinite(e.eval_paloma_c4_en_bpb) && e.eval_paloma_c4_en_bpb > 0)
                     .map(entry => ({
-                        x: entry.total_training_flops / 1e18,
+                        x: entry.training_hardware_flops / 1e18,
                         y: entry.eval_paloma_c4_en_bpb,
                         run_name: entry.run_name
                     }));
@@ -453,6 +496,21 @@
         .track-btn:hover { background-color: #e5e7eb; }
         .track-btn.active { background-color: #1a73e8; color: white; }
 
+        .sort-icon {
+            display: inline-block;
+            margin-left: 4px;
+            font-size: 0.8em;
+            opacity: 0.5;
+            transition: transform 0.2s, opacity 0.2s;
+        }
+
+        th[data-sort].active .sort-icon {
+            opacity: 1;
+        }
+
+        th[data-sort].active[data-direction='desc'] .sort-icon {
+            transform: rotate(180deg);
+        }
     </style>
 </body>
 </html>
