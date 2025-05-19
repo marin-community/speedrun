@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Marin Speedrun - Leaderboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js" defer></script>
     <script>
@@ -13,6 +14,9 @@
                     colors: {
                         'marin-blue': '#1a73e8',
                         'marin-dark': '#1e293b'
+                    },
+                    fontFamily: {
+                        'display': ['Inter', 'system-ui', 'sans-serif']
                     }
                 }
             }
@@ -28,6 +32,27 @@
             </div>
         </header>
         <main class="container mx-auto px-4 py-8">
+            <div class="bg-white rounded-lg shadow p-8 mb-8">
+                <div class="flex justify-between items-start mb-6">
+                    <h2 class="text-3xl font-extrabold text-gray-900 font-display">What is Speedrun?</h2>
+                    <a href="https://github.com/marin-community/marin/blob/main/docs/tutorials/submitting-speedrun.md" target="_blank" rel="noopener" class="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-marin-blue hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-marin-blue transition-colors duration-150">
+                        Get started with Speedrun
+                    </a>
+                </div>
+                <p class="text-gray-600 leading-relaxed text-lg mb-8">
+                    Speedrun is a community-driven initiative by the <a href="https://marin.community/" target="_blank" rel="noopener" class="text-marin-blue hover:text-blue-600 transition-colors duration-150">Marin project</a> to track and optimize the training efficiency of large language models. 
+                    Have a new architecture or training procedure that you think is more efficient? Participate in the Marin speedrun competition (inspired by 
+                    the <a href="https://github.com/KellerJordan/modded-nanogpt?tab=readme-ov-file#world-record-history" class="text-marin-blue hover:text-blue-600 transition-colors duration-150">nanogpt speedrun</a>), pick your compute budget, and create the fastest method to train a model to a 
+                    certain quality! 
+                </p>
+                <p class="text-gray-600 leading-relaxed text-lg mb-8">
+                    On this page, you can find a leaderboard of runs currently created/submitted to Marin Speedrun; you can click on any run to view the code that
+                    generated it, or view the Weights and Biases run for the model! We also track the Pareto frontier of models, allowing us to track efficiency-performance tradeoffs.
+                </p>
+                <p class="text-gray-600 leading-relaxed text-lg">
+                    We invite you to join us in the search for more performant and efficient training methods!
+                </p>
+            </div>
             <div class="mb-8">
                 <button id="clear-selection" class="px-4 py-2 rounded-md text-sm font-medium bg-gray-200 hover:bg-gray-300" style="display: none;">Clear Selection</button>
             </div>
