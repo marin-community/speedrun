@@ -1,5 +1,22 @@
 [
   {
+    "run_name": "hello_world_gpu_speedrun",
+    "results_filepath": "experiments/speedrun/hello_world_gpu_speedrun",
+    "author": {
+      "name": "Herumb Shandilya",
+      "affiliation": "Stanford University",
+      "url": "https://www.x.com/krypticmouse"
+    },
+    "model_size": 8241312,
+    "training_hardware_flops": 9803812574230134.0,
+    "training_time": 31.42247619945556,
+    "model_flops": 41342415667200.0,
+    "eval_paloma_c4_en_bpb": 2.4522433280944824,
+    "wandb_link": "https://wandb.ai/marin-community/marin/runs/llama_nano_gpu_speedrun-62030f",
+    "run_completion_timestamp": "2025-05-19 07:14:05 UTC",
+    "description": "Nano model based on Llama architecture."
+  },
+  {
     "run_name": "llama_150m_run",
     "results_filepath": "experiments/speedrun/llama_150m_run",
     "author": {
@@ -85,6 +102,23 @@
     "description": "50m model based on Llama architecture."
   },
   {
+    "run_name": "llama_50m_h200",
+    "results_filepath": "experiments/speedrun/llama_50m_h200",
+    "author": {
+      "name": "Will Held",
+      "affiliation": "Georgia Institute of Technology",
+      "url": "WilliamHeld.com"
+    },
+    "model_size": 50874048,
+    "training_hardware_flops": 1.540218909919616e+18,
+    "training_time": 1556.5628195246245,
+    "model_flops": 1.66350525825024e+17,
+    "eval_paloma_c4_en_bpb": 1.403206706047058,
+    "wandb_link": "https://wandb.ai/held/marin/runs/llama_50m_gpu_H200_run-3b31f6",
+    "run_completion_timestamp": "2025-05-21 07:13:58 UTC",
+    "description": "50M param model based on Llama architecture on H200."
+  },
+  {
     "run_name": "llama_75m",
     "results_filepath": "experiments/speedrun/llama_75m",
     "author": {
@@ -151,5 +185,22 @@
     "wandb_link": "https://wandb.ai/stanford-mercury/marin/runs/300M_moe-2-53b029",
     "run_completion_timestamp": "2025-05-14 23:45:07 UTC",
     "description": "300M activated parameter MoE model based on the Mixtral architecture. Has 32 experts and only activates 4 of them."
+  },
+  {
+    "run_name": "olmo_50m_h200",
+    "results_filepath": "experiments/speedrun/olmo_50m_h200",
+    "author": {
+      "name": "Will Held",
+      "affiliation": "Georgia Institute of Technology",
+      "url": "https://WilliamHeld.com"
+    },
+    "model_size": 50875584,
+    "training_hardware_flops": 1.425986462869921e+18,
+    "training_time": 1441.1182040120475,
+    "model_flops": 1.66350525825024e+17,
+    "eval_paloma_c4_en_bpb": 1.4019017219543457,
+    "wandb_link": "https://wandb.ai/held/marin/runs/olmo_50m_gpu_1xH200_run-65d630",
+    "run_completion_timestamp": "2025-05-21 04:46:21 UTC",
+    "description": "50M param model based on OLMo architecture."
   }
 ]
