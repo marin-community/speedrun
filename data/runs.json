@@ -1,22 +1,5 @@
 [
   {
-    "run_name": "hello_world_gpu_speedrun",
-    "results_filepath": "experiments/speedrun/hello_world_gpu_speedrun",
-    "author": {
-      "name": "Herumb Shandilya",
-      "affiliation": "Stanford University",
-      "url": "https://www.x.com/krypticmouse"
-    },
-    "model_size": 8241312,
-    "training_hardware_flops": 9803812574230134.0,
-    "training_time": 31.42247619945556,
-    "model_flops": 41342415667200.0,
-    "eval_paloma_c4_en_bpb": 2.4522433280944824,
-    "wandb_link": "https://wandb.ai/marin-community/marin/runs/llama_nano_gpu_speedrun-62030f",
-    "run_completion_timestamp": "2025-05-19 07:14:05 UTC",
-    "description": "Nano model based on Llama architecture."
-  },
-  {
     "run_name": "llama_150m_run",
     "results_filepath": "experiments/speedrun/llama_150m_run",
     "author": {
@@ -32,6 +15,23 @@
     "wandb_link": "https://wandb.ai/marin-community/marin/runs/llama_150m_run-37ce8d",
     "run_completion_timestamp": "2025-05-19 06:12:35 UTC",
     "description": "150M param model based on Llama architecture."
+  },
+  {
+    "run_name": "llama_1_4B_8xH200",
+    "results_filepath": "experiments/speedrun/llama_1_4B_8xH200",
+    "author": {
+      "name": "Will Held",
+      "affiliation": "Georgia Institute of Technology",
+      "url": "WilliamHeld.com"
+    },
+    "model_size": 2136049664,
+    "training_hardware_flops": 4.032976813981806e+20,
+    "training_time": 50947.15530548012,
+    "model_flops": 1.2454406018439945e+20,
+    "eval_paloma_c4_en_bpb": 0.9557313919067384,
+    "wandb_link": "https://wandb.ai/held/marin/runs/llama_1_4B_8xH200-7313df",
+    "run_completion_timestamp": "2025-05-23 21:42:47 UTC",
+    "description": "1.4B param model based on Llama architecture."
   },
   {
     "run_name": "llama_300m",
