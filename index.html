@@ -62,7 +62,7 @@
             <!-- Track Selection -->
             <div class="bg-white rounded-lg shadow p-6 mb-8">
                 <h3 class="text-xl font-semibold text-gray-900 mb-4">Speedrun Tracks</h3>
-                <p class="text-gray-600 mb-4">Select a track to view runs targeting specific loss thresholds. Each track ranks runs by training efficiency (FLOPs) to reach the target loss.</p>
+                <p class="text-gray-600 mb-4">Select a track to view leaderboard results for a specific model run. Each track now corresponds to a particular Llama model size and its best run's BPB.</p>
                 <div id="track-buttons" class="flex flex-wrap gap-3">
                     <!-- Track buttons will be populated by JavaScript -->
                 </div>
@@ -264,16 +264,17 @@
             if (trackId === 'all') {
                 return allEntries;
             }
-            
             const track = tracks.find(t => t.id === trackId);
-            if (!track || track.target_bpb === null) {
-                return allEntries;
+            if (!track) return allEntries;
+            // For new model-based tracks, use run_name
+            if (track.run_name) {
+                return allEntries.filter(entry => entry.run_name === track.run_name);
             }
-
-            return allEntries.filter(entry => 
-                entry.eval_paloma_c4_en_bpb !== null && 
-                entry.eval_paloma_c4_en_bpb <= track.target_bpb
-            );
+            // fallback for any BPB tracks (shouldn't exist now)
+            if (track.target_bpb !== null) {
+                return allEntries.filter(entry => entry.eval_paloma_c4_en_bpb !== null && entry.eval_paloma_c4_en_bpb <= track.target_bpb);
+            }
+            return allEntries;
         }
 
         function formatModelSize(size) {
@@ -380,8 +381,8 @@
                 const yValues = allChartData.map(d => d.y);
                 const xAxisMin = Math.max(0, Math.min(...xValues) * 0.85);
                 const xAxisMax = Math.max(...xValues) * 1.15;
-                const yAxisMin = 1.0;
-                const yAxisMax = 1.6;
+                const yAxisMin = 0.85;
+                const yAxisMax = 1.7;
 
                 // Create datasets array
                 const datasets = [
