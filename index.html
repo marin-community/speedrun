@@ -266,13 +266,26 @@
             }
             const track = tracks.find(t => t.id === trackId);
             if (!track) return allEntries;
-            // For new model-based tracks, use run_name
-            if (track.run_name) {
-                return allEntries.filter(entry => entry.run_name === track.run_name);
-            }
-            // fallback for any BPB tracks (shouldn't exist now)
+            
             if (track.target_bpb !== null) {
-                return allEntries.filter(entry => entry.eval_paloma_c4_en_bpb !== null && entry.eval_paloma_c4_en_bpb <= track.target_bpb);
+                // Sort tracks by target_bpb in descending order (highest BPB first)
+                const sortedTracks = tracks
+                    .filter(t => t.id !== 'all' && t.target_bpb !== null)
+                    .sort((a, b) => b.target_bpb - a.target_bpb);
+                
+                // Find the current track's index in the sorted array
+                const currentTrackIndex = sortedTracks.findIndex(t => t.id === track.id);
+                
+                // Find the next lower threshold (if any)
+                const nextLowerThreshold = currentTrackIndex < sortedTracks.length - 1 ? 
+                    sortedTracks[currentTrackIndex + 1].target_bpb : 0;
+                
+                // Filter entries to include only those in the band between current threshold and next lower threshold
+                return allEntries.filter(entry => 
+                    entry.eval_paloma_c4_en_bpb !== null && 
+                    entry.eval_paloma_c4_en_bpb <= track.target_bpb &&
+                    entry.eval_paloma_c4_en_bpb > nextLowerThreshold
+                );
             }
             return allEntries;
         }
@@ -420,13 +433,34 @@
                 const trackBackgroundPlugin = {
                     id: 'trackBackground',
                     beforeDatasetsDraw: (chart) => {
-                        if (currentTrack && currentTrack.target_bpb !== null) {
+                        if (currentTrack && currentTrack.target_bpb !== null && currentTrack.id !== 'all') {
                             const ctx = chart.ctx;
                             const chartArea = chart.chartArea;
                             const yScale = chart.scales.y;
                             
-                            // Convert target BPB to pixel position
-                            const targetY = yScale.getPixelForValue(currentTrack.target_bpb);
+                            // Sort tracks by target_bpb in descending order (highest BPB first)
+                            const sortedTracks = tracks
+                                .filter(t => t.id !== 'all' && t.target_bpb !== null)
+                                .sort((a, b) => b.target_bpb - a.target_bpb);
+                            
+                            // Find the current track's index in the sorted array
+                            const currentTrackIndex = sortedTracks.findIndex(t => t.id === currentTrack.id);
+                            
+                            // Find the next lower threshold (if any)
+                            const nextLowerThreshold = currentTrackIndex < sortedTracks.length - 1 ? 
+                                sortedTracks[currentTrackIndex + 1].target_bpb : 0;
+                            
+                            // Convert BPB values to pixel positions
+                            const upperY = yScale.getPixelForValue(currentTrack.target_bpb);
+                            
+                            // For the lowest track, limit the lower bound to the chart's visible area
+                            let lowerY;
+                            if (currentTrackIndex === sortedTracks.length - 1) {
+                                // For the lowest track, use the min value of the y-axis instead of extending below
+                                lowerY = yScale.getPixelForValue(yScale.min);
+                            } else {
+                                lowerY = yScale.getPixelForValue(nextLowerThreshold);
+                            }
                             
                             // Convert hex color to rgba
                             const hexToRgba = (hex, alpha) => {
@@ -436,24 +470,35 @@
                                 return `rgba(${r}, ${g}, ${b}, ${alpha})`;
                             };
                             
-                            // Draw filled rectangle from bottom to target line
+                            // Draw filled rectangle for the band between upper and lower thresholds
                             ctx.save();
                             ctx.fillStyle = hexToRgba(currentTrack.color, 0.15);
                             ctx.fillRect(
                                 chartArea.left,
-                                targetY,
+                                upperY,
                                 chartArea.right - chartArea.left,
-                                chartArea.bottom - targetY
+                                lowerY - upperY
                             );
                             
-                            // Draw target line
+                            // Draw upper threshold line
                             ctx.strokeStyle = hexToRgba(currentTrack.color, 0.6);
                             ctx.lineWidth = 2;
                             ctx.setLineDash([5, 5]);
                             ctx.beginPath();
-                            ctx.moveTo(chartArea.left, targetY);
-                            ctx.lineTo(chartArea.right, targetY);
+                            ctx.moveTo(chartArea.left, upperY);
+                            ctx.lineTo(chartArea.right, upperY);
                             ctx.stroke();
+                            
+                            // Draw lower threshold line (if not the lowest track)
+                            if (currentTrackIndex < sortedTracks.length - 1) {
+                                ctx.strokeStyle = hexToRgba(currentTrack.color, 0.4);
+                                ctx.lineWidth = 1;
+                                ctx.beginPath();
+                                ctx.moveTo(chartArea.left, lowerY);
+                                ctx.lineTo(chartArea.right, lowerY);
+                                ctx.stroke();
+                            }
+                            
                             ctx.setLineDash([]);
                             ctx.restore();
                         }
