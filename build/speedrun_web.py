@@ -11,10 +11,9 @@
 
 import marimo
 
-__generated_with = "0.14.9"
+__generated_with = "0.14.10"
 app = marimo.App(
     width="full",
-    layout_file="layouts/speedrun_web.grid.json",
     css_file="custom.css",
     html_head_file="head.html",
 )
@@ -97,7 +96,7 @@ def _(df_tracks, mo):
     print(options)
 
     track_select = mo.ui.radio(
-        options=options, value="All Runs", label="Track", inline=True
+        options=options, value="Scaling", label="Track", inline=True
     )
     track_select
     return (track_select,)
@@ -109,7 +108,11 @@ def _(df_runs, df_tracks, pd, track_select):
 
     filtered = df_runs
 
-    if track_id != "all":
+    if track_id == "scaling":
+
+        t = df_tracks.loc[df_tracks["id"] == track_id].iloc[0]
+        filtered = df_runs[df_runs["run_name"].str.contains("/")]
+    elif track_id != "all":
         t = df_tracks.loc[df_tracks["id"] == track_id].iloc[0]
 
         if pd.notna(t["target_bpb"]):
@@ -128,13 +131,10 @@ def _(df_runs, df_tracks, pd, track_select):
                 else 0
             )
 
-            filtered = (
-                df_runs[df_runs["eval_paloma_c4_en_bpb"].notna()]
-                .loc[
-                    lambda d: (d.eval_paloma_c4_en_bpb <= t.target_bpb)
-                            & (d.eval_paloma_c4_en_bpb > next_lower)
-                ]
-            )
+            filtered = df_runs[df_runs["eval_paloma_c4_en_bpb"].notna()].loc[
+                lambda d: (d.eval_paloma_c4_en_bpb <= t.target_bpb)
+                & (d.eval_paloma_c4_en_bpb > next_lower)
+            ]
     return filtered, next_lower, t, track_id
 
 
@@ -171,59 +171,111 @@ def _(filtered, mo):
 @app.cell
 def _(df_runs, filtered, mo, next_lower, np, t, track_id):
     import plotly.graph_objects as go
+    import plotly.express as px
 
     df_all = df_runs.copy()
-    df_all["training_flops_ef"] = df_all["training_hardware_flops"] / 1e18  # 1 EF = 1e18 FLOPs
+    df_all["training_flops_ef"] = (
+        df_all["training_hardware_flops"] / 1e18
+    )  # 1 EF = 1e18 FLOPs
     df_all["in_track"] = df_all.index.isin(filtered.index)
 
-    track_color = (t.color if track_id != "all" else "#1877F2")  # fallback blue
+    track_color = t.color if track_id != "all" else "#1877F2"  # fallback blue
 
-    fig = go.Figure()
-    fig.layout = None
-    fig.data = None
-
-
-    fig.add_trace(
-        go.Scatter(
-            x=df_all["training_flops_ef"],
-            y=df_all["eval_paloma_c4_en_bpb"],
-            mode="markers",
-            marker=dict(color="rgba(156,163,175,0.3)", size=8, line=dict(width=0)),
-            name="All Runs",
-            text=df_all["run_name"],
-            customdata=np.column_stack((df_all["training_flops_ef"],)),
-            hovertemplate="<b>%{text}</b><br>%{customdata[0]:.2f} EF<br>%{y:.3f} BPB<extra></extra>",
-        )
-    )
-
-    highlight = df_all[df_all["in_track"]]
-    if not highlight.empty:
+    if track_id == "scaling":
+        fig = go.Figure()
+        fig.layout = None
+        fig.data = None
+        df_all["lead_folder"] = df_all["run_name"].apply(lambda p: p.split("/")[0])
+        groups = df_all[df_all["in_track"]].groupby("lead_folder")
+        colors = px.colors.qualitative.Plotly
+        group_scaling = {}
+        for i, (name, g) in enumerate(groups):
+            color = colors[i % len(colors)]
+            fig.add_trace(
+                go.Scatter(
+                    x=g["training_flops_ef"],
+                    y=g["eval_paloma_c4_en_bpb"],
+                    mode="markers",
+                    marker=dict(color=color, size=10),
+                    name=name,
+                    text=g["run_name"],
+                    customdata=np.column_stack((g["training_flops_ef"],)),
+                    hovertemplate="<b>%{text}</b><br>%{customdata[0]:.2f} EF<br>%{y:.3f} BPB<extra></extra>",
+                )
+            )
+            xlog = np.log(g["training_flops_ef"])
+            ylog = np.log(g["eval_paloma_c4_en_bpb"])
+            slope, intercept = np.polyfit(xlog, ylog, 1)
+            group_scaling[name] = {"slope": slope, "intercept": intercept}
+            x_fit = np.linspace(
+                g["training_flops_ef"].min(), g["training_flops_ef"].max(), 100
+            )
+            y_fit = np.exp(intercept + slope * np.log(x_fit))
+            fig.add_trace(
+                go.Scatter(
+                    x=x_fit,
+                    y=y_fit,
+                    mode="lines",
+                    line=dict(color=color, dash="dash"),
+                    name=f"{name} fit",
+                    hoverinfo="skip",
+                    showlegend=False,
+                )
+            )
+    else:
+        fig = go.Figure()
+        fig.layout = None
+        fig.data = None
         fig.add_trace(
             go.Scatter(
-                x=highlight["training_flops_ef"],
-                y=highlight["eval_paloma_c4_en_bpb"],
+                x=df_all["training_flops_ef"],
+                y=df_all["eval_paloma_c4_en_bpb"],
                 mode="markers",
-                marker=dict(color=track_color, size=12, opacity=0.9,
-                            line=dict(color="white", width=1)),
-                name="Selected Track",
-                text=highlight["run_name"],
-                customdata=np.column_stack((highlight["training_flops_ef"],)),
+                marker=dict(color="rgba(156,163,175,0.3)", size=8, line=dict(width=0)),
+                name="All Runs",
+                text=df_all["run_name"],
+                customdata=np.column_stack((df_all["training_flops_ef"],)),
                 hovertemplate="<b>%{text}</b><br>%{customdata[0]:.2f} EF<br>%{y:.3f} BPB<extra></extra>",
             )
         )
+        highlight = df_all[df_all["in_track"]]
+        if not highlight.empty:
+            fig.add_trace(
+                go.Scatter(
+                    x=highlight["training_flops_ef"],
+                    y=highlight["eval_paloma_c4_en_bpb"],
+                    mode="markers",
+                    marker=dict(
+                        color=track_color,
+                        size=12,
+                        opacity=0.9,
+                        line=dict(color="white", width=1),
+                    ),
+                    name="Selected Track",
+                    text=highlight["run_name"],
+                    customdata=np.column_stack((highlight["training_flops_ef"],)),
+                    hovertemplate="<b>%{text}</b><br>%{customdata[0]:.2f} EF<br>%{y:.3f} BPB<extra></extra>",
+                )
+            )
 
     valid = df_all.dropna(subset=["eval_paloma_c4_en_bpb"])
     valid = valid[valid["training_hardware_flops"] > 0]
 
     def dominated(row):
-        return ((valid["training_hardware_flops"] <= row.training_hardware_flops) &
-                (valid["eval_paloma_c4_en_bpb"] <  row.eval_paloma_c4_en_bpb) &
-                ((valid["training_hardware_flops"] < row.training_hardware_flops) |
-                 (valid["eval_paloma_c4_en_bpb"] < row.eval_paloma_c4_en_bpb))).any()
+        return (
+            (valid["training_hardware_flops"] <= row.training_hardware_flops)
+            & (valid["eval_paloma_c4_en_bpb"] < row.eval_paloma_c4_en_bpb)
+            & (
+                (valid["training_hardware_flops"] < row.training_hardware_flops)
+                | (valid["eval_paloma_c4_en_bpb"] < row.eval_paloma_c4_en_bpb)
+            )
+        ).any()
 
-    pareto_df = valid[~valid.apply(dominated, axis=1)].sort_values("training_hardware_flops")
+    pareto_df = valid[~valid.apply(dominated, axis=1)].sort_values(
+        "training_hardware_flops"
+    )
 
-    if not pareto_df.empty:
+    if not pareto_df.empty and track_id != "scaling":
         fig.add_trace(
             go.Scatter(
                 x=pareto_df["training_flops_ef"],
@@ -236,10 +288,12 @@ def _(df_runs, filtered, mo, next_lower, np, t, track_id):
             )
         )
 
-    print(track_id)
-    if track_id != "all":
-        x_min, x_max = df_all["training_flops_ef"].min(), df_all["training_flops_ef"].max()
-    
+    if track_id not in ["all", "scaling"]:
+        x_min, x_max = (
+            df_all["training_flops_ef"].min(),
+            df_all["training_flops_ef"].max(),
+        )
+
         fig.add_trace(
             go.Scatter(
                 x=[x_min, x_max],
@@ -250,14 +304,14 @@ def _(df_runs, filtered, mo, next_lower, np, t, track_id):
                 showlegend=False,
             )
         )
-    
+
         fig.add_trace(
             go.Scatter(
                 x=[x_min, x_max],
                 y=[next_lower, next_lower],
                 mode="lines",
                 line=dict(color=track_color, dash="dash", width=1),
-                fill="tonexty",          # ← the magic
+                fill="tonexty",  # ← the magic
                 fillcolor=f"rgba{(*tuple(int(track_color.lstrip('#')[i:i+2], 16) for i in (0,2,4)), 0.15)}",
                 hoverinfo="skip",
                 showlegend=False,
@@ -280,8 +334,7 @@ def _(df_runs, filtered, mo, next_lower, np, t, track_id):
             showgrid=True,
             gridcolor="rgba(0,0,0,0.05)",
         ),
-        legend=dict(orientation="h", x=0.5, xanchor="center",
-                    y=1.05, yanchor="bottom"),
+        legend=dict(orientation="h", x=0.5, xanchor="center", y=0.9, yanchor="bottom"),
         plot_bgcolor="white",
         margin=dict(l=50, r=20, t=60, b=50),
     )
@@ -289,19 +342,25 @@ def _(df_runs, filtered, mo, next_lower, np, t, track_id):
     print(fig)
     mo.ui.plotly(fig, label="Runs")
 
-    return
+    return (group_scaling,)
 
 
 @app.cell
-def _(filtered, mo, pd, t, track_id):
+def _(filtered, group_scaling, mo, pd, t, track_id):
     # ───────────────────────────── helpers ─────────────────────────────
     def fmt_model_size(x: float) -> str:
         if pd.isna(x):
             return "N/A"
-        return f"{x/1e6:.1f} M" if x < 1e9 else f"{x/1e9:.1f} B"
+        return f"{x / 1e6:.1f} M" if x < 1e9 else f"{x / 1e9:.1f} B"
+
 
     def fmt_flops(x: float) -> str:
-        return "N/A" if pd.isna(x) else f"{x:.2E}".replace("E+0", "E").replace("E+", "E")
+        return (
+            "N/A"
+            if pd.isna(x)
+            else f"{x:.2E}".replace("E+0", "E").replace("E+", "E")
+        )
+
 
     def fmt_date(ts: str) -> str:
         if not ts:
@@ -309,40 +368,78 @@ def _(filtered, mo, pd, t, track_id):
         ts = ts.replace(" UTC", "")
         return pd.to_datetime(ts).date().isoformat()
 
+
     # ─────────────────────────── table rows ────────────────────────────
     rows = []
     for rank, (_, r) in enumerate(
         filtered.sort_values("training_hardware_flops").iterrows(), start=1
     ):
-        author = r["author.name"]
+        _website = r["author.url"]
+        _name = r["author.name"]
+        author = f'<a href="{_website}" target="_blank" rel="noopener" class="text-marin-blue hover:text-blue-600 transition-colors duration-150">{_name}</a>'
         if pd.notna(r["author.affiliation"]):
-            author += f"\n{r['author.affiliation']}"
+            author += f"<br/>{r['author.affiliation']}"
+        author = {"mimetype": "text/html", "data": author}
 
         wandb = r.wandb_link if pd.notna(r.wandb_link) else "N/A"
+        experiment_file = (
+            "https://github.com/marin-community/marin/tree/main/"
+            + (r["results_filepath"] if track_id != "scaling" else "/".join(r["results_filepath"].split("/")[:-1]))
+        ) 
+        _run_name = (
+            r["run_name"] if track_id != "scaling" else r["run_name"].split("/")[0].strip()
+        )
 
-        rows.append(
-            {
-                "Rank": rank,
-                "Run Name": r.run_name,
-                "Author": author,
-                "Date Added": fmt_date(r.run_completion_timestamp),
+        if track_id != "scaling":
+            perf = {
                 "Model Size*": fmt_model_size(r.model_size),
                 "Training Time": f"{r.training_time:.1f} m",
                 "Total FLOPs*": fmt_flops(r.training_hardware_flops),
                 "C4-EN BPB": f"{r.eval_paloma_c4_en_bpb:.3f}",
-                "W&B Run": wandb,
+            }
+        else:
+            perf = {
+                "Scaling Law Intercept": group_scaling[_run_name]["intercept"],
+                "Scaling Law Slope": group_scaling[_run_name]["slope"],
+            }
+
+        rows.append(
+            {
+                "Rank": rank,
+                "Run Name": {
+                    "mimetype": "text/html",
+                    "data": f'<a href="{experiment_file}" target="_blank" rel="noopener" class="text-marin-blue hover:text-blue-600 transition-colors duration-150">{_run_name}</a>',
+                },
+                "Author": author,
+                "Date Added": fmt_date(r.run_completion_timestamp),
+                **perf,
+                "W&B Run": {
+                    "mimetype": "text/html",
+                    "data": f'<a href="{wandb}" target="_blank" rel="noopener" class="text-marin-blue hover:text-blue-600 transition-colors duration-150">View Run</a>',
+                },
             }
         )
 
-    df_disp = pd.DataFrame(rows)
+    df_disp = pd.DataFrame(rows).drop_duplicates(subset=["Run Name"]).sort_values(by=["Scaling Law Slope"] if track_id == "scaling" else ["C4-EN BPB"])
 
     # ──────────────────────────── headers ──────────────────────────────
-    if track_id != "all":
+    if track_id == "scaling":
         header = mo.Html(
             f"""
             <div style='display:flex;align-items:center;gap:6px'>
               <span style='width:14px;height:14px;border-radius:2px;background:{t.color}'></span>
-              <h3 style='margin:0'>{t.name} ({t.target_bpb:.2f} BPB) Leaderboard</h3>
+              <h3 style='margin:0'>{t["name"]} Leaderboard</h3>
+            </div>"""
+        )
+        subtitle = mo.Html(
+            "<div style='color:#6b7280;font-size:0.9rem'>Runs grouped by leading folder with log-linear fits</div>"
+        )
+    elif track_id != "all":
+        header = mo.Html(
+            f"""
+            <div style='display:flex;align-items:center;gap:6px'>
+              <span style='width:14px;height:14px;border-radius:2px;background:{t.color}'></span>
+              <h3 style='margin:0'>{t["name"]} ({t.target_bpb:.2f} BPB) Leaderboard</h3>
             </div>
             """
         )
@@ -366,7 +463,6 @@ def _(filtered, mo, pd, t, track_id):
     # ──────────────────────────── assemble ─────────────────────────────
     table = mo.ui.table(df_disp, label="Leaderboard")  # plain strings only
     mo.vstack([header, subtitle, table, footnotes])
-
     return
 
 

@@ -37,5 +37,12 @@
     "target_bpb": 0.9557313919067384,
     "run_name": "llama_1_4b",
     "color": "#f472b6"
+  },
+  {
+    "id": "scaling",
+    "name": "Scaling",
+    "description": "Group runs by leading folder to view scaling trends",
+    "target_bpb": null,
+    "color": "#4f46e5"
   }
-] 
+]
