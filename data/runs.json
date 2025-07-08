@@ -136,6 +136,142 @@
     "description": "520M parameter model trained with the AdamW optimizer."
   },
   {
+    "run_name": "c-adamc_llama_scaling/130m",
+    "results_filepath": "experiments/speedrun/c-adamc_llama_scaling/130m",
+    "author": {
+      "name": "William Held",
+      "affiliation": "Georgia Tech",
+      "url": "https://WilliamHeld.com"
+    },
+    "model_size": 154147328,
+    "training_hardware_flops": 1.7051882246373634e+19,
+    "training_time": 1160.9396954230415,
+    "model_flops": 1.777337490915459e+18,
+    "eval_paloma_c4_en_bpb": 1.1886805295944214,
+    "wandb_link": "https://wandb.ai/marin-community/marin/runs/llama_130m_c_adamc_4096-0609e9",
+    "run_completion_timestamp": "2025-07-03 23:32:13 UTC",
+    "description": "130M parameter model trained with the C-AdamC optimizer."
+  },
+  {
+    "run_name": "c-adamc_llama_scaling/1_2b",
+    "results_filepath": "experiments/speedrun/c-adamc_llama_scaling/1_2b",
+    "author": {
+      "name": "William Held",
+      "affiliation": "Georgia Tech",
+      "url": "https://WilliamHeld.com"
+    },
+    "model_size": 1431373824,
+    "training_hardware_flops": 7.937334384059815e+20,
+    "training_time": 54039.58594811965,
+    "model_flops": 2.071634014279733e+20,
+    "eval_paloma_c4_en_bpb": 0.9381008148193359,
+    "wandb_link": "https://wandb.ai/marin-community/marin/runs/llama_1_2b_c_adamc_4096-d56b4a",
+    "run_completion_timestamp": "2025-07-04 14:44:49 UTC",
+    "description": "1.2B parameter model trained with the C-AdamC optimizer."
+  },
+  {
+    "run_name": "c-adamc_llama_scaling/300m",
+    "results_filepath": "experiments/speedrun/c-adamc_llama_scaling/300m",
+    "author": {
+      "name": "William Held",
+      "affiliation": "Georgia Tech",
+      "url": "https://WilliamHeld.com"
+    },
+    "model_size": 299649792,
+    "training_hardware_flops": 7.790693662141797e+19,
+    "training_time": 5304.121502002858,
+    "model_flops": 9.99035877535934e+18,
+    "eval_paloma_c4_en_bpb": 1.0705386400222778,
+    "wandb_link": "https://wandb.ai/marin-community/marin/runs/llama_300m_c_adamc_4096-62f75f",
+    "run_completion_timestamp": "2025-07-04 00:46:20 UTC",
+    "description": "300M parameter model trained with the C-AdamC optimizer."
+  },
+  {
+    "run_name": "c-adamc_llama_scaling/520m",
+    "results_filepath": "experiments/speedrun/c-adamc_llama_scaling/520m",
+    "author": {
+      "name": "William Held",
+      "affiliation": "Georgia Tech",
+      "url": "https://WilliamHeld.com"
+    },
+    "model_size": 602457088,
+    "training_hardware_flops": 2.7576777203210722e+20,
+    "training_time": 18775.03894554107,
+    "model_flops": 4.210403636805422e+19,
+    "eval_paloma_c4_en_bpb": 0.9977965950965881,
+    "wandb_link": "https://wandb.ai/marin-community/marin/runs/llama_520m_c_adamc_4096-42dcc9",
+    "run_completion_timestamp": "2025-07-04 04:34:42 UTC",
+    "description": "520M parameter model trained with the C-AdamC optimizer."
+  },
+  {
+    "run_name": "cautious_llama_scaling/130m",
+    "results_filepath": "experiments/speedrun/cautious_llama_scaling/130m",
+    "author": {
+      "name": "William Held",
+      "affiliation": "Georgia Tech",
+      "url": "https://WilliamHeld.com"
+    },
+    "model_size": 154147328,
+    "training_hardware_flops": 1.6891453089003848e+19,
+    "training_time": 1150.017231005164,
+    "model_flops": 1.777337490915459e+18,
+    "eval_paloma_c4_en_bpb": 1.1882025003433228,
+    "wandb_link": "https://wandb.ai/marin-community/marin/runs/llama_130m_cautious_4096-3c36ee",
+    "run_completion_timestamp": "2025-07-03 23:29:58 UTC",
+    "description": "130M parameter model trained with the Cautious optimizer."
+  },
+  {
+    "run_name": "cautious_llama_scaling/1_2b",
+    "results_filepath": "experiments/speedrun/cautious_llama_scaling/1_2b",
+    "author": {
+      "name": "William Held",
+      "affiliation": "Georgia Tech",
+      "url": "https://WilliamHeld.com"
+    },
+    "model_size": 1431373824,
+    "training_hardware_flops": 7.941160395043e+20,
+    "training_time": 54065.63449784178,
+    "model_flops": 2.071634014279733e+20,
+    "eval_paloma_c4_en_bpb": 0.9378550052642822,
+    "wandb_link": "https://wandb.ai/marin-community/marin/runs/llama_1_2b_cautious_4096-1fcc8e",
+    "run_completion_timestamp": "2025-07-04 14:43:36 UTC",
+    "description": "1.2B parameter model trained with the Cautious optimizer."
+  },
+  {
+    "run_name": "cautious_llama_scaling/300m",
+    "results_filepath": "experiments/speedrun/cautious_llama_scaling/300m",
+    "author": {
+      "name": "William Held",
+      "affiliation": "Georgia Tech",
+      "url": "https://WilliamHeld.com"
+    },
+    "model_size": 299649792,
+    "training_hardware_flops": 7.730599211937243e+19,
+    "training_time": 5263.207524467078,
+    "model_flops": 9.99035877535934e+18,
+    "eval_paloma_c4_en_bpb": 1.071447491645813,
+    "wandb_link": "https://wandb.ai/marin-community/marin/runs/llama_300m_cautious_4096-ce2f5f",
+    "run_completion_timestamp": "2025-07-04 00:43:54 UTC",
+    "description": "300M parameter model trained with the Cautious optimizer."
+  },
+  {
+    "run_name": "cautious_llama_scaling/520m",
+    "results_filepath": "experiments/speedrun/cautious_llama_scaling/520m",
+    "author": {
+      "name": "William Held",
+      "affiliation": "Georgia Tech",
+      "url": "https://WilliamHeld.com"
+    },
+    "model_size": 602457088,
+    "training_hardware_flops": 2.7571167238883996e+20,
+    "training_time": 18771.219525383985,
+    "model_flops": 4.210403636805422e+19,
+    "eval_paloma_c4_en_bpb": 0.9973351955413818,
+    "wandb_link": "https://wandb.ai/marin-community/marin/runs/llama_520m_cautious_4096-7650d9",
+    "run_completion_timestamp": "2025-07-04 04:32:53 UTC",
+    "description": "520M parameter model trained with the Cautious optimizer."
+  },
+  {
     "run_name": "llama_150m_run",
     "results_filepath": "experiments/speedrun/llama_150m_run",
     "author": {
