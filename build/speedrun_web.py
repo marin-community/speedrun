@@ -96,10 +96,10 @@ def _():
 @app.cell
 def _(df_tracks, mo):
     q = mo.query_params()
-    tab_map = {row["name"]: row["id"] for _, row in df_tracks.iterrows()}
+    tab_map = {row["name"].capitalize(): row["id"] for _, row in df_tracks.iterrows()}
     tabs = mo.ui.tabs(
-        {row["name"]: "" for _, row in df_tracks.iterrows()},
-        value=q.get("track") or "Scaling",
+        {row["name"].capitalize(): "" for _, row in df_tracks.iterrows()},
+        value=q.get("track").capitalize() or "Scaling",
     )
     tabs.center()
     return q, tab_map, tabs
@@ -112,14 +112,12 @@ def _(df_runs, df_tracks, pd, q, tab_map, tabs):
     filtered = df_runs
 
     if track_id == "scaling":
-
         t = df_tracks.loc[df_tracks["id"] == track_id].iloc[0]
         filtered = df_runs[df_runs["run_name"].str.contains("/")]
     elif track_id != "all":
         t = df_tracks.loc[df_tracks["id"] == track_id].iloc[0]
 
         if pd.notna(t["target_bpb"]):
-
             sorted_tracks = (
                 df_tracks[(df_tracks["id"] != "all") & df_tracks["target_bpb"].notna()]
                 .sort_values("target_bpb", ascending=False)
@@ -145,7 +143,7 @@ def _(df_runs, df_tracks, pd, q, tab_map, tabs):
 def _(filtered, mo, track_id):
     import numpy as np
 
-    FLOPS_BUDGET = 1e22
+    FLOPS_BUDGET = 2e24
     best_flops_header = "Best FLOPs in Track"
 
     if track_id == "scaling":
@@ -159,9 +157,13 @@ def _(filtered, mo, track_id):
             preds.append(np.exp(_intercept + _slope * np.log(FLOPS_BUDGET)))
 
         best_bpb_value = f"{min(preds):.4g}" if preds else "N/A"
-        best_bpb_header = f"Best Projected BPB @ {FLOPS_BUDGET/1e18:.0f} EF"
-        best_flops_header = f"Best Compute Scaling Term"
+        best_bpb_header = (
+            f"Best Projected BPB @ {FLOPS_BUDGET:.0e}".replace("e+", "e")
+            + " FLOPs<br/>(Approx. Llama 3 8B Compute)"
+        )
+        best_flops_header = "Best Compute Scaling Term"
         best_flops_value = f"{_slope:.4g}"
+        num_runs = len(df.drop_duplicates(subset=["lead_folder"]))
     else:
         best_flops = (
             filtered.training_hardware_flops.min() if not filtered.empty else np.nan
@@ -172,13 +174,14 @@ def _(filtered, mo, track_id):
         )
         best_bpb_header = "Best C4-EN BPB"
         best_bpb_value = f"{best_bpb:.4g}"
+        num_runs = len(filtered)
 
     stats = mo.Html(
         f"""
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
         <div class="bg-white rounded-lg shadow p-6">
             <h3 class="text-lg font-medium mb-4">Total Runs in Track</h3>
-            <div id="total-runs" class="text-2xl font-bold">{len(filtered)}</div>
+            <div id="total-runs" class="text-2xl font-bold">{num_runs}</div>
         </div>
         <div class="bg-white rounded-lg shadow p-6">
             <h3 class="text-lg font-medium mb-4">{best_flops_header}</h3>
@@ -192,18 +195,16 @@ def _(filtered, mo, track_id):
     """
     )
     stats
-    return (np,)
+    return (np, FLOPS_BUDGET)
 
 
 @app.cell
-def _(df_runs, filtered, mo, next_lower, np, t, track_id):
+def _(df_runs, filtered, mo, next_lower, np, t, track_id, FLOPS_BUDGET):
     import plotly.graph_objects as go
     import plotly.express as px
 
     df_all = df_runs.copy()
-    df_all["training_flops_ef"] = (
-        df_all["training_hardware_flops"] / 1e18
-    )  # 1 EF = 1e18 FLOPs
+    df_all["training_flops"] = df_all["training_hardware_flops"]
     df_all["in_track"] = df_all.index.isin(filtered.index)
 
     track_color = t.color if track_id != "all" else "#1877F2"  # fallback blue
@@ -220,22 +221,26 @@ def _(df_runs, filtered, mo, next_lower, np, t, track_id):
             color = colors[i % len(colors)]
             fig.add_trace(
                 go.Scatter(
-                    x=g["training_flops_ef"],
+                    x=g["training_flops"],
                     y=g["eval_paloma_c4_en_bpb"],
                     mode="markers",
                     marker=dict(color=color, size=10),
                     name=name,
                     text=g["run_name"],
-                    customdata=np.column_stack((g["training_flops_ef"],)),
-                    hovertemplate="<b>%{text}</b><br>%{customdata[0]:.2f} EF<br>%{y:.3f} BPB<extra></extra>",
+                    customdata=np.column_stack((g["training_flops"],)),
+                    hovertemplate="<b>%{text}</b><br>%{customdata[0]:.2e} FLOPs<br>%{y:.3f} BPB<extra></extra>",
                 )
             )
-            xlog = np.log(g["training_flops_ef"])
+            xlog = np.log(g["training_flops"])
             ylog = np.log(g["eval_paloma_c4_en_bpb"])
             slope, intercept = np.polyfit(xlog, ylog, 1)
-            group_scaling[name] = {"slope": slope, "intercept": intercept}
-            x_fit = np.linspace(
-                g["training_flops_ef"].min(), g["training_flops_ef"].max(), 100
+            group_scaling[name] = {
+                "slope": slope,
+                "intercept": intercept,
+                "projected": float(np.exp(intercept + slope * np.log(FLOPS_BUDGET))),
+            }
+            x_fit = np.logspace(
+                np.log10(g["training_flops"].min()), np.log10(FLOPS_BUDGET), 100
             )
             y_fit = np.exp(intercept + slope * np.log(x_fit))
             fig.add_trace(
@@ -249,6 +254,19 @@ def _(df_runs, filtered, mo, next_lower, np, t, track_id):
                     showlegend=False,
                 )
             )
+        fig.add_trace(
+            go.Scatter(
+                x=[FLOPS_BUDGET, FLOPS_BUDGET],
+                y=[
+                    0,
+                    df_all.eval_paloma_c4_en_bpb.max(),
+                ],
+                mode="lines",
+                line=dict(color="black", dash="dash"),
+                hoverinfo="skip",
+                showlegend=False,
+            )
+        )
     else:
         group_scaling = None
         fig = go.Figure()
@@ -256,21 +274,21 @@ def _(df_runs, filtered, mo, next_lower, np, t, track_id):
         fig.data = None
         fig.add_trace(
             go.Scatter(
-                x=df_all["training_flops_ef"],
+                x=df_all["training_flops"],
                 y=df_all["eval_paloma_c4_en_bpb"],
                 mode="markers",
                 marker=dict(color="rgba(156,163,175,0.3)", size=8, line=dict(width=0)),
                 name="All Runs",
                 text=df_all["run_name"],
-                customdata=np.column_stack((df_all["training_flops_ef"],)),
-                hovertemplate="<b>%{text}</b><br>%{customdata[0]:.2f} EF<br>%{y:.3f} BPB<extra></extra>",
+                customdata=np.column_stack((df_all["training_flops"],)),
+                hovertemplate="<b>%{text}</b><br>%{customdata[0]:.2e} FLOPs<br>%{y:.3f} BPB<extra></extra>",
             )
         )
         highlight = df_all[df_all["in_track"]]
         if not highlight.empty:
             fig.add_trace(
                 go.Scatter(
-                    x=highlight["training_flops_ef"],
+                    x=highlight["training_flops"],
                     y=highlight["eval_paloma_c4_en_bpb"],
                     mode="markers",
                     marker=dict(
@@ -281,8 +299,8 @@ def _(df_runs, filtered, mo, next_lower, np, t, track_id):
                     ),
                     name="Selected Track",
                     text=highlight["run_name"],
-                    customdata=np.column_stack((highlight["training_flops_ef"],)),
-                    hovertemplate="<b>%{text}</b><br>%{customdata[0]:.2f} EF<br>%{y:.3f} BPB<extra></extra>",
+                    customdata=np.column_stack((highlight["training_flops"],)),
+                    hovertemplate="<b>%{text}</b><br>%{customdata[0]:.2e} FLOPs<br>%{y:.3f} BPB<extra></extra>",
                 )
             )
 
@@ -306,7 +324,7 @@ def _(df_runs, filtered, mo, next_lower, np, t, track_id):
     if not pareto_df.empty and track_id != "scaling":
         fig.add_trace(
             go.Scatter(
-                x=pareto_df["training_flops_ef"],
+                x=pareto_df["training_flops"],
                 y=pareto_df["eval_paloma_c4_en_bpb"],
                 mode="lines+markers",
                 line=dict(color="#FF2D55", width=2),
@@ -318,8 +336,8 @@ def _(df_runs, filtered, mo, next_lower, np, t, track_id):
 
     if track_id not in ["all", "scaling"]:
         x_min, x_max = (
-            df_all["training_flops_ef"].min(),
-            df_all["training_flops_ef"].max(),
+            df_all["training_flops"].min(),
+            df_all["training_flops"].max(),
         )
 
         fig.add_trace(
@@ -339,8 +357,8 @@ def _(df_runs, filtered, mo, next_lower, np, t, track_id):
                 y=[next_lower, next_lower],
                 mode="lines",
                 line=dict(color=track_color, dash="dash", width=1),
-                fill="tonexty",  # ← the magic
-                fillcolor=f"rgba{(*tuple(int(track_color.lstrip('#')[i:i+2], 16) for i in (0,2,4)), 0.15)}",
+                fill="tonexty",
+                fillcolor=f"rgba{(*tuple(int(track_color.lstrip('#')[i : i + 2], 16) for i in (0, 2, 4)), 0.15)}",
                 hoverinfo="skip",
                 showlegend=False,
             )
@@ -350,8 +368,7 @@ def _(df_runs, filtered, mo, next_lower, np, t, track_id):
         title="Overall Pareto Frontier: FLOPs vs C4-EN BPB",
         xaxis=dict(
             type="log",
-            title="Training FLOPs (ExaFLOPs)",
-            tickformat=".1f",
+            title="Training FLOPs",
             ticks="outside",
             showgrid=True,
             gridcolor="rgba(0,0,0,0.05)",
@@ -373,7 +390,7 @@ def _(df_runs, filtered, mo, next_lower, np, t, track_id):
 
 
 @app.cell
-def _(filtered, group_scaling, mo, pd, t, track_id):
+def _(filtered, group_scaling, mo, pd, t, track_id, FLOPS_BUDGET):
     # ───────────────────────────── helpers ─────────────────────────────
     def fmt_model_size(x: float) -> str:
         if pd.isna(x):
@@ -425,8 +442,11 @@ def _(filtered, group_scaling, mo, pd, t, track_id):
             }
         else:
             perf = {
-                "Scaling Law Intercept": f'{group_scaling[_run_name]["intercept"]:.3f}',
-                "Scaling Law Slope": f'{group_scaling[_run_name]["slope"]:.3f}',
+                "Scaling Law Intercept": f"{group_scaling[_run_name]['intercept']:.3f}",
+                "Scaling Law Slope": f"{group_scaling[_run_name]['slope']:.3f}",
+                (
+                    f"Projected BPB @ {FLOPS_BUDGET:.0e}".replace("e+", "e") + " FLOPs"
+                ): f"{group_scaling[_run_name]['projected']:.3f}",
             }
 
         rows.append(
