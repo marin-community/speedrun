@@ -92,17 +92,20 @@ def _():
 
 @app.cell
 def _(df_tracks, mo):
-    tabs = mo.ui.tabs({row["name"]: "" for _, row in df_tracks.iterrows()})
+    q = mo.query_params()
     tab_map = {row["name"]: row["id"] for _, row in df_tracks.iterrows()}
+    tabs = mo.ui.tabs(
+        {row["name"]: "" for _, row in df_tracks.iterrows()},
+        value=q.get("track") or "Scaling",
+    )
     tabs.center()
-    return tab_map, tabs
+    return tab_map, tabs, q
 
 
 @app.cell
-def _(df_runs, df_tracks, mo, pd, tab_map, tabs):
-    q = mo.query_params()
+def _(df_runs, df_tracks, mo, pd, tab_map, tabs, q):
     track_id = tab_map[tabs.value]
-    q["track"] = track_id
+    q["track"] = tabs.value
     filtered = df_runs
 
     if track_id == "scaling":
