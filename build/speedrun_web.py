@@ -394,7 +394,8 @@ def _(filtered, group_scaling, mo, pd, t, track_id):
     # ─────────────────────────── table rows ────────────────────────────
     rows = []
     for rank, (_, r) in enumerate(
-        filtered.sort_values("training_hardware_flops").iterrows(), start=1
+        filtered.sort_values("eval_paloma_c4_en_bpb", ascending=True).iterrows(),
+        start=1,
     ):
         _website = r["author.url"]
         _name = r["author.name"]
@@ -490,8 +491,11 @@ def _(filtered, group_scaling, mo, pd, t, track_id):
     )
 
     # ──────────────────────────── assemble ─────────────────────────────
+    df_disp["Rank"] = df_disp.reset_index().index + 1
     table = mo.ui.table(
-        df_disp.set_index("Rank"), label="Leaderboard", selection=None
+        df_disp.set_index("Rank").sort_values(by="Rank"),
+        label="Leaderboard",
+        selection=None,
     )  # plain strings only
     mo.vstack([header, subtitle, table, footnotes])
     return
