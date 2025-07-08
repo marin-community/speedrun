@@ -12,7 +12,15 @@
 # ]
 # ///
 
+from __future__ import annotations
+
 import marimo
+from types import ModuleType
+from typing import Any, Dict, Tuple, TYPE_CHECKING
+
+if TYPE_CHECKING:  # Imports used only for type checking
+    import pandas as pd
+    import numpy as np
 
 __generated_with = "0.14.10"
 app = marimo.App(
@@ -24,16 +32,35 @@ app = marimo.App(
 
 
 @app.cell
-def base_import():
-    """Import and return the ``marimo`` module."""
+def base_import() -> Tuple[ModuleType]:
+    """Import ``marimo`` and return it.
+
+    Returns
+    -------
+    tuple
+        A single-element tuple containing the imported ``marimo`` module. The
+        tuple form is used so that the value can be captured by subsequent
+        cells in the notebook.
+    """
     import marimo as mo
 
     return (mo,)
 
 
 @app.cell
-def render_header(mo):
-    """Render the page header with logo and title."""
+def render_header(mo: ModuleType) -> None:
+    """Render the page header.
+
+    Parameters
+    ----------
+    mo : ModuleType
+        The ``marimo`` module used to create HTML elements.
+
+    Returns
+    -------
+    None
+        The header is rendered for its side effect; nothing is returned.
+    """
     mo.Html(
         f"""
     <header class="bg-marin-dark text-white shadow-lg">
@@ -53,8 +80,19 @@ def render_header(mo):
 
 
 @app.cell
-def render_intro_paragraph(mo):
-    """Display introductory content explaining Speedrun."""
+def render_intro_paragraph(mo: ModuleType) -> None:
+    """Display the introductory paragraph.
+
+    Parameters
+    ----------
+    mo : ModuleType
+        The ``marimo`` module used for HTML rendering.
+
+    Returns
+    -------
+    None
+        This function only produces HTML output in the notebook.
+    """
     mo.Html(
         """
     <div class="bg-white rounded-lg shadow p-8 mb-8">
@@ -84,8 +122,17 @@ def render_intro_paragraph(mo):
 
 
 @app.cell
-def load_leaderboard_data():
-    """Load run and track data from JSON files."""
+def load_leaderboard_data() -> Tuple[pd.DataFrame, pd.DataFrame, ModuleType]:
+    """Load run and track information from disk.
+
+    Returns
+    -------
+    tuple
+        ``(df_runs, df_tracks, pd)`` where ``df_runs`` contains run metadata
+        and ``df_tracks`` describes the available leaderboard tracks. The
+        ``pd`` return value is the imported :mod:`pandas` module for reuse in
+        later cells.
+    """
     import json
     import pandas as pd
 
@@ -99,8 +146,25 @@ def load_leaderboard_data():
 
 
 @app.cell
-def render_track_tabs(df_tracks, mo):
-    """Create tabs for selecting a leaderboard track."""
+def render_track_tabs(
+    df_tracks: pd.DataFrame, mo: ModuleType
+) -> Tuple[Any, Dict[str, str], Any]:
+    """Create tabs allowing the user to choose a track.
+
+    Parameters
+    ----------
+    df_tracks : pandas.DataFrame
+        Data frame describing all available leaderboard tracks.
+    mo : ModuleType
+        The ``marimo`` module for constructing UI elements.
+
+    Returns
+    -------
+    tuple
+        ``(q, tab_map, tabs)`` where ``q`` represents the current query
+        parameters, ``tab_map`` maps the displayed tab name to its underlying
+        track identifier and ``tabs`` is the tab widget itself.
+    """
     q = mo.query_params()
     tab_map = {row["name"].capitalize(): row["id"] for _, row in df_tracks.iterrows()}
     tabs = mo.ui.tabs(
@@ -112,8 +176,39 @@ def render_track_tabs(df_tracks, mo):
 
 
 @app.cell
-def filter_data_by_selected_track(df_runs, df_tracks, pd, q, tab_map, tabs):
-    """Filter runs according to the selected track."""
+def filter_data_by_selected_track(
+    df_runs: pd.DataFrame,
+    df_tracks: pd.DataFrame,
+    pd: ModuleType,
+    q: Any,
+    tab_map: Dict[str, str],
+    tabs: Any,
+) -> Tuple[pd.DataFrame, float, pd.Series, str]:
+    """Filter runs according to the selected track.
+
+    Parameters
+    ----------
+    df_runs : pandas.DataFrame
+        Data for all submitted runs.
+    df_tracks : pandas.DataFrame
+        Metadata describing available tracks.
+    pd : ModuleType
+        The :mod:`pandas` module.
+    q : Any
+        Query parameter object used to store the currently selected track.
+    tab_map : dict[str, str]
+        Mapping from tab label to track identifier.
+    tabs : Any
+        The tab widget created by :func:`render_track_tabs`.
+
+    Returns
+    -------
+    tuple
+        ``(filtered, next_lower, t, track_id)`` where ``filtered`` is the subset
+        of ``df_runs`` matching the selected track, ``next_lower`` is the next
+        best BPB threshold for the track, ``t`` is the row in ``df_tracks``
+        describing the track and ``track_id`` is the selected track identifier.
+    """
     track_id = tab_map[tabs.value]
     q["track"] = tabs.value
     filtered = df_runs
@@ -147,8 +242,27 @@ def filter_data_by_selected_track(df_runs, df_tracks, pd, q, tab_map, tabs):
 
 
 @app.cell
-def compute_and_render_high_level_track_stats(filtered, mo, track_id):
-    """Compute summary statistics for the selected track."""
+def compute_and_render_high_level_track_stats(
+    filtered: pd.DataFrame, mo: ModuleType, track_id: str
+) -> Tuple[float, ModuleType]:
+    """Compute and display high-level statistics for a track.
+
+    Parameters
+    ----------
+    filtered : pandas.DataFrame
+        Data frame containing runs restricted to the chosen track.
+    mo : ModuleType
+        The ``marimo`` module used to render HTML.
+    track_id : str
+        Identifier of the selected track.
+
+    Returns
+    -------
+    tuple
+        ``(FLOPS_BUDGET, np)`` where ``FLOPS_BUDGET`` is the reference
+        compute budget used for projections and ``np`` is the imported
+        :mod:`numpy` module for reuse by subsequent cells.
+    """
     import numpy as np
 
     FLOPS_BUDGET = 2e24
@@ -208,9 +322,43 @@ def compute_and_render_high_level_track_stats(filtered, mo, track_id):
 
 @app.cell
 def render_speedrun_plot(
-    df_runs, filtered, mo, next_lower, np, t, track_id, FLOPS_BUDGET
-):
-    """Plot the Pareto frontier for runs in the selected track."""
+    df_runs: pd.DataFrame,
+    filtered: pd.DataFrame,
+    mo: ModuleType,
+    next_lower: float,
+    np: ModuleType,
+    t: pd.Series,
+    track_id: str,
+    FLOPS_BUDGET: float,
+) -> Tuple[Dict[str, Dict[str, float]] | None]:
+    """Plot the Pareto frontier for runs in the selected track.
+
+    Parameters
+    ----------
+    df_runs : pandas.DataFrame
+        All run information.
+    filtered : pandas.DataFrame
+        Subset of ``df_runs`` belonging to the current track.
+    mo : ModuleType
+        ``marimo`` module for rendering the plot.
+    next_lower : float
+        Lower BPB bound of the track (used for shading).
+    np : ModuleType
+        The :mod:`numpy` module.
+    t : pandas.Series
+        Row of ``df_tracks`` describing the track.
+    track_id : str
+        Identifier of the selected track.
+    FLOPS_BUDGET : float
+        Reference FLOPs budget used for scaling-law projection.
+
+    Returns
+    -------
+    tuple
+        A one-element tuple ``(group_scaling,)`` containing a dictionary of
+        scaling statistics when ``track_id`` is ``"scaling"``. Otherwise the
+        tuple contains ``None``.
+    """
     import plotly.graph_objects as go
     import plotly.express as px
 
@@ -402,22 +550,56 @@ def render_speedrun_plot(
 
 @app.cell
 def render_speedrun_leaderboard_table(
-    filtered, group_scaling, mo, pd, t, track_id, FLOPS_BUDGET
-):
-    """Render the leaderboard table for the current track."""
+    filtered: pd.DataFrame,
+    group_scaling: Dict[str, Dict[str, float]] | None,
+    mo: ModuleType,
+    pd: ModuleType,
+    t: pd.Series,
+    track_id: str,
+    FLOPS_BUDGET: float,
+) -> None:
+    """Render the leaderboard table for the current track.
+
+    Parameters
+    ----------
+    filtered : pandas.DataFrame
+        Runs belonging to the selected track.
+    group_scaling : dict[str, dict[str, float]] | None
+        Scaling statistics returned from :func:`render_speedrun_plot` when the
+        track is ``"scaling"``.
+    mo : ModuleType
+        ``marimo`` module for rendering UI elements.
+    pd : ModuleType
+        The :mod:`pandas` module.
+    t : pandas.Series
+        Row of ``df_tracks`` describing the selected track.
+    track_id : str
+        Identifier for the current track.
+    FLOPS_BUDGET : float
+        Compute budget used for scaling-law projections.
+
+    Returns
+    -------
+    None
+        The leaderboard is rendered to the notebook; the function does not
+        return a value.
+    """
 
     # ───────────────────────────── helpers ─────────────────────────────
     def fmt_model_size(x: float) -> str:
+        """Format a parameter count as a human readable string."""
         if pd.isna(x):
             return "N/A"
         return f"{x / 1e6:.1f} M" if x < 1e9 else f"{x / 1e9:.1f} B"
 
     def fmt_flops(x: float) -> str:
+        """Format a FLOP count in scientific notation."""
         return (
             "N/A" if pd.isna(x) else f"{x:.2E}".replace("E+0", "E").replace("E+", "E")
         )
 
     def fmt_date(ts: str) -> str:
+        """Return the ISO date component of a timestamp string."""
         if not ts:
             return "N/A"
         ts = ts.replace(" UTC", "")
