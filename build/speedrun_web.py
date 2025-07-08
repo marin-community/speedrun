@@ -24,7 +24,7 @@ app = marimo.App(
 
 
 @app.cell
-def _():
+def base_import():
     """Import and return the ``marimo`` module."""
     import marimo as mo
 
@@ -32,7 +32,7 @@ def _():
 
 
 @app.cell
-def _(mo):
+def render_header(mo):
     """Render the page header with logo and title."""
     mo.Html(
         f"""
@@ -53,7 +53,7 @@ def _(mo):
 
 
 @app.cell
-def _(mo):
+def render_intro_paragraph(mo):
     """Display introductory content explaining Speedrun."""
     mo.Html(
         """
@@ -84,7 +84,7 @@ def _(mo):
 
 
 @app.cell
-def _():
+def load_leaderboard_data():
     """Load run and track data from JSON files."""
     import json
     import pandas as pd
@@ -99,7 +99,7 @@ def _():
 
 
 @app.cell
-def _(df_tracks, mo):
+def render_track_tabs(df_tracks, mo):
     """Create tabs for selecting a leaderboard track."""
     q = mo.query_params()
     tab_map = {row["name"].capitalize(): row["id"] for _, row in df_tracks.iterrows()}
@@ -112,7 +112,7 @@ def _(df_tracks, mo):
 
 
 @app.cell
-def _(df_runs, df_tracks, pd, q, tab_map, tabs):
+def filter_data_by_selected_track(df_runs, df_tracks, pd, q, tab_map, tabs):
     """Filter runs according to the selected track."""
     track_id = tab_map[tabs.value]
     q["track"] = tabs.value
@@ -147,7 +147,7 @@ def _(df_runs, df_tracks, pd, q, tab_map, tabs):
 
 
 @app.cell
-def _(filtered, mo, track_id):
+def compute_and_render_high_level_track_stats(filtered, mo, track_id):
     """Compute summary statistics for the selected track."""
     import numpy as np
 
@@ -207,7 +207,9 @@ def _(filtered, mo, track_id):
 
 
 @app.cell
-def _(df_runs, filtered, mo, next_lower, np, t, track_id, FLOPS_BUDGET):
+def render_speedrun_plot(
+    df_runs, filtered, mo, next_lower, np, t, track_id, FLOPS_BUDGET
+):
     """Plot the Pareto frontier for runs in the selected track."""
     import plotly.graph_objects as go
     import plotly.express as px
@@ -399,7 +401,9 @@ def _(df_runs, filtered, mo, next_lower, np, t, track_id, FLOPS_BUDGET):
 
 
 @app.cell
-def _(filtered, group_scaling, mo, pd, t, track_id, FLOPS_BUDGET):
+def render_speedrun_leaderboard_table(
+    filtered, group_scaling, mo, pd, t, track_id, FLOPS_BUDGET
+):
     """Render the leaderboard table for the current track."""
 
     # ───────────────────────────── helpers ─────────────────────────────
