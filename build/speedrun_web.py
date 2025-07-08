@@ -6,6 +6,9 @@
 #   "pandas==2.3.0",
 #   "plotly==6.2.0",
 #   "pyarrow",
+#   "fsspec==2025.5.1",
+#   "requests",
+#   "aiohttp",
 # ]
 # ///
 
@@ -23,7 +26,6 @@ app = marimo.App(
 @app.cell
 def _():
     import marimo as mo
-
     return (mo,)
 
 
@@ -140,13 +142,37 @@ def _(df_runs, df_tracks, pd, q, tab_map, tabs):
 
 
 @app.cell
-def _(filtered, mo):
+def _(filtered, mo, track_id):
     import numpy as np
 
-    best_flops = (
-        filtered.training_hardware_flops.min() if not filtered.empty else np.nan
-    )
-    best_bpb = filtered.eval_paloma_c4_en_bpb.min() if not filtered.empty else np.nan
+    FLOPS_BUDGET = 1e22
+    best_flops_header = "Best FLOPs in Track"
+
+    if track_id == "scaling":
+        df = filtered.copy()
+        df["lead_folder"] = df["run_name"].apply(lambda p: p.split("/")[0])
+        preds = []
+        for _, _g in df.groupby("lead_folder"):
+            x = np.log(_g["training_hardware_flops"])
+            y = np.log(_g["eval_paloma_c4_en_bpb"])
+            _slope, _intercept = np.polyfit(x, y, 1)
+            preds.append(np.exp(_intercept + _slope * np.log(FLOPS_BUDGET)))
+
+        best_bpb_value = f"{min(preds):.4g}" if preds else "N/A"
+        best_bpb_header = f"Best Projected BPB @ {FLOPS_BUDGET/1e18:.0f} EF"
+        best_flops_header = f"Best Compute Scaling Term"
+        best_flops_value = f"{_slope:.4g}"
+    else:
+        best_flops = (
+            filtered.training_hardware_flops.min() if not filtered.empty else np.nan
+        )
+        best_flops_value = f"{best_flops:.4g}"
+        best_bpb = (
+            filtered.eval_paloma_c4_en_bpb.min() if not filtered.empty else np.nan
+        )
+        best_bpb_header = "Best C4-EN BPB"
+        best_bpb_value = f"{best_bpb:.4g}"
+
     stats = mo.Html(
         f"""
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
@@ -155,12 +181,12 @@ def _(filtered, mo):
             <div id="total-runs" class="text-2xl font-bold">{len(filtered)}</div>
         </div>
         <div class="bg-white rounded-lg shadow p-6">
-            <h3 class="text-lg font-medium mb-4">Best FLOPs in Track</h3>
-            <div id="best-flops" class="text-2xl font-bold">{best_flops:.4g}</div>
+            <h3 class="text-lg font-medium mb-4">{best_flops_header}</h3>
+            <div id="best-flops" class="text-2xl font-bold">{best_flops_value}</div>
         </div>
         <div class="bg-white rounded-lg shadow p-6">
-            <h3 class="text-lg font-medium mb-4">Best C4-EN BPB</h3>
-            <div id="best-bpb" class="text-2xl font-bold">{best_bpb:.4g}</div>
+            <h3 class="text-lg font-medium mb-4">{best_bpb_header}</h3>
+            <div id="best-bpb" class="text-2xl font-bold">{best_bpb_value}</div>
         </div>
     </div>
     """
@@ -224,6 +250,7 @@ def _(df_runs, filtered, mo, next_lower, np, t, track_id):
                 )
             )
     else:
+        group_scaling = None
         fig = go.Figure()
         fig.layout = None
         fig.data = None
@@ -371,7 +398,7 @@ def _(filtered, group_scaling, mo, pd, t, track_id):
     ):
         _website = r["author.url"]
         _name = r["author.name"]
-        author = f'<a href="{_website}" target="_blank" rel="noopener" class="text-marin-blue hover:text-blue-600 transition-colors duration-150">{_name}</a>'
+        author = f'<a href="{_website}" title="{_website}" target="_blank" rel="noopener" class="text-marin-blue hover:text-blue-600 transition-colors duration-150">{_name}</a>'
         if pd.notna(r["author.affiliation"]):
             author += f"<br/>{r['author.affiliation']}"
         author = {"mimetype": "text/html", "data": author}
@@ -406,14 +433,14 @@ def _(filtered, group_scaling, mo, pd, t, track_id):
                 "Rank": rank,
                 "Run Name": {
                     "mimetype": "text/html",
-                    "data": f'<a href="{experiment_file}" target="_blank" rel="noopener" class="text-marin-blue hover:text-blue-600 transition-colors duration-150">{_run_name}</a>',
+                    "data": f'<a href="{experiment_file}" title="{experiment_file}" target="_blank" rel="noopener" class="text-marin-blue hover:text-blue-600 transition-colors duration-150">{_run_name}</a>',
                 },
                 "Author": author,
                 "Date Added": fmt_date(r.run_completion_timestamp),
                 **perf,
                 "W&B Run": {
                     "mimetype": "text/html",
-                    "data": f'<a href="{wandb}" target="_blank" rel="noopener" class="text-marin-blue hover:text-blue-600 transition-colors duration-150">View Run</a>',
+                    "data": f'<a href="{wandb}" title="{wandb}" target="_blank" rel="noopener" class="text-marin-blue hover:text-blue-600 transition-colors duration-150">View Run</a>',
                 },
             }
         )
@@ -421,9 +448,7 @@ def _(filtered, group_scaling, mo, pd, t, track_id):
     df_disp = (
         pd.DataFrame(rows)
         .drop_duplicates(subset=["Run Name"])
-        .sort_values(
-            by=["Scaling Law Slope"] if track_id == "scaling" else ["C4-EN BPB"]
-        )
+        .sort_values(by=["Scaling Law Slope"] if track_id == "scaling" else ["Rank"])
     )
 
     # ──────────────────────────── headers ──────────────────────────────
