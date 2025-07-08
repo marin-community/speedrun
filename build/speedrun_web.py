@@ -25,12 +25,15 @@ app = marimo.App(
 
 @app.cell
 def _():
+    """Import and return the ``marimo`` module."""
     import marimo as mo
+
     return (mo,)
 
 
 @app.cell
 def _(mo):
+    """Render the page header with logo and title."""
     mo.Html(
         f"""
     <header class="bg-marin-dark text-white shadow-lg">
@@ -51,6 +54,7 @@ def _(mo):
 
 @app.cell
 def _(mo):
+    """Display introductory content explaining Speedrun."""
     mo.Html(
         """
     <div class="bg-white rounded-lg shadow p-8 mb-8">
@@ -81,6 +85,7 @@ def _(mo):
 
 @app.cell
 def _():
+    """Load run and track data from JSON files."""
     import json
     import pandas as pd
 
@@ -95,11 +100,12 @@ def _():
 
 @app.cell
 def _(df_tracks, mo):
+    """Create tabs for selecting a leaderboard track."""
     q = mo.query_params()
     tab_map = {row["name"].capitalize(): row["id"] for _, row in df_tracks.iterrows()}
     tabs = mo.ui.tabs(
         {row["name"].capitalize(): "" for _, row in df_tracks.iterrows()},
-        value=q.get("track").capitalize() or "Scaling",
+        value=(q.get("track") or "Scaling").capitalize(),
     )
     tabs.center()
     return q, tab_map, tabs
@@ -107,6 +113,7 @@ def _(df_tracks, mo):
 
 @app.cell
 def _(df_runs, df_tracks, pd, q, tab_map, tabs):
+    """Filter runs according to the selected track."""
     track_id = tab_map[tabs.value]
     q["track"] = tabs.value
     filtered = df_runs
@@ -141,6 +148,7 @@ def _(df_runs, df_tracks, pd, q, tab_map, tabs):
 
 @app.cell
 def _(filtered, mo, track_id):
+    """Compute summary statistics for the selected track."""
     import numpy as np
 
     FLOPS_BUDGET = 2e24
@@ -195,11 +203,12 @@ def _(filtered, mo, track_id):
     """
     )
     stats
-    return (np, FLOPS_BUDGET)
+    return FLOPS_BUDGET, np
 
 
 @app.cell
 def _(df_runs, filtered, mo, next_lower, np, t, track_id, FLOPS_BUDGET):
+    """Plot the Pareto frontier for runs in the selected track."""
     import plotly.graph_objects as go
     import plotly.express as px
 
@@ -391,6 +400,8 @@ def _(df_runs, filtered, mo, next_lower, np, t, track_id, FLOPS_BUDGET):
 
 @app.cell
 def _(filtered, group_scaling, mo, pd, t, track_id, FLOPS_BUDGET):
+    """Render the leaderboard table for the current track."""
+
     # ───────────────────────────── helpers ─────────────────────────────
     def fmt_model_size(x: float) -> str:
         if pd.isna(x):
@@ -518,11 +529,6 @@ def _(filtered, group_scaling, mo, pd, t, track_id, FLOPS_BUDGET):
         selection=None,
     )  # plain strings only
     mo.vstack([header, subtitle, table, footnotes])
-    return
-
-
-@app.cell
-def _():
     return
 
 
