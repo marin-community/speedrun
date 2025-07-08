@@ -92,20 +92,18 @@ def _():
 
 @app.cell
 def _(df_tracks, mo):
-    options = {row["name"]: row["id"] for _, row in df_tracks.iterrows()}
-    print(options)
-
-    track_select = mo.ui.radio(
-        options=options, value="Scaling", label="Track", inline=True
-    )
-    track_select
-    return (track_select,)
+    tabs = mo.ui.tabs({row["name"]: "" for _, row in df_tracks.iterrows()})
+    tab_map = {row["name"]: row["id"] for _, row in df_tracks.iterrows()}
+    tabs.center()
+    return tab_map, tabs
 
 
 @app.cell
-def _(df_runs, df_tracks, pd, track_select):
-    track_id = track_select.value
-
+def _(df_runs, df_tracks, mo, pd, tab_map, tabs):
+    q = mo.query_params()
+    track_id = tab_map[tabs.value]
+    print(track_id)
+    q["track"] = track_id
     filtered = df_runs
 
     if track_id == "scaling":
@@ -155,11 +153,11 @@ def _(filtered, mo):
         </div>
         <div class="bg-white rounded-lg shadow p-6">
             <h3 class="text-lg font-medium mb-4">Best FLOPs in Track</h3>
-            <div id="best-flops" class="text-2xl font-bold">{best_flops}</div>
+            <div id="best-flops" class="text-2xl font-bold">{best_flops:.4g}</div>
         </div>
         <div class="bg-white rounded-lg shadow p-6">
             <h3 class="text-lg font-medium mb-4">Best C4-EN BPB</h3>
-            <div id="best-bpb" class="text-2xl font-bold">{best_bpb}</div>
+            <div id="best-bpb" class="text-2xl font-bold">{best_bpb:.4g}</div>
         </div>
     </div>
     """
@@ -353,21 +351,16 @@ def _(filtered, group_scaling, mo, pd, t, track_id):
             return "N/A"
         return f"{x / 1e6:.1f} M" if x < 1e9 else f"{x / 1e9:.1f} B"
 
-
     def fmt_flops(x: float) -> str:
         return (
-            "N/A"
-            if pd.isna(x)
-            else f"{x:.2E}".replace("E+0", "E").replace("E+", "E")
+            "N/A" if pd.isna(x) else f"{x:.2E}".replace("E+0", "E").replace("E+", "E")
         )
-
 
     def fmt_date(ts: str) -> str:
         if not ts:
             return "N/A"
         ts = ts.replace(" UTC", "")
         return pd.to_datetime(ts).date().isoformat()
-
 
     # ─────────────────────────── table rows ────────────────────────────
     rows = []
@@ -382,12 +375,15 @@ def _(filtered, group_scaling, mo, pd, t, track_id):
         author = {"mimetype": "text/html", "data": author}
 
         wandb = r.wandb_link if pd.notna(r.wandb_link) else "N/A"
-        experiment_file = (
-            "https://github.com/marin-community/marin/tree/main/"
-            + (r["results_filepath"] if track_id != "scaling" else "/".join(r["results_filepath"].split("/")[:-1]))
-        ) 
+        experiment_file = "https://github.com/marin-community/marin/tree/main/" + (
+            r["results_filepath"]
+            if track_id != "scaling"
+            else "/".join(r["results_filepath"].split("/")[:-1])
+        )
         _run_name = (
-            r["run_name"] if track_id != "scaling" else r["run_name"].split("/")[0].strip()
+            r["run_name"]
+            if track_id != "scaling"
+            else r["run_name"].split("/")[0].strip()
         )
 
         if track_id != "scaling":
@@ -399,8 +395,8 @@ def _(filtered, group_scaling, mo, pd, t, track_id):
             }
         else:
             perf = {
-                "Scaling Law Intercept": group_scaling[_run_name]["intercept"],
-                "Scaling Law Slope": group_scaling[_run_name]["slope"],
+                "Scaling Law Intercept": f'{group_scaling[_run_name]["intercept"]:.3f}',
+                "Scaling Law Slope": f'{group_scaling[_run_name]["slope"]:.3f}',
             }
 
         rows.append(
@@ -420,7 +416,13 @@ def _(filtered, group_scaling, mo, pd, t, track_id):
             }
         )
 
-    df_disp = pd.DataFrame(rows).drop_duplicates(subset=["Run Name"]).sort_values(by=["Scaling Law Slope"] if track_id == "scaling" else ["C4-EN BPB"])
+    df_disp = (
+        pd.DataFrame(rows)
+        .drop_duplicates(subset=["Run Name"])
+        .sort_values(
+            by=["Scaling Law Slope"] if track_id == "scaling" else ["C4-EN BPB"]
+        )
+    )
 
     # ──────────────────────────── headers ──────────────────────────────
     if track_id == "scaling":
@@ -445,7 +447,7 @@ def _(filtered, group_scaling, mo, pd, t, track_id):
         )
         subtitle = mo.Html(
             f"<div style='color:#6b7280;font-size:0.9rem'>"
-            f"Runs achieving ≤ {t.target_bpb:.9f} C4-EN BPB, ranked by training efficiency (FLOPs)"
+            f"Runs achieving ≤ {t.target_bpb:.4f} C4-EN BPB, ranked by training efficiency (FLOPs)"
             f"</div>"
         )
     else:
@@ -461,7 +463,7 @@ def _(filtered, group_scaling, mo, pd, t, track_id):
     )
 
     # ──────────────────────────── assemble ─────────────────────────────
-    table = mo.ui.table(df_disp, label="Leaderboard")  # plain strings only
+    table = mo.ui.table(df_disp.set_index("Rank"), label="Leaderboard", selection=None)  # plain strings only
     mo.vstack([header, subtitle, table, footnotes])
     return
 
