@@ -102,7 +102,6 @@ def _(df_tracks, mo):
 def _(df_runs, df_tracks, mo, pd, tab_map, tabs):
     q = mo.query_params()
     track_id = tab_map[tabs.value]
-    print(track_id)
     q["track"] = track_id
     filtered = df_runs
 
@@ -337,7 +336,6 @@ def _(df_runs, filtered, mo, next_lower, np, t, track_id):
         margin=dict(l=50, r=20, t=60, b=50),
     )
 
-    print(fig)
     mo.ui.plotly(fig, label="Runs")
 
     return (group_scaling,)
@@ -463,7 +461,9 @@ def _(filtered, group_scaling, mo, pd, t, track_id):
     )
 
     # ──────────────────────────── assemble ─────────────────────────────
-    table = mo.ui.table(df_disp.set_index("Rank"), label="Leaderboard", selection=None)  # plain strings only
+    table = mo.ui.table(
+        df_disp.set_index("Rank"), label="Leaderboard", selection=None
+    )  # plain strings only
     mo.vstack([header, subtitle, table, footnotes])
     return
 
