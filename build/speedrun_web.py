@@ -14,6 +14,7 @@ import marimo
 __generated_with = "0.14.10"
 app = marimo.App(
     width="full",
+    app_title="Marin Speedrun",
     css_file="custom.css",
     html_head_file="head.html",
 )
@@ -99,11 +100,11 @@ def _(df_tracks, mo):
         value=q.get("track") or "Scaling",
     )
     tabs.center()
-    return tab_map, tabs, q
+    return q, tab_map, tabs
 
 
 @app.cell
-def _(df_runs, df_tracks, mo, pd, tab_map, tabs, q):
+def _(df_runs, df_tracks, pd, q, tab_map, tabs):
     track_id = tab_map[tabs.value]
     q["track"] = tabs.value
     filtered = df_runs
