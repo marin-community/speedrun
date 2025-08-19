@@ -6,9 +6,6 @@
 #   "pandas==2.3.0",
 #   "plotly==6.2.0",
 #   "pyarrow",
-#   "fsspec==2025.5.1",
-#   "requests",
-#   "aiohttp",
 # ]
 # ///
 
@@ -136,12 +133,13 @@ def load_leaderboard_data() -> Tuple[pd.DataFrame, pd.DataFrame, ModuleType]:
     import json
     import pandas as pd
 
-    with open("../data/runs.json", "r") as f:
-        runs = json.load(f)
-    with open("../data/tracks.json", "r") as f:
-        tracks = json.load(f)
-    df_runs = pd.json_normalize(runs)
-    df_tracks = pd.DataFrame(tracks)
+    df_runs = pd.read_json(
+        "https://raw.githubusercontent.com/marin-community/speedrun/refs/heads/main/data/runs.json"
+    )
+    df_runs = pd.json_normalize(df_runs.to_dict(orient="records"))
+    df_tracks = pd.read_json(
+        "https://raw.githubusercontent.com/marin-community/speedrun/refs/heads/main/data/tracks.json"
+    )
     return df_runs, df_tracks, pd
 
 
@@ -265,28 +263,35 @@ def compute_and_render_high_level_track_stats(
     """
     import numpy as np
 
-    FLOPS_BUDGET = 2e24
+    FLOPS_BUDGET = 1e22
     best_flops_header = "Best FLOPs in Track"
 
     if track_id == "scaling":
         df = filtered.copy()
         df["lead_folder"] = df["run_name"].apply(lambda p: p.split("/")[0])
         preds = []
-        for _, _g in df.groupby("lead_folder"):
+        group_scaling = {}
+        for _n, _g in df.groupby("lead_folder"):
             x = np.log(_g["training_hardware_flops"])
             y = np.log(_g["eval_paloma_c4_en_bpb"])
             _slope, _intercept = np.polyfit(x, y, 1)
             preds.append(np.exp(_intercept + _slope * np.log(FLOPS_BUDGET)))
+            group_scaling[_n] = {
+                "slope": _slope,
+                "intercept": _intercept,
+                "projected": float(np.exp(_intercept + _slope * np.log(FLOPS_BUDGET))),
+            }
 
         best_bpb_value = f"{min(preds):.4g}" if preds else "N/A"
         best_bpb_header = (
             f"Best Projected BPB @ {FLOPS_BUDGET:.0e}".replace("e+", "e")
-            + " FLOPs<br/>(Approx. Llama 3 8B Compute)"
+            + ' FLOPs<br/><h4 style="margin-top: -20px;">(Approx. Compute Optimal 8B Model)</h4>'
         )
         best_flops_header = "Best Compute Scaling Term"
         best_flops_value = f"{_slope:.4g}"
         num_runs = len(df.drop_duplicates(subset=["lead_folder"]))
     else:
+        group_scaling = None
         best_flops = (
             filtered.training_hardware_flops.min() if not filtered.empty else np.nan
         )
@@ -317,7 +322,7 @@ def compute_and_render_high_level_track_stats(
     """
     )
     stats
-    return FLOPS_BUDGET, np
+    return FLOPS_BUDGET, group_scaling, np
 
 
 @app.cell
@@ -373,35 +378,49 @@ def render_speedrun_plot(
         fig.layout = None
         fig.data = None
         df_all["lead_folder"] = df_all["run_name"].apply(lambda p: p.split("/")[0])
-        groups = df_all[df_all["in_track"]].groupby("lead_folder")
+        df_all["is_baseline"] = df_all["lead_folder"] == "adamw_llama_scaling"
+        groups = (
+            df_all[df_all["in_track"]]
+            .sort_values(by=["is_baseline", "training_flops"], ascending=False)
+            .groupby("lead_folder", sort=False)
+        )
         colors = px.colors.qualitative.Plotly
-        group_scaling = {}
+        baseline = [g for (n, g) in groups if n == "adamw_llama_scaling"][0]
         for i, (name, g) in enumerate(groups):
-            color = colors[i % len(colors)]
+            color = (
+                colors[(i - 1) % len(colors)]
+                if name != "adamw_llama_scaling"
+                else "gray"
+            )
+            baselined = (
+                g["eval_paloma_c4_en_bpb"].values
+                / baseline["eval_paloma_c4_en_bpb"].values
+            )
             fig.add_trace(
                 go.Scatter(
                     x=g["training_flops"],
-                    y=g["eval_paloma_c4_en_bpb"],
+                    y=baselined,
                     mode="markers",
                     marker=dict(color=color, size=10),
-                    name=name,
+                    name=(
+                        name
+                        if name != "adamw_llama_scaling"
+                        else "Baseline (AdamW, Llama)"
+                    ),
                     text=g["run_name"],
-                    customdata=np.column_stack((g["training_flops"],)),
-                    hovertemplate="<b>%{text}</b><br>%{customdata[0]:.2e} FLOPs<br>%{y:.3f} BPB<extra></extra>",
+                    customdata=np.column_stack(
+                        (g["training_flops"], g["eval_paloma_c4_en_bpb"])
+                    ),
+                    hovertemplate="<b>%{text}</b><br>%{customdata[0]:.2e} FLOPs<br>%{customdata[1]:.3f} BPB<extra></extra>",
                 )
             )
             xlog = np.log(g["training_flops"])
-            ylog = np.log(g["eval_paloma_c4_en_bpb"])
+            ylog = baselined
             slope, intercept = np.polyfit(xlog, ylog, 1)
-            group_scaling[name] = {
-                "slope": slope,
-                "intercept": intercept,
-                "projected": float(np.exp(intercept + slope * np.log(FLOPS_BUDGET))),
-            }
             x_fit = np.logspace(
                 np.log10(g["training_flops"].min()), np.log10(FLOPS_BUDGET), 100
             )
-            y_fit = np.exp(intercept + slope * np.log(x_fit))
+            y_fit = intercept + slope * np.log(x_fit)
             fig.add_trace(
                 go.Scatter(
                     x=x_fit,
@@ -413,12 +432,13 @@ def render_speedrun_plot(
                     showlegend=False,
                 )
             )
+
         fig.add_trace(
             go.Scatter(
                 x=[FLOPS_BUDGET, FLOPS_BUDGET],
                 y=[
-                    0,
-                    df_all.eval_paloma_c4_en_bpb.max(),
+                    y_fit.min() - (y_fit.min() * 0.005),
+                    y_fit.max() + (y_fit.max() * 0.005),
                 ],
                 mode="lines",
                 line=dict(color="black", dash="dash"),
@@ -427,7 +447,6 @@ def render_speedrun_plot(
             )
         )
     else:
-        group_scaling = None
         fig = go.Figure()
         fig.layout = None
         fig.data = None
@@ -524,7 +543,11 @@ def render_speedrun_plot(
         )
 
     fig.update_layout(
-        title="Overall Pareto Frontier: FLOPs vs C4-EN BPB",
+        title={
+            "text": "Marin Speedrun<br>Hardware FLOPs v.s. C4-EN BPB",
+            "x": 0.5,
+            "xanchor": "center",
+        },
         xaxis=dict(
             type="log",
             title="Training FLOPs",
@@ -533,19 +556,22 @@ def render_speedrun_plot(
             gridcolor="rgba(0,0,0,0.05)",
         ),
         yaxis=dict(
-            title="C4-EN BPB",
+            title="C4-EN BPB Relative to Baseline"
+            if track_id == "scaling"
+            else "C4-EN BPB",
+            tickformat=".1%" if track_id == "scaling" else ".2f",
             ticks="outside",
             showgrid=True,
             gridcolor="rgba(0,0,0,0.05)",
         ),
-        legend=dict(orientation="h", x=0.5, xanchor="center", y=0.9, yanchor="bottom"),
+        legend=dict(x=0.8, xanchor="center", y=0.8, yanchor="bottom"),
         plot_bgcolor="white",
         margin=dict(l=50, r=20, t=60, b=50),
     )
 
     mo.ui.plotly(fig, label="Runs")
 
-    return (group_scaling,)
+    return
 
 
 @app.cell
