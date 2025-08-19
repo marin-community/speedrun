@@ -375,7 +375,7 @@
                 );
 
                 const allChartData = validEntries.map(entry => ({
-                    x: entry.training_hardware_flops / 1e18,
+                    x: entry.training_hardware_flops,
                     y: entry.eval_paloma_c4_en_bpb,
                     run_name: entry.run_name,
                     inTrack: validTrackEntries.includes(entry)
@@ -384,7 +384,7 @@
                 const paretoEntries = computeParetoFrontier(validEntries);
                 const paretoData = paretoEntries
                     .map(entry => ({
-                        x: entry.training_hardware_flops / 1e18,
+                        x: entry.training_hardware_flops,
                         y: entry.eval_paloma_c4_en_bpb
                     }))
                     .sort((a, b) => a.x - b.x);
@@ -530,9 +530,9 @@
                                     label: function(context) {
                                         const point = context.raw;
                                         if (!point.run_name) {
-                                            return `${point.x.toFixed(1)} EF, ${point.y.toFixed(3)} BPB`;
+                                            return `${point.x.toExponential(1).replace('e+','e')} FLOPs, ${point.y.toFixed(3)} BPB`;
                                         }
-                                        return `${point.run_name}: ${formatFlops(point.x * 1e18)} FLOPs, ${point.y.toFixed(3)} BPB`;
+                                        return `${point.run_name}: ${formatFlops(point.x)} FLOPs, ${point.y.toFixed(3)} BPB`;
                                     }
                                 }
                             }
@@ -543,13 +543,13 @@
                                 position: 'bottom',
                                 title: {
                                     display: true,
-                                    text: 'Training FLOPs (ExaFLOPs)'
+                                    text: 'Training FLOPs'
                                 },
                                 min: xAxisMin,
                                 max: xAxisMax,
                                 ticks: {
                                     callback: function(value) {
-                                        return value.toFixed(1) + ' EF';
+                                        return value.toExponential(0).replace('e+','e');
                                     },
                                     maxTicksLimit: 8
                                 }
@@ -767,7 +767,7 @@
                 const chartData = allEntries
                     .filter(e => Number.isFinite(e.training_hardware_flops) && e.training_hardware_flops > 0 && Number.isFinite(e.eval_paloma_c4_en_bpb) && e.eval_paloma_c4_en_bpb > 0)
                     .map(entry => ({
-                        x: entry.training_hardware_flops / 1e18,
+                        x: entry.training_hardware_flops,
                         y: entry.eval_paloma_c4_en_bpb,
                         run_name: entry.run_name
                     }));
