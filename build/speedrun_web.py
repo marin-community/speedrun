@@ -659,7 +659,7 @@ def render_speedrun_leaderboard_table(
         if track_id != "scaling":
             perf = {
                 "Model Size*": fmt_model_size(r.model_size),
-                "Training Time": f"{r.training_time:.1f} m",
+                "Training Time": f"{r.training_time/60:.1f} m",
                 "Total FLOPs*": fmt_flops(r.training_hardware_flops),
                 "C4-EN BPB": f"{r.eval_paloma_c4_en_bpb:.3f}",
             }
