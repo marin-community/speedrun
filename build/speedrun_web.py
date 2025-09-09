@@ -220,7 +220,7 @@ def filter_data_by_selected_track(
         if pd.notna(t["target_bpb"]):
             sorted_tracks = (
                 df_tracks[(df_tracks["id"] != "all") & df_tracks["target_bpb"].notna()]
-                .sort_values("target_bpb", ascending=False)
+                .sort_values("target_bpb", ascending=True)
                 .reset_index(drop=True)
             )
 
