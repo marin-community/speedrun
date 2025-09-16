@@ -527,6 +527,74 @@
     "description": "520M parameter model trained with the Muon optimizer."
   },
   {
+    "run_name": "muon_qwen3_scaling/130m",
+    "results_filepath": "experiments/speedrun/muon_qwen3_scaling/130m",
+    "author": {
+      "name": "Calvin Xu",
+      "affiliation": "Stanford University",
+      "url": "https://pinlinxu.com"
+    },
+    "model_size": 154147328,
+    "training_hardware_flops": 2.053736788813536e+19,
+    "training_time": 1398.2412777869936,
+    "model_flops": 1.777337490915459e+18,
+    "eval_paloma_c4_en_bpb": 1.1662893295288086,
+    "wandb_link": "https://wandb.ai/marin-community/marin/runs/qwen3_130m_muon_4096-04770b",
+    "run_completion_timestamp": "2025-09-10 23:04:48 UTC",
+    "description": "Qwen3 ~130M (LLaMA-geometry-matched) with Muon."
+  },
+  {
+    "run_name": "muon_qwen3_scaling/1_2b",
+    "results_filepath": "experiments/speedrun/muon_qwen3_scaling/1_2b",
+    "author": {
+      "name": "Calvin Xu",
+      "affiliation": "Stanford University",
+      "url": "https://pinlinxu.com"
+    },
+    "model_size": 1431373824,
+    "training_hardware_flops": 8.549158444435479e+20,
+    "training_time": 58205.05476876007,
+    "model_flops": 2.071634014279733e+20,
+    "eval_paloma_c4_en_bpb": 0.9355724453926086,
+    "wandb_link": "https://wandb.ai/marin-community/marin/runs/qwen3_1_2b_muon_4096-d117d2",
+    "run_completion_timestamp": "2025-09-11 07:33:06 UTC",
+    "description": "Qwen3 ~1.2B (LLaMA-geometry-matched) with Muon."
+  },
+  {
+    "run_name": "muon_qwen3_scaling/300m",
+    "results_filepath": "experiments/speedrun/muon_qwen3_scaling/300m",
+    "author": {
+      "name": "Calvin Xu",
+      "affiliation": "Stanford University",
+      "url": "https://pinlinxu.com"
+    },
+    "model_size": 299649792,
+    "training_hardware_flops": 1.0054400794856672e+20,
+    "training_time": 6845.316445300022,
+    "model_flops": 9.99035877535934e+18,
+    "eval_paloma_c4_en_bpb": 1.0582433938980103,
+    "wandb_link": "https://wandb.ai/marin-community/marin/runs/qwen3_300m_muon_4096-ee4f99",
+    "run_completion_timestamp": "2025-09-11 00:42:20 UTC",
+    "description": "Qwen3 ~300M (LLaMA-geometry-matched) with Muon."
+  },
+  {
+    "run_name": "muon_qwen3_scaling/520m",
+    "results_filepath": "experiments/speedrun/muon_qwen3_scaling/520m",
+    "author": {
+      "name": "Calvin Xu",
+      "affiliation": "Stanford University",
+      "url": "https://pinlinxu.com"
+    },
+    "model_size": 602457088,
+    "training_hardware_flops": 3.6739191350752726e+20,
+    "training_time": 25013.066006776095,
+    "model_flops": 4.210403636805422e+19,
+    "eval_paloma_c4_en_bpb": 0.9887921214103699,
+    "wandb_link": "https://wandb.ai/marin-community/marin/runs/qwen3_520m_muon_4096-361875",
+    "run_completion_timestamp": "2025-09-11 05:12:48 UTC",
+    "description": "Qwen3 ~520M (LLaMA-geometry-matched) with Muon."
+  },
+  {
     "run_name": "olmo_50m_h200",
     "results_filepath": "experiments/speedrun/olmo_50m_h200",
     "author": {
