@@ -1,0 +1,48 @@
+[
+  {
+    "id": "all",
+    "name": "All Runs",
+    "description": "All submitted runs regardless of target loss",
+    "target_bpb": null,
+    "color": "#1a73e8"
+  },
+  {
+    "id": "llama_30m",
+    "name": "llama 30m (1.53 BPB)",
+    "description": "Leaderboard for the 30M parameter Llama model run (BPB: 1.53)",
+    "target_bpb": 1.5263875722885132,
+    "run_name": "llama_30m",
+    "color": "#eab308"
+  },
+  {
+    "id": "llama_75m",
+    "name": "llama 75m (1.28 BPB)",
+    "description": "Leaderboard for the 75M parameter Llama model run (BPB: 1.28)",
+    "target_bpb": 1.2788727283477783,
+    "run_name": "llama_75m",
+    "color": "#6366f1"
+  },
+  {
+    "id": "llama_300m",
+    "name": "llama 300m (1.10 BPB)",
+    "description": "Leaderboard for the 300M parameter Llama model run (BPB: 1.10)",
+    "target_bpb": 1.103714942932129,
+    "run_name": "llama_300m",
+    "color": "#14b8a6"
+  },
+  {
+    "id": "llama_1_4b",
+    "name": "llama 1.4B (~0.9 BPB)",
+    "description": "Leaderboard for the 1.4B parameter Llama model run (BPB: ~0.9)",
+    "target_bpb": 0.9557313919067384,
+    "run_name": "llama_1_4b",
+    "color": "#f472b6"
+  },
+  {
+    "id": "scaling",
+    "name": "Scaling",
+    "description": "Group runs by leading folder to view scaling trends",
+    "target_bpb": null,
+    "color": "#4f46e5"
+  }
+]
