@@ -680,57 +680,6 @@
     "description": "50M param model based on OLMo architecture."
   },
   {
-    "run_name": "parallel_llama/gpu/150m",
-    "results_filepath": "experiments/speedrun/parallel_llama/gpu/150m",
-    "author": {
-      "name": "Harry Shin",
-      "affiliation": "Independent",
-      "url": "https://www.linkedin.com/in/harry-shin-34743216a/"
-    },
-    "model_size": 154147328,
-    "training_hardware_flops": 9.264161724167268e+18,
-    "training_time": 9362.46763432771,
-    "model_flops": 1.707084418797011e+18,
-    "eval_paloma_c4_en_bpb": 1.230665683746338,
-    "wandb_link": "https://wandb.ai/dh2shin2-stanford-university/marin/runs/parallel_llama_150m_20250927_214314-6b5619",
-    "run_completion_timestamp": "2025-09-28 00:49:27 UTC",
-    "description": "Parallel Llama ~150M with parallel attention/MLP computation."
-  },
-  {
-    "run_name": "parallel_llama/gpu/300m",
-    "results_filepath": "experiments/speedrun/parallel_llama/gpu/300m",
-    "author": {
-      "name": "Harry Shin",
-      "affiliation": "Independent",
-      "url": "https://www.linkedin.com/in/harry-shin-34743216a/"
-    },
-    "model_size": 299649792,
-    "training_hardware_flops": 3.704721641930257e+19,
-    "training_time": 37440.33998918906,
-    "model_flops": 7.92805570191242e+18,
-    "eval_paloma_c4_en_bpb": 1.1177308559417725,
-    "wandb_link": "https://wandb.ai/dh2shin2-stanford-university/marin/runs/parallel_llama_300m_20250928_005125-5ab6f2",
-    "run_completion_timestamp": "2025-09-28 12:47:30 UTC",
-    "description": "Parallel Llama ~300M with parallel attention/MLP computation."
-  },
-  {
-    "run_name": "parallel_llama/gpu/75m",
-    "results_filepath": "experiments/speedrun/parallel_llama/gpu/75m",
-    "author": {
-      "name": "Harry Shin",
-      "affiliation": "Independent",
-      "url": "https://www.linkedin.com/in/harry-shin-34743216a/"
-    },
-    "model_size": 73273600,
-    "training_hardware_flops": 3.296863581757771e+18,
-    "training_time": 3331.8479856066406,
-    "model_flops": 4.0210928652150374e+17,
-    "eval_paloma_c4_en_bpb": 1.3113893270492554,
-    "wandb_link": "https://wandb.ai/dh2shin2-stanford-university/marin/runs/parallel_llama_75m_1024-4ba3f3",
-    "run_completion_timestamp": "2025-09-25 04:14:50 UTC",
-    "description": "Parallel Llama ~75M with parallel attention/MLP computation."
-  },
-  {
     "run_name": "parallel_llama/tpu/150m",
     "results_filepath": "experiments/speedrun/parallel_llama/tpu/150m",
     "author": {
