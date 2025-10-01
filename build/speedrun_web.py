@@ -216,11 +216,10 @@ def filter_data_by_selected_track(
         filtered = df_runs[df_runs["run_name"].str.contains("/")]
     elif track_id != "all":
         t = df_tracks.loc[df_tracks["id"] == track_id].iloc[0]
-
         if pd.notna(t["target_bpb"]):
             sorted_tracks = (
                 df_tracks[(df_tracks["id"] != "all") & df_tracks["target_bpb"].notna()]
-                .sort_values("target_bpb", ascending=True)
+                .sort_values("target_bpb", ascending=False)
                 .reset_index(drop=True)
             )
 
@@ -692,7 +691,7 @@ def render_speedrun_leaderboard_table(
     df_disp = (
         pd.DataFrame(rows)
         .drop_duplicates(subset=["Run Name"])
-        .sort_values(by=["Scaling Law Slope"] if track_id == "scaling" else ["Rank"])
+        .sort_values(by=[f"Projected BPB @ {FLOPS_BUDGET:.0e}".replace("e+", "e") + " FLOPs"] if track_id == "scaling" else ["Rank"])
     )
 
     # ──────────────────────────── headers ──────────────────────────────
