@@ -683,9 +683,9 @@
     "run_name": "parallel_llama/130m",
     "results_filepath": "experiments/speedrun/parallel_llama/130m",
     "author": {
-      "name": "Calvin Xu",
-      "affiliation": "Stanford University",
-      "url": "https://pinlinxu.com"
+      "name": "Harry Shin",
+      "affiliation": "Independent",
+      "url": "https://www.linkedin.com/in/harry-shin-34743216a/"
     },
     "model_size": 154147328,
     "training_hardware_flops": 2.236763301176485e+19,
@@ -700,9 +700,9 @@
     "run_name": "parallel_llama/1_2b",
     "results_filepath": "experiments/speedrun/parallel_llama/1_2b",
     "author": {
-      "name": "Calvin Xu",
-      "affiliation": "Stanford University",
-      "url": "https://pinlinxu.com"
+      "name": "Harry Shin",
+      "affiliation": "Independent",
+      "url": "https://www.linkedin.com/in/harry-shin-34743216a/"
     },
     "model_size": 1431373824,
     "training_hardware_flops": 1.0371990254415228e+21,
@@ -717,9 +717,9 @@
     "run_name": "parallel_llama/300m",
     "results_filepath": "experiments/speedrun/parallel_llama/300m",
     "author": {
-      "name": "Calvin Xu",
-      "affiliation": "Stanford University",
-      "url": "https://pinlinxu.com"
+      "name": "Harry Shin",
+      "affiliation": "Independent",
+      "url": "https://www.linkedin.com/in/harry-shin-34743216a/"
     },
     "model_size": 299649792,
     "training_hardware_flops": 9.85263974940102e+19,
@@ -734,9 +734,9 @@
     "run_name": "parallel_llama/520m",
     "results_filepath": "experiments/speedrun/parallel_llama/520m",
     "author": {
-      "name": "Calvin Xu",
-      "affiliation": "Stanford University",
-      "url": "https://pinlinxu.com"
+      "name": "Harry Shin",
+      "affiliation": "Independent",
+      "url": "https://www.linkedin.com/in/harry-shin-34743216a/"
     },
     "model_size": 602457088,
     "training_hardware_flops": 4.16995334864789e+20,
@@ -746,124 +746,5 @@
     "wandb_link": "https://wandb.ai/marin-community/marin/runs/hacktx_520m_stdattn_parallel_4096-5648cf",
     "run_completion_timestamp": "2025-10-02 15:25:32 UTC",
     "description": "Hackable Transformer (520m); Attention with parallel MLP (Muon)"
-  },
-  {
-    "run_name": "parallel_llama/old_scaling/gpu/150m",
-    "results_filepath": "experiments/speedrun/parallel_llama/old_scaling/gpu/150m",
-    "author": {
-      "name": "Harry Shin",
-      "affiliation": "Independent",
-      "url": "https://www.linkedin.com/in/harry-shin-34743216a/"
-    },
-    "model_size": 154147328,
-    "training_hardware_flops": 9.264161724167268e+18,
-    "training_time": 9362.46763432771,
-    "model_flops": 1.707084418797011e+18,
-    "eval_paloma_c4_en_bpb": 1.230665683746338,
-    "wandb_link": "https://wandb.ai/dh2shin2-stanford-university/marin/runs/parallel_llama_150m_20250927_214314-6b5619",
-    "run_completion_timestamp": "2025-09-28 00:49:27 UTC",
-    "description": "Parallel Llama ~150M with parallel attention/MLP computation."
-  },
-  {
-    "run_name": "parallel_llama/old_scaling/gpu/300m",
-    "results_filepath": "experiments/speedrun/parallel_llama/old_scaling/gpu/300m",
-    "author": {
-      "name": "Harry Shin",
-      "affiliation": "Independent",
-      "url": "https://www.linkedin.com/in/harry-shin-34743216a/"
-    },
-    "model_size": 299649792,
-    "training_hardware_flops": 3.704721641930257e+19,
-    "training_time": 37440.33998918906,
-    "model_flops": 7.92805570191242e+18,
-    "eval_paloma_c4_en_bpb": 1.1177308559417725,
-    "wandb_link": "https://wandb.ai/dh2shin2-stanford-university/marin/runs/parallel_llama_300m_20250928_005125-5ab6f2",
-    "run_completion_timestamp": "2025-09-28 12:47:30 UTC",
-    "description": "Parallel Llama ~300M with parallel attention/MLP computation."
-  },
-  {
-    "run_name": "parallel_llama/old_scaling/gpu/75m",
-    "results_filepath": "experiments/speedrun/parallel_llama/old_scaling/gpu/75m",
-    "author": {
-      "name": "Harry Shin",
-      "affiliation": "Independent",
-      "url": "https://www.linkedin.com/in/harry-shin-34743216a/"
-    },
-    "model_size": 73273600,
-    "training_hardware_flops": 3.296863581757771e+18,
-    "training_time": 3331.8479856066406,
-    "model_flops": 4.0210928652150374e+17,
-    "eval_paloma_c4_en_bpb": 1.3113893270492554,
-    "wandb_link": "https://wandb.ai/dh2shin2-stanford-university/marin/runs/parallel_llama_75m_1024-4ba3f3",
-    "run_completion_timestamp": "2025-09-25 04:14:50 UTC",
-    "description": "Parallel Llama ~75M with parallel attention/MLP computation."
-  },
-  {
-    "run_name": "parallel_llama/old_scaling/tpu/150m",
-    "results_filepath": "experiments/speedrun/parallel_llama/old_scaling/tpu/150m",
-    "author": {
-      "name": "Harry Shin",
-      "affiliation": "Independent",
-      "url": "https://www.linkedin.com/in/harry-shin-34743216a/"
-    },
-    "model_size": 154147328,
-    "training_hardware_flops": 2.8950289894939865e+19,
-    "training_time": 1971.0164688820714,
-    "model_flops": 1.707084418797011e+18,
-    "eval_paloma_c4_en_bpb": 1.2320165634155273,
-    "wandb_link": "https://wandb.ai/marin-community/marin/runs/parallel_llama_150m_tpu_20250930_001036-22db7b",
-    "run_completion_timestamp": "2025-09-30 10:25:53 UTC",
-    "description": "Parallel Llama ~150M with parallel attention/MLP computation on TPU."
-  },
-  {
-    "run_name": "parallel_llama/old_scaling/tpu/300m",
-    "results_filepath": "experiments/speedrun/parallel_llama/old_scaling/tpu/300m",
-    "author": {
-      "name": "Harry Shin",
-      "affiliation": "Independent",
-      "url": "https://www.linkedin.com/in/harry-shin-34743216a/"
-    },
-    "model_size": 299649792,
-    "training_hardware_flops": 9.708202239281793e+19,
-    "training_time": 6609.61481432584,
-    "model_flops": 7.92805570191242e+18,
-    "eval_paloma_c4_en_bpb": 1.117195725440979,
-    "wandb_link": "https://wandb.ai/marin-community/marin/runs/parallel_llama_300m_tpu_20250930_001036-37089e",
-    "run_completion_timestamp": "2025-09-30 09:37:52 UTC",
-    "description": "Parallel Llama ~300M with parallel attention/MLP computation on TPU."
-  },
-  {
-    "run_name": "parallel_llama/old_scaling/tpu/520m",
-    "results_filepath": "experiments/speedrun/parallel_llama/old_scaling/tpu/520m",
-    "author": {
-      "name": "Harry Shin",
-      "affiliation": "Independent",
-      "url": "https://www.linkedin.com/in/harry-shin-34743216a/"
-    },
-    "model_size": 602457088,
-    "training_hardware_flops": 2.751142691969322e+20,
-    "training_time": 18730.546650117933,
-    "model_flops": 3.2571741421090898e+19,
-    "eval_paloma_c4_en_bpb": 1.0284080505371094,
-    "wandb_link": "https://wandb.ai/marin-community/marin/runs/parallel_llama_520m_tpu_20250930_001036-ea06dd",
-    "run_completion_timestamp": "2025-09-30 15:02:27 UTC",
-    "description": "Parallel Llama ~520m with parallel attention/MLP computation on TPU."
-  },
-  {
-    "run_name": "parallel_llama/old_scaling/tpu/75m",
-    "results_filepath": "experiments/speedrun/parallel_llama/old_scaling/tpu/75m",
-    "author": {
-      "name": "Harry Shin",
-      "affiliation": "Independent",
-      "url": "https://www.linkedin.com/in/harry-shin-34743216a/"
-    },
-    "model_size": 73273600,
-    "training_hardware_flops": 1.3393745069403621e+19,
-    "training_time": 911.8835150737759,
-    "model_flops": 4.0210928652150374e+17,
-    "eval_paloma_c4_en_bpb": 1.3109135627746582,
-    "wandb_link": "https://wandb.ai/marin-community/marin/runs/parallel_llama_75m_tpu_20250930_001036-9212b5",
-    "run_completion_timestamp": "2025-09-30 10:49:43 UTC",
-    "description": "Parallel Llama ~75M with parallel attention/MLP computation on TPU."
   }
 ]
