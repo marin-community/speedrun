@@ -680,71 +680,71 @@
     "description": "50M param model based on OLMo architecture."
   },
   {
-    "run_name": "parallel_llama/tpu/150m",
-    "results_filepath": "experiments/speedrun/parallel_llama/tpu/150m",
+    "run_name": "parallel_llama/130m",
+    "results_filepath": "experiments/speedrun/parallel_llama/130m",
     "author": {
       "name": "Harry Shin",
       "affiliation": "Independent",
       "url": "https://www.linkedin.com/in/harry-shin-34743216a/"
     },
     "model_size": 154147328,
-    "training_hardware_flops": 2.8950289894939865e+19,
-    "training_time": 1971.0164688820714,
-    "model_flops": 1.707084418797011e+18,
-    "eval_paloma_c4_en_bpb": 1.2320165634155273,
-    "wandb_link": "https://wandb.ai/marin-community/marin/runs/parallel_llama_150m_tpu_20250930_001036-22db7b",
-    "run_completion_timestamp": "2025-09-30 10:25:53 UTC",
-    "description": "Parallel Llama ~150M with parallel attention/MLP computation on TPU."
+    "training_hardware_flops": 2.236763301176485e+19,
+    "training_time": 1522.8508314110056,
+    "model_flops": 2.107429813789655e+18,
+    "eval_paloma_c4_en_bpb": 1.1829973459243774,
+    "wandb_link": "https://wandb.ai/marin-community/marin/runs/hacktx_130m_stdattn_parallel_4096-12314d",
+    "run_completion_timestamp": "2025-10-02 06:24:34 UTC",
+    "description": "Hackable Transformer (130m); Attention with parallel MLP (Muon)"
   },
   {
-    "run_name": "parallel_llama/tpu/300m",
-    "results_filepath": "experiments/speedrun/parallel_llama/tpu/300m",
+    "run_name": "parallel_llama/1_2b",
+    "results_filepath": "experiments/speedrun/parallel_llama/1_2b",
+    "author": {
+      "name": "Harry Shin",
+      "affiliation": "Independent",
+      "url": "https://www.linkedin.com/in/harry-shin-34743216a/"
+    },
+    "model_size": 1431373824,
+    "training_hardware_flops": 1.0371990254415228e+21,
+    "training_time": 70615.40205892721,
+    "model_flops": 2.4710625753168033e+20,
+    "eval_paloma_c4_en_bpb": 0.9401440620422363,
+    "wandb_link": "https://wandb.ai/marin-community/marin/runs/hacktx_1_2b_stdattn_parallel_4096-613d61",
+    "run_completion_timestamp": "2025-10-03 03:13:19 UTC",
+    "description": "Hackable Transformer (1_2b); Attention with parallel MLP (Muon)"
+  },
+  {
+    "run_name": "parallel_llama/300m",
+    "results_filepath": "experiments/speedrun/parallel_llama/300m",
     "author": {
       "name": "Harry Shin",
       "affiliation": "Independent",
       "url": "https://www.linkedin.com/in/harry-shin-34743216a/"
     },
     "model_size": 299649792,
-    "training_hardware_flops": 9.708202239281793e+19,
-    "training_time": 6609.61481432584,
-    "model_flops": 7.92805570191242e+18,
-    "eval_paloma_c4_en_bpb": 1.117195725440979,
-    "wandb_link": "https://wandb.ai/marin-community/marin/runs/parallel_llama_300m_tpu_20250930_001036-37089e",
-    "run_completion_timestamp": "2025-09-30 09:37:52 UTC",
-    "description": "Parallel Llama ~300M with parallel attention/MLP computation on TPU."
+    "training_hardware_flops": 9.85263974940102e+19,
+    "training_time": 6707.951899102001,
+    "model_flops": 9.97813708514132e+18,
+    "eval_paloma_c4_en_bpb": 1.071972370147705,
+    "wandb_link": "https://wandb.ai/marin-community/marin/runs/hacktx_300m_stdattn_parallel_4096-a454c2",
+    "run_completion_timestamp": "2025-10-02 08:55:08 UTC",
+    "description": "Hackable Transformer (300m); Attention with parallel MLP (Muon)"
   },
   {
-    "run_name": "parallel_llama/tpu/520m",
-    "results_filepath": "experiments/speedrun/parallel_llama/tpu/520m",
+    "run_name": "parallel_llama/520m",
+    "results_filepath": "experiments/speedrun/parallel_llama/520m",
     "author": {
       "name": "Harry Shin",
       "affiliation": "Independent",
       "url": "https://www.linkedin.com/in/harry-shin-34743216a/"
     },
     "model_size": 602457088,
-    "training_hardware_flops": 2.751142691969322e+20,
-    "training_time": 18730.546650117933,
-    "model_flops": 3.2571741421090898e+19,
-    "eval_paloma_c4_en_bpb": 1.0284080505371094,
-    "wandb_link": "https://wandb.ai/marin-community/marin/runs/parallel_llama_520m_tpu_20250930_001036-ea06dd",
-    "run_completion_timestamp": "2025-09-30 15:02:27 UTC",
-    "description": "Parallel Llama ~520m with parallel attention/MLP computation on TPU."
-  },
-  {
-    "run_name": "parallel_llama/tpu/75m",
-    "results_filepath": "experiments/speedrun/parallel_llama/tpu/75m",
-    "author": {
-      "name": "Harry Shin",
-      "affiliation": "Independent",
-      "url": "https://www.linkedin.com/in/harry-shin-34743216a/"
-    },
-    "model_size": 73273600,
-    "training_hardware_flops": 1.3393745069403621e+19,
-    "training_time": 911.8835150737759,
-    "model_flops": 4.0210928652150374e+17,
-    "eval_paloma_c4_en_bpb": 1.3109135627746582,
-    "wandb_link": "https://wandb.ai/marin-community/marin/runs/parallel_llama_75m_tpu_20250930_001036-9212b5",
-    "run_completion_timestamp": "2025-09-30 10:49:43 UTC",
-    "description": "Parallel Llama ~75M with parallel attention/MLP computation on TPU."
+    "training_hardware_flops": 4.16995334864789e+20,
+    "training_time": 28390.2052604023,
+    "model_flops": 4.8779636003945054e+19,
+    "eval_paloma_c4_en_bpb": 0.9909179210662842,
+    "wandb_link": "https://wandb.ai/marin-community/marin/runs/hacktx_520m_stdattn_parallel_4096-5648cf",
+    "run_completion_timestamp": "2025-10-02 15:25:32 UTC",
+    "description": "Hackable Transformer (520m); Attention with parallel MLP (Muon)"
   }
 ]
