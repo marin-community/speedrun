@@ -391,6 +391,9 @@ def render_speedrun_plot(
                 if name != "adamw_llama_scaling"
                 else "gray"
             )
+            legend_name = (
+                name if name != "adamw_llama_scaling" else "Baseline (AdamW, Llama)"
+            )
             baselined = (
                 g["eval_paloma_c4_en_bpb"].values
                 / baseline["eval_paloma_c4_en_bpb"].values
@@ -401,11 +404,8 @@ def render_speedrun_plot(
                     y=baselined,
                     mode="markers",
                     marker=dict(color=color, size=10),
-                    name=(
-                        name
-                        if name != "adamw_llama_scaling"
-                        else "Baseline (AdamW, Llama)"
-                    ),
+                    name=legend_name,
+                    legendgroup=legend_name,
                     text=g["run_name"],
                     customdata=np.column_stack(
                         (g["training_flops"], g["eval_paloma_c4_en_bpb"])
@@ -426,8 +426,9 @@ def render_speedrun_plot(
                     y=y_fit,
                     mode="lines",
                     line=dict(color=color, dash="dash"),
-                    name=f"{name} fit",
+                    name=f"{legend_name} fit",
                     hoverinfo="skip",
+                    legendgroup=legend_name,
                     showlegend=False,
                 )
             )
