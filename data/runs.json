@@ -8,7 +8,7 @@
       "url": "https://WilliamHeld.com"
     },
     "model_size": 154147328,
-    "training_hardware_flops": 1.6520702575799476e+19,
+    "training_hardware_flops": 8.260351287899738e+18,
     "training_time": 1124.775502164997,
     "model_flops": 1.777337490915459e+18,
     "eval_paloma_c4_en_bpb": 1.186086654663086,
@@ -25,7 +25,7 @@
       "url": "https://WilliamHeld.com"
     },
     "model_size": 1431373824,
-    "training_hardware_flops": 7.993261437067462e+20,
+    "training_hardware_flops": 3.996630718533731e+20,
     "training_time": 54420.352921210935,
     "model_flops": 2.071634014279733e+20,
     "eval_paloma_c4_en_bpb": 0.9400151371955872,
@@ -42,7 +42,7 @@
       "url": "https://WilliamHeld.com"
     },
     "model_size": 299649792,
-    "training_hardware_flops": 7.694435660758345e+19,
+    "training_hardware_flops": 3.847217830379173e+19,
     "training_time": 5238.586370342011,
     "model_flops": 9.99035877535934e+18,
     "eval_paloma_c4_en_bpb": 1.0697346925735474,
@@ -59,7 +59,7 @@
       "url": "https://WilliamHeld.com"
     },
     "model_size": 602457088,
-    "training_hardware_flops": 2.7431438403223837e+20,
+    "training_hardware_flops": 1.3715719201611919e+20,
     "training_time": 18676.088237488995,
     "model_flops": 4.210403636805422e+19,
     "eval_paloma_c4_en_bpb": 0.9989621043205261,
@@ -76,7 +76,7 @@
       "url": "https://WilliamHeld.com"
     },
     "model_size": 154147328,
-    "training_hardware_flops": 1.65297833431566e+19,
+    "training_hardware_flops": 8.2648916715783e+18,
     "training_time": 1125.3937461299429,
     "model_flops": 1.777337490915459e+18,
     "eval_paloma_c4_en_bpb": 1.1862303018569946,
@@ -93,7 +93,7 @@
       "url": "https://WilliamHeld.com"
     },
     "model_size": 1431373824,
-    "training_hardware_flops": 8.00894093327791e+20,
+    "training_hardware_flops": 4.004470466638955e+20,
     "training_time": 54527.10330390734,
     "model_flops": 2.071634014279733e+20,
     "eval_paloma_c4_en_bpb": 0.9442186951637268,
@@ -110,7 +110,7 @@
       "url": "https://WilliamHeld.com"
     },
     "model_size": 299649792,
-    "training_hardware_flops": 7.711788528451579e+19,
+    "training_hardware_flops": 3.8558942642257895e+19,
     "training_time": 5250.400686581957,
     "model_flops": 9.99035877535934e+18,
     "eval_paloma_c4_en_bpb": 1.069084644317627,
@@ -127,7 +127,7 @@
       "url": "https://WilliamHeld.com"
     },
     "model_size": 602457088,
-    "training_hardware_flops": 2.7551452660361622e+20,
+    "training_hardware_flops": 1.3775726330180811e+20,
     "training_time": 18757.797290551214,
     "model_flops": 4.210403636805422e+19,
     "eval_paloma_c4_en_bpb": 0.9990090727806091,
@@ -144,7 +144,7 @@
       "url": "https://WilliamHeld.com"
     },
     "model_size": 154147328,
-    "training_hardware_flops": 1.7051882246373634e+19,
+    "training_hardware_flops": 8.525941123186817e+18,
     "training_time": 1160.9396954230415,
     "model_flops": 1.777337490915459e+18,
     "eval_paloma_c4_en_bpb": 1.1886805295944214,
@@ -161,7 +161,7 @@
       "url": "https://WilliamHeld.com"
     },
     "model_size": 1431373824,
-    "training_hardware_flops": 7.937334384059815e+20,
+    "training_hardware_flops": 3.9686671920299075e+20,
     "training_time": 54039.58594811965,
     "model_flops": 2.071634014279733e+20,
     "eval_paloma_c4_en_bpb": 0.9381008148193359,
@@ -178,7 +178,7 @@
       "url": "https://WilliamHeld.com"
     },
     "model_size": 299649792,
-    "training_hardware_flops": 7.790693662141797e+19,
+    "training_hardware_flops": 3.8953468310708986e+19,
     "training_time": 5304.121502002858,
     "model_flops": 9.99035877535934e+18,
     "eval_paloma_c4_en_bpb": 1.0705386400222778,
@@ -195,7 +195,7 @@
       "url": "https://WilliamHeld.com"
     },
     "model_size": 602457088,
-    "training_hardware_flops": 2.7576777203210722e+20,
+    "training_hardware_flops": 1.3788388601605361e+20,
     "training_time": 18775.03894554107,
     "model_flops": 4.210403636805422e+19,
     "eval_paloma_c4_en_bpb": 0.9977965950965881,
@@ -212,7 +212,7 @@
       "url": "https://WilliamHeld.com"
     },
     "model_size": 154147328,
-    "training_hardware_flops": 1.6891453089003848e+19,
+    "training_hardware_flops": 8.445726544501924e+18,
     "training_time": 1150.017231005164,
     "model_flops": 1.777337490915459e+18,
     "eval_paloma_c4_en_bpb": 1.1882025003433228,
@@ -229,7 +229,7 @@
       "url": "https://WilliamHeld.com"
     },
     "model_size": 1431373824,
-    "training_hardware_flops": 7.941160395043e+20,
+    "training_hardware_flops": 3.9705801975215e+20,
     "training_time": 54065.63449784178,
     "model_flops": 2.071634014279733e+20,
     "eval_paloma_c4_en_bpb": 0.9378550052642822,
@@ -246,7 +246,7 @@
       "url": "https://WilliamHeld.com"
     },
     "model_size": 299649792,
-    "training_hardware_flops": 7.730599211937243e+19,
+    "training_hardware_flops": 3.8652996059686216e+19,
     "training_time": 5263.207524467078,
     "model_flops": 9.99035877535934e+18,
     "eval_paloma_c4_en_bpb": 1.071447491645813,
@@ -263,7 +263,7 @@
       "url": "https://WilliamHeld.com"
     },
     "model_size": 602457088,
-    "training_hardware_flops": 2.7571167238883996e+20,
+    "training_hardware_flops": 1.3785583619441998e+20,
     "training_time": 18771.219525383985,
     "model_flops": 4.210403636805422e+19,
     "eval_paloma_c4_en_bpb": 0.9973351955413818,
@@ -280,7 +280,7 @@
       "url": "https://pinlinxu.com"
     },
     "model_size": 1431373824,
-    "training_hardware_flops": 1.084319112930505e+21,
+    "training_hardware_flops": 5.421595564652525e+20,
     "training_time": 73823.46901759974,
     "model_flops": 2.4710625753168033e+20,
     "eval_paloma_c4_en_bpb": 0.9318751692771912,
@@ -297,7 +297,7 @@
       "url": "https://pinlinxu.com"
     },
     "model_size": 154147328,
-    "training_hardware_flops": 2.2424167394743554e+19,
+    "training_hardware_flops": 1.1212083697371777e+19,
     "training_time": 1526.6998498599914,
     "model_flops": 2.107429813789655e+18,
     "eval_paloma_c4_en_bpb": 1.1646385192871094,
@@ -314,7 +314,7 @@
       "url": "https://pinlinxu.com"
     },
     "model_size": 299649792,
-    "training_hardware_flops": 9.873351668754319e+19,
+    "training_hardware_flops": 4.9366758343771595e+19,
     "training_time": 6722.053151385021,
     "model_flops": 9.97813708514132e+18,
     "eval_paloma_c4_en_bpb": 1.063051462173462,
@@ -331,7 +331,7 @@
       "url": "https://pinlinxu.com"
     },
     "model_size": 602457088,
-    "training_hardware_flops": 4.2063620651052053e+20,
+    "training_hardware_flops": 2.1031810325526027e+20,
     "training_time": 28638.085955236966,
     "model_flops": 4.8779636003945054e+19,
     "eval_paloma_c4_en_bpb": 0.9861995577812195,
@@ -535,7 +535,7 @@
       "url": "https://WilliamHeld.com"
     },
     "model_size": 154147328,
-    "training_hardware_flops": 1.770128556749164e+19,
+    "training_hardware_flops": 8.85064278374582e+18,
     "training_time": 1205.1528844969798,
     "model_flops": 1.777337490915459e+18,
     "eval_paloma_c4_en_bpb": 1.169844388961792,
@@ -552,7 +552,7 @@
       "url": "https://WilliamHeld.com"
     },
     "model_size": 1431373824,
-    "training_hardware_flops": 8.411842768611676e+20,
+    "training_hardware_flops": 4.205921384305838e+20,
     "training_time": 57270.171354926984,
     "model_flops": 2.071634014279733e+20,
     "eval_paloma_c4_en_bpb": 0.936806321144104,
@@ -569,7 +569,7 @@
       "url": "https://WilliamHeld.com"
     },
     "model_size": 299649792,
-    "training_hardware_flops": 8.158463035803733e+19,
+    "training_hardware_flops": 4.079231517901867e+19,
     "training_time": 5554.509147469862,
     "model_flops": 9.99035877535934e+18,
     "eval_paloma_c4_en_bpb": 1.061553716659546,
@@ -586,7 +586,7 @@
       "url": "https://WilliamHeld.com"
     },
     "model_size": 602457088,
-    "training_hardware_flops": 3.0654229773737755e+20,
+    "training_hardware_flops": 1.5327114886868877e+20,
     "training_time": 20870.254475583984,
     "model_flops": 4.210403636805422e+19,
     "eval_paloma_c4_en_bpb": 0.9908430576324463,
@@ -603,7 +603,7 @@
       "url": "https://pinlinxu.com"
     },
     "model_size": 154147328,
-    "training_hardware_flops": 2.053736788813536e+19,
+    "training_hardware_flops": 1.026868394406768e+19,
     "training_time": 1398.2412777869936,
     "model_flops": 1.777337490915459e+18,
     "eval_paloma_c4_en_bpb": 1.1662893295288086,
@@ -620,7 +620,7 @@
       "url": "https://pinlinxu.com"
     },
     "model_size": 1431373824,
-    "training_hardware_flops": 8.549158444435479e+20,
+    "training_hardware_flops": 4.2745792222177395e+20,
     "training_time": 58205.05476876007,
     "model_flops": 2.071634014279733e+20,
     "eval_paloma_c4_en_bpb": 0.9355724453926086,
@@ -637,7 +637,7 @@
       "url": "https://pinlinxu.com"
     },
     "model_size": 299649792,
-    "training_hardware_flops": 1.0054400794856672e+20,
+    "training_hardware_flops": 5.027200397428336e+19,
     "training_time": 6845.316445300022,
     "model_flops": 9.99035877535934e+18,
     "eval_paloma_c4_en_bpb": 1.0582433938980103,
@@ -654,7 +654,7 @@
       "url": "https://pinlinxu.com"
     },
     "model_size": 602457088,
-    "training_hardware_flops": 3.6739191350752726e+20,
+    "training_hardware_flops": 1.8369595675376363e+20,
     "training_time": 25013.066006776095,
     "model_flops": 4.210403636805422e+19,
     "eval_paloma_c4_en_bpb": 0.9887921214103699,
@@ -688,7 +688,7 @@
       "url": "https://www.linkedin.com/in/harry-shin-34743216a/"
     },
     "model_size": 154147328,
-    "training_hardware_flops": 2.236763301176485e+19,
+    "training_hardware_flops": 1.1183816505882425e+19,
     "training_time": 1522.8508314110056,
     "model_flops": 2.107429813789655e+18,
     "eval_paloma_c4_en_bpb": 1.1829973459243774,
@@ -705,7 +705,7 @@
       "url": "https://www.linkedin.com/in/harry-shin-34743216a/"
     },
     "model_size": 1431373824,
-    "training_hardware_flops": 1.0371990254415228e+21,
+    "training_hardware_flops": 5.185995127207614e+20,
     "training_time": 70615.40205892721,
     "model_flops": 2.4710625753168033e+20,
     "eval_paloma_c4_en_bpb": 0.9401440620422363,
@@ -722,7 +722,7 @@
       "url": "https://www.linkedin.com/in/harry-shin-34743216a/"
     },
     "model_size": 299649792,
-    "training_hardware_flops": 9.85263974940102e+19,
+    "training_hardware_flops": 4.92631987470051e+19,
     "training_time": 6707.951899102001,
     "model_flops": 9.97813708514132e+18,
     "eval_paloma_c4_en_bpb": 1.071972370147705,
@@ -739,7 +739,7 @@
       "url": "https://www.linkedin.com/in/harry-shin-34743216a/"
     },
     "model_size": 602457088,
-    "training_hardware_flops": 4.16995334864789e+20,
+    "training_hardware_flops": 2.084976674323945e+20,
     "training_time": 28390.2052604023,
     "model_flops": 4.8779636003945054e+19,
     "eval_paloma_c4_en_bpb": 0.9909179210662842,
