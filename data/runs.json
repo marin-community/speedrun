@@ -683,9 +683,9 @@
     "run_name": "parallel_llama/130m",
     "results_filepath": "experiments/speedrun/parallel_llama/130m",
     "author": {
-      "name": "Calvin Xu",
-      "affiliation": "Stanford University",
-      "url": "https://pinlinxu.com"
+      "name": "Harry Shin",
+      "affiliation": "Independent",
+      "url": "https://www.linkedin.com/in/harry-shin-34743216a/"
     },
     "model_size": 154147328,
     "training_hardware_flops": 1.1183816505882425e+19,
@@ -700,9 +700,9 @@
     "run_name": "parallel_llama/1_2b",
     "results_filepath": "experiments/speedrun/parallel_llama/1_2b",
     "author": {
-      "name": "Calvin Xu",
-      "affiliation": "Stanford University",
-      "url": "https://pinlinxu.com"
+      "name": "Harry Shin",
+      "affiliation": "Independent",
+      "url": "https://www.linkedin.com/in/harry-shin-34743216a/"
     },
     "model_size": 1431373824,
     "training_hardware_flops": 5.185995127207614e+20,
@@ -717,9 +717,9 @@
     "run_name": "parallel_llama/300m",
     "results_filepath": "experiments/speedrun/parallel_llama/300m",
     "author": {
-      "name": "Calvin Xu",
-      "affiliation": "Stanford University",
-      "url": "https://pinlinxu.com"
+      "name": "Harry Shin",
+      "affiliation": "Independent",
+      "url": "https://www.linkedin.com/in/harry-shin-34743216a/"
     },
     "model_size": 299649792,
     "training_hardware_flops": 4.92631987470051e+19,
@@ -734,9 +734,9 @@
     "run_name": "parallel_llama/520m",
     "results_filepath": "experiments/speedrun/parallel_llama/520m",
     "author": {
-      "name": "Calvin Xu",
-      "affiliation": "Stanford University",
-      "url": "https://pinlinxu.com"
+      "name": "Harry Shin",
+      "affiliation": "Independent",
+      "url": "https://www.linkedin.com/in/harry-shin-34743216a/"
     },
     "model_size": 602457088,
     "training_hardware_flops": 2.084976674323945e+20,
