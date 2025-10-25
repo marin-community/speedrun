@@ -325,6 +325,33 @@ def compute_and_render_high_level_track_stats(
 
 
 @app.cell
+def render_axis_selectors(mo: ModuleType) -> Tuple[Any, Any]:
+    """Create axis selection controls for the plot."""
+
+    x_axis_options = {
+        "Model FLOPs": "model_flops",
+        "Training Hardware FLOPs": "training_hardware_flops",
+    }
+    x_axis_select = mo.ui.radio(
+        options=x_axis_options,
+        value="Training Hardware FLOPs",
+        label="X-axis metric",
+    )
+
+    y_axis_options = {
+        "C4-EN BPB (relative to baseline)": "relative",
+        "C4-EN BPB (absolute)": "absolute",
+    }
+    y_axis_select = mo.ui.radio(
+        options=y_axis_options,
+        value="C4-EN BPB (relative to baseline)",
+        label="Y-axis metric",
+    )
+
+    return x_axis_select, y_axis_select
+
+
+@app.cell
 def render_speedrun_plot(
     df_runs: pd.DataFrame,
     filtered: pd.DataFrame,
@@ -334,6 +361,8 @@ def render_speedrun_plot(
     t: pd.Series,
     track_id: str,
     FLOPS_BUDGET: float,
+    x_axis_select: Any,
+    y_axis_select: Any,
 ) -> Tuple[Dict[str, Dict[str, float]] | None]:
     """Plot the Pareto frontier for runs in the selected track.
 
@@ -363,14 +392,85 @@ def render_speedrun_plot(
         scaling statistics when ``track_id`` is ``"scaling"``. Otherwise the
         tuple contains ``None``.
     """
-    import plotly.graph_objects as go
     import plotly.express as px
+    import plotly.graph_objects as go
+
+    x_axis_map = {
+        "model_flops": (
+            "model_flops",
+            "Training Model FLOPs",
+            "Model FLOPs",
+        ),
+        "training_hardware_flops": (
+            "training_hardware_flops",
+            "Training Hardware FLOPs",
+            "Hardware FLOPs",
+        ),
+    }
+
+    selected_x = x_axis_select.value
+    if isinstance(selected_x, tuple):
+        selected_x = selected_x[1] if len(selected_x) > 1 else selected_x[0]
+    x_column, x_axis_title, x_hover_label = x_axis_map.get(
+        selected_x, x_axis_map["training_hardware_flops"]
+    )
+    if x_column not in df_runs.columns:
+        x_column, x_axis_title, x_hover_label = x_axis_map["training_hardware_flops"]
+
+    selected_y = y_axis_select.value
+    if isinstance(selected_y, tuple):
+        selected_y = selected_y[1] if len(selected_y) > 1 else selected_y[0]
+
+    relative_requested = selected_y == "relative"
 
     df_all = df_runs.copy()
-    df_all["training_flops"] = df_all["training_hardware_flops"]
+    df_all["x_value"] = df_all[x_column]
     df_all["in_track"] = df_all.index.isin(filtered.index)
 
-    track_color = t.color if track_id != "all" else "#1877F2"  # fallback blue
+    track_color = t.color if track_id != "all" else "#1877F2"
+
+    baseline_bpb = None
+    baseline_run_name = t.get("run_name") if hasattr(t, "get") else None
+    if track_id not in ("all", "scaling") and baseline_run_name:
+        baseline_row = df_runs[df_runs["run_name"] == baseline_run_name]
+        if not baseline_row.empty:
+            baseline_value = baseline_row.iloc[0]["eval_paloma_c4_en_bpb"]
+            if baseline_value is not None:
+                try:
+                    baseline_bpb = float(baseline_value)
+                except (TypeError, ValueError):
+                    baseline_bpb = None
+                else:
+                    if np.isnan(baseline_bpb):
+                        baseline_bpb = None
+
+    def build_customdata(dataframe, use_relative):
+        if use_relative:
+            data = np.column_stack(
+                (dataframe["x_value"], dataframe["eval_paloma_c4_en_bpb"])
+            )
+            hover = (
+                f"<b>%{{text}}</b><br>{x_hover_label}: %{{customdata[0]:.2e}}"
+                "<br>Relative BPB: %{y:.3f}<br>Absolute BPB: %{customdata[1]:.3f}<extra></extra>"
+            )
+        elif baseline_bpb is not None:
+            ratios = dataframe["eval_paloma_c4_en_bpb"] / baseline_bpb
+            data = np.column_stack(
+                (dataframe["x_value"], dataframe["eval_paloma_c4_en_bpb"], ratios)
+            )
+            hover = (
+                f"<b>%{{text}}</b><br>{x_hover_label}: %{{customdata[0]:.2e}}"
+                "<br>Absolute BPB: %{y:.3f}<br>Relative BPB: %{customdata[2]:.3f}<extra></extra>"
+            )
+        else:
+            data = np.column_stack(
+                (dataframe["x_value"], dataframe["eval_paloma_c4_en_bpb"])
+            )
+            hover = (
+                f"<b>%{{text}}</b><br>{x_hover_label}: %{{customdata[0]:.2e}}"
+                "<br>Absolute BPB: %{y:.3f}<extra></extra>"
+            )
+        return data, hover
 
     if track_id == "scaling":
         fig = go.Figure()
@@ -380,11 +480,13 @@ def render_speedrun_plot(
         df_all["is_baseline"] = df_all["lead_folder"] == "adamw_llama_scaling"
         groups = (
             df_all[df_all["in_track"]]
-            .sort_values(by=["is_baseline", "training_flops"], ascending=False)
+            .sort_values(by=["is_baseline", "x_value"], ascending=False)
             .groupby("lead_folder", sort=False)
         )
         colors = px.colors.qualitative.Plotly
-        baseline = [g for (n, g) in groups if n == "adamw_llama_scaling"][0]
+        baseline_group = [g for (n, g) in groups if n == "adamw_llama_scaling"]
+        baseline_group = baseline_group[0] if baseline_group else None
+        last_y_fit = None
         for i, (name, g) in enumerate(groups):
             color = (
                 colors[(i - 1) % len(colors)]
@@ -394,32 +496,54 @@ def render_speedrun_plot(
             legend_name = (
                 name if name != "adamw_llama_scaling" else "Baseline (AdamW, Llama)"
             )
-            baselined = (
-                g["eval_paloma_c4_en_bpb"].values
-                / baseline["eval_paloma_c4_en_bpb"].values
-            )
+            absolute_values = g["eval_paloma_c4_en_bpb"].values
+            if relative_requested and baseline_group is not None:
+                baseline_values = baseline_group["eval_paloma_c4_en_bpb"].values
+                y_values = absolute_values / baseline_values
+                customdata = np.column_stack((g["x_value"], absolute_values))
+                hovertemplate = (
+                    f"<b>%{{text}}</b><br>{x_hover_label}: %{{customdata[0]:.2e}}"
+                    "<br>Relative BPB: %{y:.3f}<br>Absolute BPB: %{customdata[1]:.3f}<extra></extra>"
+                )
+            else:
+                if baseline_group is not None:
+                    baseline_values = baseline_group["eval_paloma_c4_en_bpb"].values
+                    relative_values = absolute_values / baseline_values
+                    customdata = np.column_stack(
+                        (g["x_value"], absolute_values, relative_values)
+                    )
+                    hovertemplate = (
+                        f"<b>%{{text}}</b><br>{x_hover_label}: %{{customdata[0]:.2e}}"
+                        "<br>Absolute BPB: %{y:.3f}<br>Relative BPB: %{customdata[2]:.3f}<extra></extra>"
+                    )
+                else:
+                    y_values = absolute_values
+                    customdata = np.column_stack((g["x_value"], absolute_values))
+                    hovertemplate = (
+                        f"<b>%{{text}}</b><br>{x_hover_label}: %{{customdata[0]:.2e}}"
+                        "<br>Absolute BPB: %{y:.3f}<extra></extra>"
+                    )
+                y_values = absolute_values
             fig.add_trace(
                 go.Scatter(
-                    x=g["training_flops"],
-                    y=baselined,
+                    x=g["x_value"],
+                    y=y_values,
                     mode="markers",
                     marker=dict(color=color, size=10),
                     name=legend_name,
                     legendgroup=legend_name,
                     text=g["run_name"],
-                    customdata=np.column_stack(
-                        (g["training_flops"], g["eval_paloma_c4_en_bpb"])
-                    ),
-                    hovertemplate="<b>%{text}</b><br>%{customdata[0]:.2e} FLOPs<br>%{customdata[1]:.3f} BPB<extra></extra>",
+                    customdata=customdata,
+                    hovertemplate=hovertemplate,
                 )
             )
-            xlog = np.log(g["training_flops"])
-            ylog = baselined
-            slope, intercept = np.polyfit(xlog, ylog, 1)
+            xlog = np.log(g["x_value"])
+            slope, intercept = np.polyfit(xlog, y_values, 1)
             x_fit = np.logspace(
-                np.log10(g["training_flops"].min()), np.log10(FLOPS_BUDGET), 100
+                np.log10(g["x_value"].min()), np.log10(FLOPS_BUDGET), 100
             )
             y_fit = intercept + slope * np.log(x_fit)
+            last_y_fit = y_fit
             fig.add_trace(
                 go.Scatter(
                     x=x_fit,
@@ -433,41 +557,52 @@ def render_speedrun_plot(
                 )
             )
 
-        fig.add_trace(
-            go.Scatter(
-                x=[FLOPS_BUDGET, FLOPS_BUDGET],
-                y=[
-                    y_fit.min() - (y_fit.min() * 0.005),
-                    y_fit.max() + (y_fit.max() * 0.005),
-                ],
-                mode="lines",
-                line=dict(color="black", dash="dash"),
-                hoverinfo="skip",
-                showlegend=False,
+        if last_y_fit is not None:
+            fig.add_trace(
+                go.Scatter(
+                    x=[FLOPS_BUDGET, FLOPS_BUDGET],
+                    y=[
+                        last_y_fit.min() - (last_y_fit.min() * 0.005),
+                        last_y_fit.max() + (last_y_fit.max() * 0.005),
+                    ],
+                    mode="lines",
+                    line=dict(color="black", dash="dash"),
+                    hoverinfo="skip",
+                    showlegend=False,
+                )
             )
-        )
     else:
         fig = go.Figure()
         fig.layout = None
         fig.data = None
+        use_relative = relative_requested and baseline_bpb is not None
+        if use_relative:
+            df_all["y_value"] = df_all["eval_paloma_c4_en_bpb"] / baseline_bpb
+        else:
+            df_all["y_value"] = df_all["eval_paloma_c4_en_bpb"]
+
+        customdata_all, hover_all = build_customdata(df_all, use_relative)
         fig.add_trace(
             go.Scatter(
-                x=df_all["training_flops"],
-                y=df_all["eval_paloma_c4_en_bpb"],
+                x=df_all["x_value"],
+                y=df_all["y_value"],
                 mode="markers",
                 marker=dict(color="rgba(156,163,175,0.3)", size=8, line=dict(width=0)),
                 name="All Runs",
                 text=df_all["run_name"],
-                customdata=np.column_stack((df_all["training_flops"],)),
-                hovertemplate="<b>%{text}</b><br>%{customdata[0]:.2e} FLOPs<br>%{y:.3f} BPB<extra></extra>",
+                customdata=customdata_all,
+                hovertemplate=hover_all,
             )
         )
         highlight = df_all[df_all["in_track"]]
         if not highlight.empty:
+            customdata_highlight, hover_highlight = build_customdata(
+                highlight, use_relative
+            )
             fig.add_trace(
                 go.Scatter(
-                    x=highlight["training_flops"],
-                    y=highlight["eval_paloma_c4_en_bpb"],
+                    x=highlight["x_value"],
+                    y=highlight["y_value"],
                     mode="markers",
                     marker=dict(
                         color=track_color,
@@ -477,89 +612,109 @@ def render_speedrun_plot(
                     ),
                     name="Selected Track",
                     text=highlight["run_name"],
-                    customdata=np.column_stack((highlight["training_flops"],)),
-                    hovertemplate="<b>%{text}</b><br>%{customdata[0]:.2e} FLOPs<br>%{y:.3f} BPB<extra></extra>",
+                    customdata=customdata_highlight,
+                    hovertemplate=hover_highlight,
                 )
             )
 
-    valid = df_all.dropna(subset=["eval_paloma_c4_en_bpb"])
-    valid = valid[valid["training_hardware_flops"] > 0]
+        valid = df_all.dropna(subset=["x_value", "y_value"])
+        valid = valid[valid["x_value"] > 0]
 
-    def dominated(row):
-        return (
-            (valid["training_hardware_flops"] <= row.training_hardware_flops)
-            & (valid["eval_paloma_c4_en_bpb"] < row.eval_paloma_c4_en_bpb)
-            & (
-                (valid["training_hardware_flops"] < row.training_hardware_flops)
-                | (valid["eval_paloma_c4_en_bpb"] < row.eval_paloma_c4_en_bpb)
+        def dominated(row):
+            return (
+                (valid["x_value"] <= row.x_value)
+                & (valid["y_value"] < row.y_value)
+                & (
+                    (valid["x_value"] < row.x_value)
+                    | (valid["y_value"] < row.y_value)
+                )
+            ).any()
+
+        pareto_df = valid[~valid.apply(dominated, axis=1)].sort_values("x_value")
+
+        if not pareto_df.empty and track_id != "scaling":
+            fig.add_trace(
+                go.Scatter(
+                    x=pareto_df["x_value"],
+                    y=pareto_df["y_value"],
+                    mode="lines+markers",
+                    line=dict(color="#FF2D55", width=2),
+                    marker=dict(size=5, color="#FF2D55"),
+                    name="Pareto Frontier",
+                    hoverinfo="skip",
+                )
             )
-        ).any()
 
-    pareto_df = valid[~valid.apply(dominated, axis=1)].sort_values(
-        "training_hardware_flops"
-    )
-
-    if not pareto_df.empty and track_id != "scaling":
-        fig.add_trace(
-            go.Scatter(
-                x=pareto_df["training_flops"],
-                y=pareto_df["eval_paloma_c4_en_bpb"],
-                mode="lines+markers",
-                line=dict(color="#FF2D55", width=2),
-                marker=dict(size=5, color="#FF2D55"),
-                name="Pareto Frontier",
-                hoverinfo="skip",
+        if track_id not in ["all", "scaling"]:
+            x_min, x_max = (
+                df_all["x_value"].min(),
+                df_all["x_value"].max(),
             )
-        )
-
-    if track_id not in ["all", "scaling"]:
-        x_min, x_max = (
-            df_all["training_flops"].min(),
-            df_all["training_flops"].max(),
-        )
-
-        fig.add_trace(
-            go.Scatter(
-                x=[x_min, x_max],
-                y=[t.target_bpb, t.target_bpb],
-                mode="lines",
-                line=dict(color=track_color, dash="dash", width=2),
-                hoverinfo="skip",
-                showlegend=False,
+            target_value = (
+                t.target_bpb / baseline_bpb
+                if (baseline_bpb is not None and use_relative)
+                else t.target_bpb
             )
-        )
-
-        fig.add_trace(
-            go.Scatter(
-                x=[x_min, x_max],
-                y=[next_lower, next_lower],
-                mode="lines",
-                line=dict(color=track_color, dash="dash", width=1),
-                fill="tonexty",
-                fillcolor=f"rgba{(*tuple(int(track_color.lstrip('#')[i : i + 2], 16) for i in (0, 2, 4)), 0.15)}",
-                hoverinfo="skip",
-                showlegend=False,
+            lower_bound = (
+                next_lower / baseline_bpb
+                if (baseline_bpb is not None and use_relative)
+                else next_lower
             )
+
+            fig.add_trace(
+                go.Scatter(
+                    x=[x_min, x_max],
+                    y=[target_value, target_value],
+                    mode="lines",
+                    line=dict(color=track_color, dash="dash", width=2),
+                    hoverinfo="skip",
+                    showlegend=False,
+                )
+            )
+
+            fig.add_trace(
+                go.Scatter(
+                    x=[x_min, x_max],
+                    y=[lower_bound, lower_bound],
+                    mode="lines",
+                    line=dict(color=track_color, dash="dash", width=1),
+                    fill="tonexty",
+                    fillcolor=f"rgba{(*tuple(int(track_color.lstrip('#')[i : i + 2], 16) for i in (0, 2, 4)), 0.15)}",
+                    hoverinfo="skip",
+                    showlegend=False,
+                )
+            )
+
+    if track_id == "scaling":
+        y_axis_title = (
+            "C4-EN BPB Relative to Baseline"
+            if relative_requested
+            else "C4-EN BPB"
         )
+        y_tickformat = ".1%" if relative_requested else ".3f"
+    else:
+        use_relative = relative_requested and baseline_bpb is not None
+        y_axis_title = (
+            "C4-EN BPB Relative to Baseline" if use_relative else "C4-EN BPB"
+        )
+        y_tickformat = ".1%" if use_relative else ".3f"
 
     fig.update_layout(
         title={
-            "text": "Marin Speedrun<br>Hardware FLOPs v.s. C4-EN BPB",
+            "text": f"Marin Speedrun<br>{x_axis_title} vs. {y_axis_title}",
             "x": 0.5,
             "xanchor": "center",
         },
         xaxis=dict(
             type="log",
-            title="Training FLOPs",
+            title=x_axis_title,
             ticks="outside",
             showgrid=True,
             gridcolor="rgba(0,0,0,0.05)",
         ),
         yaxis=dict(
-            title="C4-EN BPB Relative to Baseline"
-            if track_id == "scaling"
-            else "C4-EN BPB",
-            tickformat=".1%" if track_id == "scaling" else ".2f",
+            title=y_axis_title,
+            tickformat=y_tickformat,
             ticks="outside",
             showgrid=True,
             gridcolor="rgba(0,0,0,0.05)",
@@ -569,7 +724,18 @@ def render_speedrun_plot(
         margin=dict(l=50, r=20, t=60, b=50),
     )
 
-    mo.ui.plotly(fig, label="Runs")
+    plot_widget = mo.ui.plotly(fig, label="Runs")
+    control_panel = mo.vstack(
+        [
+            mo.md("**Plot axes**"),
+            mo.md(
+                "_Choose which FLOPs estimate and BPB scale to visualize._"
+            ),
+            mo.hstack([x_axis_select, y_axis_select]),
+        ]
+    )
+
+    mo.vstack([plot_widget, control_panel])
 
     return
 
@@ -740,7 +906,8 @@ def render_speedrun_leaderboard_table(
         label="Leaderboard",
         selection=None,
     )  # plain strings only
-    mo.vstack([header, subtitle, table, footnotes])
+    layout = mo.vstack([header, subtitle, table, footnotes])
+    layout
     return
 
 
