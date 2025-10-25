@@ -532,6 +532,7 @@ def render_speedrun_plot(
                     marker=dict(color=color, size=10),
                     name=legend_name,
                     legendgroup=legend_name,
+                    uid=f"group:{legend_name}:points",
                     text=g["run_name"],
                     customdata=customdata,
                     hovertemplate=hovertemplate,
@@ -553,6 +554,7 @@ def render_speedrun_plot(
                     name=f"{legend_name} fit",
                     hoverinfo="skip",
                     legendgroup=legend_name,
+                    uid=f"group:{legend_name}:fit",
                     showlegend=False,
                 )
             )
@@ -583,17 +585,18 @@ def render_speedrun_plot(
 
         customdata_all, hover_all = build_customdata(df_all, use_relative)
         fig.add_trace(
-            go.Scatter(
-                x=df_all["x_value"],
-                y=df_all["y_value"],
-                mode="markers",
-                marker=dict(color="rgba(156,163,175,0.3)", size=8, line=dict(width=0)),
-                name="All Runs",
-                text=df_all["run_name"],
-                customdata=customdata_all,
-                hovertemplate=hover_all,
+                go.Scatter(
+                    x=df_all["x_value"],
+                    y=df_all["y_value"],
+                    mode="markers",
+                    marker=dict(color="rgba(156,163,175,0.3)", size=8, line=dict(width=0)),
+                    name="All Runs",
+                    uid="all-runs",
+                    text=df_all["run_name"],
+                    customdata=customdata_all,
+                    hovertemplate=hover_all,
+                )
             )
-        )
         highlight = df_all[df_all["in_track"]]
         if not highlight.empty:
             customdata_highlight, hover_highlight = build_customdata(
@@ -611,6 +614,7 @@ def render_speedrun_plot(
                         line=dict(color="white", width=1),
                     ),
                     name="Selected Track",
+                    uid=f"selected-{track_id}",
                     text=highlight["run_name"],
                     customdata=customdata_highlight,
                     hovertemplate=hover_highlight,
@@ -641,6 +645,7 @@ def render_speedrun_plot(
                     line=dict(color="#FF2D55", width=2),
                     marker=dict(size=5, color="#FF2D55"),
                     name="Pareto Frontier",
+                    uid=f"pareto-{track_id}",
                     hoverinfo="skip",
                 )
             )
@@ -705,6 +710,7 @@ def render_speedrun_plot(
             "x": 0.5,
             "xanchor": "center",
         },
+        uirevision=f"legend-{track_id}",
         xaxis=dict(
             type="log",
             title=x_axis_title,
