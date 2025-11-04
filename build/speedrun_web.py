@@ -58,12 +58,29 @@ def render_header(mo: ModuleType) -> None:
     None
         The header is rendered for its side effect; nothing is returned.
     """
+    import base64
+    from pathlib import Path as _Path
+
+    # Prefer local repo asset; fall back to remote only if unavailable
+    logo_src = (
+        "https://raw.githubusercontent.com/marin-community/speedrun/refs/heads/main/assets/marin-logo.png"
+    )
+    try:
+        logo_path = _Path(__file__).resolve().parent.parent / "assets" / "marin-logo.png"
+        if logo_path.exists():
+            logo_src = "data:image/png;base64," + base64.b64encode(logo_path.read_bytes()).decode(
+                "ascii"
+            )
+    except Exception:
+        # Keep remote fallback if any issue occurs reading the local file
+        pass
+
     mo.Html(
         f"""
     <header class="bg-marin-dark text-white shadow-lg">
         <div class="container mx-auto px-4 py-6">
             <div class="flex items-center gap-5 group hover:opacity-90 transition-opacity duration-150">
-                <img src="https://github.com/marin-community/speedrun/blob/5684db1a26feca7d32855a359fca7e0cfaec4267/assets/marin-logo.png?raw=true" alt="Marin Logo" class="h-14 w-14 object-contain">
+                <img src="{logo_src}" alt="Marin Logo" class="h-14 w-14 object-contain">
                 <div class="flex flex-col justify-center">
                     <h1 class="text-3xl font-bold leading-tight">Marin Speedrun - Leaderboard</h1>
                     <p class="text-gray-300 text-sm mt-0.5">Community-driven model training leaderboard</p>
@@ -130,16 +147,42 @@ def load_leaderboard_data() -> Tuple[pd.DataFrame, pd.DataFrame, ModuleType]:
         ``pd`` return value is the imported :mod:`pandas` module for reuse in
         later cells.
     """
-    import json
-    import pandas as pd
+    import pandas as _pd
+    import marimo as _mo
+    from pathlib import Path as _Path
 
-    df_runs = pd.read_json(
+    REMOTE_RUNS_URL = (
         "https://raw.githubusercontent.com/marin-community/speedrun/refs/heads/main/data/runs.json"
     )
-    df_runs = pd.json_normalize(df_runs.to_dict(orient="records"))
-    df_tracks = pd.read_json(
+    REMOTE_TRACKS_URL = (
         "https://raw.githubusercontent.com/marin-community/speedrun/refs/heads/main/data/tracks.json"
     )
+
+    repo_root = _Path(__file__).resolve().parent.parent
+    local_runs = repo_root / "data" / "runs.json"
+    local_tracks = repo_root / "data" / "tracks.json"
+
+    @_mo.cache
+    def load_json_df(local_path: str, remote_url: str):
+        """Load JSON as a DataFrame from local path, else fall back to remote URL.
+
+        Cached to avoid refetching during reactive updates.
+        """
+        from pathlib import Path as __Path
+        import pandas as __pd
+
+        try:
+            p = __Path(local_path)
+            if p.exists():
+                return __pd.read_json(p)
+        except Exception:
+            pass
+        return __pd.read_json(remote_url)
+
+    df_runs = load_json_df(str(local_runs), REMOTE_RUNS_URL)
+    df_runs = _pd.json_normalize(df_runs.to_dict(orient="records"))
+    df_tracks = load_json_df(str(local_tracks), REMOTE_TRACKS_URL)
+    pd = _pd
     return df_runs, df_tracks, pd
 
 
@@ -241,7 +284,7 @@ def filter_data_by_selected_track(
 @app.cell
 def compute_and_render_high_level_track_stats(
     filtered: pd.DataFrame, mo: ModuleType, track_id: str
-) -> Tuple[float, ModuleType]:
+) -> Tuple[float, Dict[str, Dict[str, float]] | None, ModuleType]:
     """Compute and display high-level statistics for a track.
 
     Parameters
@@ -256,9 +299,9 @@ def compute_and_render_high_level_track_stats(
     Returns
     -------
     tuple
-        ``(FLOPS_BUDGET, np)`` where ``FLOPS_BUDGET`` is the reference
-        compute budget used for projections and ``np`` is the imported
-        :mod:`numpy` module for reuse by subsequent cells.
+        ``(FLOPS_BUDGET, group_scaling, np)`` where ``FLOPS_BUDGET`` is the
+        reference compute budget, ``group_scaling`` stores scaling stats for
+        the scaling track and ``np`` is :mod:`numpy`.
     """
     import numpy as np
 
@@ -395,6 +438,7 @@ def render_speedrun_plot(
     import plotly.express as px
     import plotly.graph_objects as go
 
+    # ───────────────────────── axis mapping & selections ─────────────────────────
     x_axis_map = {
         "model_flops": (
             "model_flops",
@@ -429,20 +473,23 @@ def render_speedrun_plot(
 
     track_color = t.color if track_id != "all" else "#1877F2"
 
+    # ───────────────────────── baseline for relative values ──────────────────────
     baseline_bpb = None
-    baseline_run_name = t.get("run_name") if hasattr(t, "get") else None
-    if track_id not in ("all", "scaling") and baseline_run_name:
-        baseline_row = df_runs[df_runs["run_name"] == baseline_run_name]
-        if not baseline_row.empty:
-            baseline_value = baseline_row.iloc[0]["eval_paloma_c4_en_bpb"]
-            if baseline_value is not None:
-                try:
-                    baseline_bpb = float(baseline_value)
-                except (TypeError, ValueError):
-                    baseline_bpb = None
-                else:
-                    if np.isnan(baseline_bpb):
+    baseline_run_name = None
+    if track_id not in ("all", "scaling"):
+        baseline_run_name = t.get("run_name") if hasattr(t, "get") else None
+        if baseline_run_name:
+            baseline_row = df_runs[df_runs["run_name"] == baseline_run_name]
+            if not baseline_row.empty:
+                baseline_value = baseline_row.iloc[0]["eval_paloma_c4_en_bpb"]
+                if baseline_value is not None:
+                    try:
+                        baseline_bpb = float(baseline_value)
+                    except (TypeError, ValueError):
                         baseline_bpb = None
+                    else:
+                        if np.isnan(baseline_bpb):
+                            baseline_bpb = None
 
     def build_customdata(dataframe, use_relative):
         if use_relative:
@@ -472,10 +519,16 @@ def render_speedrun_plot(
             )
         return data, hover
 
+    # ───────────────────────── uirevision keys ─────────────────────────
+    layout_revision = f"track-{track_id}"
+    xaxis_revision = f"x-{selected_x}-{track_id}"
+    yaxis_revision = f"y-{'relative' if (relative_requested and (track_id=='scaling' or baseline_bpb is not None)) else 'absolute'}-{track_id}"
+
+    fig = go.Figure()
+    shapes = []
+
+    # ───────────────────────── build traces ────────────────────────────
     if track_id == "scaling":
-        fig = go.Figure()
-        fig.layout = None
-        fig.data = None
         df_all["lead_folder"] = df_all["run_name"].apply(lambda p: p.split("/")[0])
         df_all["is_baseline"] = df_all["lead_folder"] == "adamw_llama_scaling"
         groups = (
@@ -486,141 +539,200 @@ def render_speedrun_plot(
         colors = px.colors.qualitative.Plotly
         baseline_group = [g for (n, g) in groups if n == "adamw_llama_scaling"]
         baseline_group = baseline_group[0] if baseline_group else None
-        last_y_fit = None
+
         for i, (name, g) in enumerate(groups):
-            color = (
-                colors[(i - 1) % len(colors)]
-                if name != "adamw_llama_scaling"
-                else "gray"
-            )
-            legend_name = (
-                name if name != "adamw_llama_scaling" else "Baseline (AdamW, Llama)"
-            )
-            absolute_values = g["eval_paloma_c4_en_bpb"].values
-            if relative_requested and baseline_group is not None:
-                baseline_values = baseline_group["eval_paloma_c4_en_bpb"].values
-                y_values = absolute_values / baseline_values
-                customdata = np.column_stack((g["x_value"], absolute_values))
-                hovertemplate = (
-                    f"<b>%{{text}}</b><br>{x_hover_label}: %{{customdata[0]:.2e}}"
-                    "<br>Relative BPB: %{y:.3f}<br>Absolute BPB: %{customdata[1]:.3f}<extra></extra>"
-                )
-            else:
-                if baseline_group is not None:
-                    baseline_values = baseline_group["eval_paloma_c4_en_bpb"].values
-                    relative_values = absolute_values / baseline_values
-                    customdata = np.column_stack(
-                        (g["x_value"], absolute_values, relative_values)
-                    )
-                    hovertemplate = (
-                        f"<b>%{{text}}</b><br>{x_hover_label}: %{{customdata[0]:.2e}}"
-                        "<br>Absolute BPB: %{y:.3f}<br>Relative BPB: %{customdata[2]:.3f}<extra></extra>"
-                    )
-                else:
-                    y_values = absolute_values
-                    customdata = np.column_stack((g["x_value"], absolute_values))
+            color = "gray" if name == "adamw_llama_scaling" else colors[(i - 1) % len(colors)]
+            legend_name = name if name != "adamw_llama_scaling" else "Baseline (AdamW, Llama)"
+
+            absolute_values = g["eval_paloma_c4_en_bpb"].to_numpy()
+            x_vals = g["x_value"].to_numpy()
+            valid = np.isfinite(x_vals) & np.isfinite(absolute_values) & (x_vals > 0)
+            x_plot = x_vals[valid]
+            abs_plot = absolute_values[valid]
+
+            # y-values & hover
+            if relative_requested and baseline_group is not None and not baseline_group.empty:
+                try:
+                    base_abs = baseline_group.sort_values("x_value")["eval_paloma_c4_en_bpb"].to_numpy()
+                    cur_abs = g.sort_values("x_value")["eval_paloma_c4_en_bpb"].to_numpy()
+                    if len(base_abs) == len(cur_abs) and len(cur_abs) > 0:
+                        y_plot = cur_abs / base_abs
+                        x_plot = g.sort_values("x_value")["x_value"].to_numpy()
+                        customdata = np.column_stack((x_plot, cur_abs))
+                        hovertemplate = (
+                            f"<b>%{{text}}</b><br>{x_hover_label}: %{{customdata[0]:.2e}}"
+                            "<br>Relative BPB: %{y:.3f}<br>Absolute BPB: %{customdata[1]:.3f}<extra></extra>"
+                        )
+                    else:
+                        y_plot = abs_plot
+                        customdata = np.column_stack((x_plot, abs_plot))
+                        hovertemplate = (
+                            f"<b>%{{text}}</b><br>{x_hover_label}: %{{customdata[0]:.2e}}"
+                            "<br>Absolute BPB: %{y:.3f}<extra></extra>"
+                        )
+                except Exception:
+                    y_plot = abs_plot
+                    customdata = np.column_stack((x_plot, abs_plot))
                     hovertemplate = (
                         f"<b>%{{text}}</b><br>{x_hover_label}: %{{customdata[0]:.2e}}"
                         "<br>Absolute BPB: %{y:.3f}<extra></extra>"
                     )
-                y_values = absolute_values
+            else:
+                y_plot = abs_plot
+                if baseline_group is not None and not baseline_group.empty and len(abs_plot) > 0:
+                    try:
+                        base_abs = baseline_group.sort_values("x_value")["eval_paloma_c4_en_bpb"].to_numpy()
+                        cur_abs = g.sort_values("x_value")["eval_paloma_c4_en_bpb"].to_numpy()
+                        if len(base_abs) == len(cur_abs) and len(cur_abs) > 0:
+                            relative_vals = cur_abs / base_abs
+                            customdata = np.column_stack((np.sort(x_plot), abs_plot, relative_vals[: len(abs_plot)]))
+                            hovertemplate = (
+                                f"<b>%{{text}}</b><br>{x_hover_label}: %{{customdata[0]:.2e}}"
+                                "<br>Absolute BPB: %{y:.3f}<br>Relative BPB: %{customdata[2]:.3f}<extra></extra>"
+                            )
+                        else:
+                            customdata = np.column_stack((x_plot, abs_plot))
+                            hovertemplate = (
+                                f"<b>%{{text}}</b><br>{x_hover_label}: %{{customdata[0]:.2e}}"
+                                "<br>Absolute BPB: %{y:.3f}<extra></extra>"
+                            )
+                    except Exception:
+                        customdata = np.column_stack((x_plot, abs_plot))
+                        hovertemplate = (
+                            f"<b>%{{text}}</b><br>{x_hover_label}: %{{customdata[0]:.2e}}"
+                            "<br>Absolute BPB: %{y:.3f}<extra></extra>"
+                        )
+                else:
+                    customdata = np.column_stack((x_plot, abs_plot))
+                    hovertemplate = (
+                        f"<b>%{{text}}</b><br>{x_hover_label}: %{{customdata[0]:.2e}}"
+                        "<br>Absolute BPB: %{y:.3f}<extra></extra>"
+                    )
+
+            # Points trace — always present
             fig.add_trace(
                 go.Scatter(
-                    x=g["x_value"],
-                    y=y_values,
+                    x=x_plot.tolist(),
+                    y=y_plot.tolist(),
                     mode="markers",
                     marker=dict(color=color, size=10),
                     name=legend_name,
                     legendgroup=legend_name,
-                    uid=f"group:{legend_name}:points",
-                    text=g["run_name"],
-                    customdata=customdata,
-                    hovertemplate=hovertemplate,
-                )
-            )
-            xlog = np.log(g["x_value"])
-            slope, intercept = np.polyfit(xlog, y_values, 1)
-            x_fit = np.logspace(
-                np.log10(g["x_value"].min()), np.log10(FLOPS_BUDGET), 100
-            )
-            y_fit = intercept + slope * np.log(x_fit)
-            last_y_fit = y_fit
-            fig.add_trace(
-                go.Scatter(
-                    x=x_fit,
-                    y=y_fit,
-                    mode="lines",
-                    line=dict(color=color, dash="dash"),
-                    name=f"{legend_name} fit",
-                    hoverinfo="skip",
-                    legendgroup=legend_name,
-                    uid=f"group:{legend_name}:fit",
-                    showlegend=False,
+                    text=g["run_name"].tolist(),
+                    customdata=customdata if len(x_plot) else None,
+                    hovertemplate=hovertemplate if len(x_plot) else None,
+                    uid=f"scaling-points-{name}",
+                    visible="legendonly" if len(x_plot) == 0 else True,
                 )
             )
 
-        if last_y_fit is not None:
-            fig.add_trace(
-                go.Scatter(
-                    x=[FLOPS_BUDGET, FLOPS_BUDGET],
-                    y=[
-                        last_y_fit.min() - (last_y_fit.min() * 0.005),
-                        last_y_fit.max() + (last_y_fit.max() * 0.005),
-                    ],
-                    mode="lines",
-                    line=dict(color="black", dash="dash"),
-                    hoverinfo="skip",
-                    showlegend=False,
+            # Fit line — keep identity even if empty
+            if len(x_plot) >= 2:
+                xlog = np.log(x_plot)
+                slope, intercept = np.polyfit(xlog, y_plot, 1)
+                x_fit = np.logspace(np.log10(x_plot.min()), np.log10(max(FLOPS_BUDGET, x_plot.max())), 80)
+                y_fit = intercept + slope * np.log(x_fit)
+                fig.add_trace(
+                    go.Scatter(
+                        x=x_fit.tolist(),
+                        y=y_fit.tolist(),
+                        mode="lines",
+                        line=dict(color=color, dash="dash"),
+                        name=f"{legend_name} fit",
+                        hoverinfo="skip",
+                        legendgroup=legend_name,
+                        showlegend=False,
+                        uid=f"scaling-fit-{name}",
+                    )
                 )
+            else:
+                fig.add_trace(
+                    go.Scatter(
+                        x=[],
+                        y=[],
+                        mode="lines",
+                        line=dict(color=color, dash="dash"),
+                        name=f"{legend_name} fit",
+                        hoverinfo="skip",
+                        legendgroup=legend_name,
+                        showlegend=False,
+                        uid=f"scaling-fit-{name}",
+                    )
+                )
+
+        # Vertical budget line as a SHAPE so it doesn't affect y autorange
+        shapes.append(
+            dict(
+                type="line",
+                xref="x",
+                yref="paper",
+                x0=FLOPS_BUDGET,
+                x1=FLOPS_BUDGET,
+                y0=0,
+                y1=1,
+                line=dict(color="black", dash="dash", width=1),
+                layer="below",
             )
+        )
+
     else:
-        fig = go.Figure()
-        fig.layout = None
-        fig.data = None
         use_relative = relative_requested and baseline_bpb is not None
         if use_relative:
             df_all["y_value"] = df_all["eval_paloma_c4_en_bpb"] / baseline_bpb
         else:
             df_all["y_value"] = df_all["eval_paloma_c4_en_bpb"]
 
+        # All runs — always present
         customdata_all, hover_all = build_customdata(df_all, use_relative)
         fig.add_trace(
-                go.Scatter(
-                    x=df_all["x_value"],
-                    y=df_all["y_value"],
-                    mode="markers",
-                    marker=dict(color="rgba(156,163,175,0.3)", size=8, line=dict(width=0)),
-                    name="All Runs",
-                    uid="all-runs",
-                    text=df_all["run_name"],
-                    customdata=customdata_all,
-                    hovertemplate=hover_all,
-                )
+            go.Scatter(
+                x=df_all["x_value"],
+                y=df_all["y_value"],
+                mode="markers",
+                marker=dict(color="rgba(156,163,175,0.3)", size=8, line=dict(width=0)),
+                name="All Runs",
+                text=df_all["run_name"],
+                customdata=customdata_all,
+                hovertemplate=hover_all,
+                uid="trace-all-runs",
             )
+        )
+
+        # Selected track — always present (empty -> legendonly)
         highlight = df_all[df_all["in_track"]]
         if not highlight.empty:
             customdata_highlight, hover_highlight = build_customdata(
                 highlight, use_relative
             )
-            fig.add_trace(
-                go.Scatter(
-                    x=highlight["x_value"],
-                    y=highlight["y_value"],
-                    mode="markers",
-                    marker=dict(
-                        color=track_color,
-                        size=12,
-                        opacity=0.9,
-                        line=dict(color="white", width=1),
-                    ),
-                    name="Selected Track",
-                    uid=f"selected-{track_id}",
-                    text=highlight["run_name"],
-                    customdata=customdata_highlight,
-                    hovertemplate=hover_highlight,
-                )
-            )
+            x_h = highlight["x_value"]
+            y_h = highlight["y_value"]
+            text_h = highlight["run_name"].tolist()
+            cd_h = customdata_highlight
+            hover_h = hover_highlight
+        else:
+            x_h, y_h, text_h, cd_h, hover_h = [], [], [], None, None
 
+        fig.add_trace(
+            go.Scatter(
+                x=x_h,
+                y=y_h,
+                mode="markers",
+                marker=dict(
+                    color=track_color,
+                    size=12,
+                    opacity=0.9,
+                    line=dict(color="white", width=1),
+                ),
+                name="Selected Track",
+                text=text_h,
+                customdata=cd_h,
+                hovertemplate=hover_h,
+                uid=f"trace-selected-track-{track_id}",
+                visible=True if len(x_h) > 0 else "legendonly",
+            )
+        )
+
+        # Pareto frontier — always present
         valid = df_all.dropna(subset=["x_value", "y_value"])
         valid = valid[valid["x_value"] > 0]
 
@@ -634,27 +746,31 @@ def render_speedrun_plot(
                 )
             ).any()
 
-        pareto_df = valid[~valid.apply(dominated, axis=1)].sort_values("x_value")
+        if not valid.empty:
+            pareto_df = valid[~valid.apply(dominated, axis=1)].sort_values("x_value")
+            x_p = pareto_df["x_value"].tolist()
+            y_p = pareto_df["y_value"].tolist()
+        else:
+            x_p, y_p = [], []
 
-        if not pareto_df.empty and track_id != "scaling":
-            fig.add_trace(
-                go.Scatter(
-                    x=pareto_df["x_value"],
-                    y=pareto_df["y_value"],
-                    mode="lines+markers",
-                    line=dict(color="#FF2D55", width=2),
-                    marker=dict(size=5, color="#FF2D55"),
-                    name="Pareto Frontier",
-                    uid=f"pareto-{track_id}",
-                    hoverinfo="skip",
-                )
+        fig.add_trace(
+            go.Scatter(
+                x=x_p,
+                y=y_p,
+                mode="lines+markers",
+                line=dict(color="#FF2D55", width=2),
+                marker=dict(size=5, color="#FF2D55"),
+                name="Pareto Frontier",
+                hoverinfo="skip",
+                uid=f"trace-pareto-{track_id}",
+                visible=True if len(x_p) > 0 else "legendonly",
             )
+        )
 
+        # Target & band as SHAPES (don't affect autorange; keep trace set stable)
         if track_id not in ["all", "scaling"]:
-            x_min, x_max = (
-                df_all["x_value"].min(),
-                df_all["x_value"].max(),
-            )
+            x_min = float(df_all["x_value"].min()) if df_all["x_value"].notna().any() else 1.0
+            x_max = float(df_all["x_value"].max()) if df_all["x_value"].notna().any() else 10.0
             target_value = (
                 t.target_bpb / baseline_bpb
                 if (baseline_bpb is not None and use_relative)
@@ -665,31 +781,38 @@ def render_speedrun_plot(
                 if (baseline_bpb is not None and use_relative)
                 else next_lower
             )
-
-            fig.add_trace(
-                go.Scatter(
-                    x=[x_min, x_max],
-                    y=[target_value, target_value],
-                    mode="lines",
+            # target line
+            shapes.append(
+                dict(
+                    type="line",
+                    xref="x",
+                    yref="y",
+                    x0=x_min,
+                    x1=x_max,
+                    y0=target_value,
+                    y1=target_value,
                     line=dict(color=track_color, dash="dash", width=2),
-                    hoverinfo="skip",
-                    showlegend=False,
+                    layer="below",
+                )
+            )
+            # band
+            y0, y1 = sorted([lower_bound, target_value])
+            shapes.append(
+                dict(
+                    type="rect",
+                    xref="x",
+                    yref="y",
+                    x0=x_min,
+                    x1=x_max,
+                    y0=y0,
+                    y1=y1,
+                    fillcolor=f"rgba{(*tuple(int(track_color.lstrip('#')[i:i+2], 16) for i in (0,2,4)), 0.15)}",
+                    line=dict(width=0),
+                    layer="below",
                 )
             )
 
-            fig.add_trace(
-                go.Scatter(
-                    x=[x_min, x_max],
-                    y=[lower_bound, lower_bound],
-                    mode="lines",
-                    line=dict(color=track_color, dash="dash", width=1),
-                    fill="tonexty",
-                    fillcolor=f"rgba{(*tuple(int(track_color.lstrip('#')[i : i + 2], 16) for i in (0, 2, 4)), 0.15)}",
-                    hoverinfo="skip",
-                    showlegend=False,
-                )
-            )
-
+    # ───────────────────────── axis titles & formats ─────────────────────────
     if track_id == "scaling":
         y_axis_title = (
             "C4-EN BPB Relative to Baseline"
@@ -704,19 +827,22 @@ def render_speedrun_plot(
         )
         y_tickformat = ".1%" if use_relative else ".3f"
 
+    # ───────────────────────── layout (with uirevisions) ───────────────────────
     fig.update_layout(
+        uirevision=layout_revision,  # persist legend & zoom across metric toggles
         title={
             "text": f"Marin Speedrun<br>{x_axis_title} vs. {y_axis_title}",
             "x": 0.5,
             "xanchor": "center",
         },
-        uirevision=f"legend-{track_id}",
         xaxis=dict(
             type="log",
             title=x_axis_title,
             ticks="outside",
             showgrid=True,
             gridcolor="rgba(0,0,0,0.05)",
+            autorange=True,
+            uirevision=xaxis_revision,  # refresh x range when metric changes
         ),
         yaxis=dict(
             title=y_axis_title,
@@ -724,24 +850,25 @@ def render_speedrun_plot(
             ticks="outside",
             showgrid=True,
             gridcolor="rgba(0,0,0,0.05)",
+            autorange=True,
+            uirevision=yaxis_revision,  # refresh y range when metric changes
         ),
         legend=dict(x=0.8, xanchor="center", y=0.8, yanchor="bottom"),
         plot_bgcolor="white",
         margin=dict(l=50, r=20, t=60, b=50),
+        shapes=shapes,
     )
 
-    plot_widget = mo.ui.plotly(fig, label="Runs")
     control_panel = mo.vstack(
         [
             mo.md("**Plot axes**"),
-            mo.md(
-                "_Choose which FLOPs estimate and BPB scale to visualize._"
-            ),
+            mo.md("_Choose which FLOPs estimate and BPB scale to visualize._"),
             mo.hstack([x_axis_select, y_axis_select]),
         ]
     )
 
-    mo.vstack([plot_widget, control_panel])
+    fig_widget = mo.ui.plotly(fig)
+    mo.vstack([fig_widget, control_panel])
 
     return
 
@@ -911,6 +1038,8 @@ def render_speedrun_leaderboard_table(
         df_disp.set_index("Rank").sort_values(by="Rank"),
         label="Leaderboard",
         selection=None,
+        show_column_summaries=False,
+        show_data_types=False,
     )  # plain strings only
     layout = mo.vstack([header, subtitle, table, footnotes])
     layout
