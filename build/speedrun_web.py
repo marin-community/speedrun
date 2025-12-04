@@ -13,7 +13,7 @@ from __future__ import annotations
 
 import marimo
 from types import ModuleType
-from typing import Any, Dict, Tuple, TYPE_CHECKING
+from typing import Any, dict, Tuple, TYPE_CHECKING
 
 if TYPE_CHECKING:  # Imports used only for type checking
     import pandas as pd
@@ -189,7 +189,7 @@ def load_leaderboard_data() -> Tuple[pd.DataFrame, pd.DataFrame, ModuleType]:
 @app.cell
 def render_track_tabs(
     df_tracks: pd.DataFrame, mo: ModuleType
-) -> Tuple[Any, Dict[str, str], Any]:
+) -> Tuple[Any, dict[str, str], Any]:
     """Create tabs allowing the user to choose a track.
 
     Parameters
@@ -207,9 +207,14 @@ def render_track_tabs(
         track identifier and ``tabs`` is the tab widget itself.
     """
     q = mo.query_params()
-    tab_map = {row["name"].capitalize(): row["id"] for _, row in df_tracks.iterrows()}
+    # Restrict to just the "All runs" and "Scaling" tracks for the UI
+    allowed_ids = {"all", "scaling"}
+    df_tabs = df_tracks[df_tracks["id"].isin(allowed_ids)]
+
+    tab_map = {row["name"].capitalize(): row["id"] for _, row in df_tabs.iterrows()}
+
     tabs = mo.ui.tabs(
-        {row["name"].capitalize(): "" for _, row in df_tracks.iterrows()},
+        {row["name"].capitalize(): "" for _, row in df_tabs.iterrows()},
         value=(q.get("track") or "Scaling").capitalize(),
     )
     tabs.center()
@@ -222,7 +227,7 @@ def filter_data_by_selected_track(
     df_tracks: pd.DataFrame,
     pd: ModuleType,
     q: Any,
-    tab_map: Dict[str, str],
+    tab_map: dict[str, str],
     tabs: Any,
 ) -> Tuple[pd.DataFrame, float, pd.Series, str]:
     """Filter runs according to the selected track.
@@ -284,7 +289,7 @@ def filter_data_by_selected_track(
 @app.cell
 def compute_and_render_high_level_track_stats(
     filtered: pd.DataFrame, mo: ModuleType, track_id: str
-) -> Tuple[float, Dict[str, Dict[str, float]] | None, ModuleType]:
+) -> Tuple[float, dict[str, dict[str, float]] | None, ModuleType, float]:
     """Compute and display high-level statistics for a track.
 
     Parameters
@@ -306,6 +311,7 @@ def compute_and_render_high_level_track_stats(
     import numpy as np
 
     FLOPS_BUDGET = 1e22
+    R2_THRESHOLD = 0.99 # threshold below which scaling fits are considered poor
     best_flops_header = "Best FLOPs in Track"
 
     if track_id == "scaling":
@@ -317,11 +323,19 @@ def compute_and_render_high_level_track_stats(
             x = np.log(_g["training_hardware_flops"])
             y = np.log(_g["eval_paloma_c4_en_bpb"])
             _slope, _intercept = np.polyfit(x, y, 1)
+
+            # Compute R^2 of the log-log linear fit
+            y_pred = _intercept + _slope * x
+            ss_res = np.sum((y - y_pred) ** 2)
+            ss_tot = np.sum((y - y.mean()) ** 2) if len(y) > 1 else 0.0
+            _r2 = 1.0 - ss_res / ss_tot if ss_tot > 0 else 1.0
+
             preds.append(np.exp(_intercept + _slope * np.log(FLOPS_BUDGET)))
             group_scaling[_n] = {
                 "slope": _slope,
                 "intercept": _intercept,
                 "projected": float(np.exp(_intercept + _slope * np.log(FLOPS_BUDGET))),
+                "r2": float(_r2),
             }
 
         best_bpb_value = f"{min(preds):.4g}" if preds else "N/A"
@@ -364,7 +378,7 @@ def compute_and_render_high_level_track_stats(
     """
     )
     stats
-    return FLOPS_BUDGET, group_scaling, np
+    return FLOPS_BUDGET, group_scaling, np, R2_THRESHOLD
 
 
 @app.cell
@@ -404,9 +418,11 @@ def render_speedrun_plot(
     t: pd.Series,
     track_id: str,
     FLOPS_BUDGET: float,
+    group_scaling: dict[str, dict[str, float]] | None,
+    R2_THRESHOLD: float,
     x_axis_select: Any,
     y_axis_select: Any,
-) -> Tuple[Dict[str, Dict[str, float]] | None]:
+) -> Tuple[dict[str, dict[str, float]] | None]:
     """Plot the Pareto frontier for runs in the selected track.
 
     Parameters
@@ -541,7 +557,15 @@ def render_speedrun_plot(
         baseline_group = baseline_group[0] if baseline_group else None
 
         for i, (name, g) in enumerate(groups):
-            color = "gray" if name == "adamw_llama_scaling" else colors[(i - 1) % len(colors)]
+            # Determine whether this group has a sufficiently good scaling fit
+            _r2 = None
+            if group_scaling is not None and name in group_scaling:
+                _r2 = group_scaling[name].get("r2")
+            low_r2_group = _r2 is not None and _r2 < R2_THRESHOLD
+
+            base_color = "gray" if name == "adamw_llama_scaling" else colors[(i - 1) % len(colors)]
+            # Visually de-emphasize low-R² groups
+            color = "lightgray" if low_r2_group else base_color
             legend_name = name if name != "adamw_llama_scaling" else "Baseline (AdamW, Llama)"
 
             absolute_values = g["eval_paloma_c4_en_bpb"].to_numpy()
@@ -622,7 +646,10 @@ def render_speedrun_plot(
                     customdata=customdata if len(x_plot) else None,
                     hovertemplate=hovertemplate if len(x_plot) else None,
                     uid=f"scaling-points-{name}",
-                    visible="legendonly" if len(x_plot) == 0 else True,
+                    # Low-R² groups are hidden by default (but remain in legend)
+                    visible="legendonly"
+                    if low_r2_group or len(x_plot) == 0
+                    else True,
                 )
             )
 
@@ -876,12 +903,13 @@ def render_speedrun_plot(
 @app.cell
 def render_speedrun_leaderboard_table(
     filtered: pd.DataFrame,
-    group_scaling: Dict[str, Dict[str, float]] | None,
+    group_scaling: dict[str, dict[str, float]] | None,
     mo: ModuleType,
     pd: ModuleType,
     t: pd.Series,
     track_id: str,
     FLOPS_BUDGET: float,
+    R2_THRESHOLD: float,
 ) -> None:
     """Render the leaderboard table for the current track.
 
@@ -930,6 +958,21 @@ def render_speedrun_leaderboard_table(
         ts = ts.replace(" UTC", "")
         return pd.to_datetime(ts).date().isoformat()
 
+    # ───────────────────────────── styling ─────────────────────────────
+    def gray_text(value: str) -> dict[str, str]:
+        """Wrap plain text in a gray span for de-emphasized rows."""
+        return {
+            "mimetype": "text/html",
+            "data": f"<span style='color:#9ca3af'>{value}</span>",
+        }
+
+    def gray_html(cell: dict[str, str]) -> dict[str, str]:
+        """Wrap existing HTML content in a gray span."""
+        return {
+            "mimetype": "text/html",
+            "data": f"<span style='color:#9ca3af'>{cell['data']}</span>",
+        }
+
     # ─────────────────────────── table rows ────────────────────────────
     rows = []
     for rank, (_, r) in enumerate(
@@ -938,10 +981,10 @@ def render_speedrun_leaderboard_table(
     ):
         _website = r["author.url"]
         _name = r["author.name"]
-        author = f'<a href="{_website}" title="{_website}" target="_blank" rel="noopener" class="text-marin-blue hover:text-blue-600 transition-colors duration-150">{_name}</a>'
+        author_html = f'<a href="{_website}" title="{_website}" target="_blank" rel="noopener" class="text-marin-blue hover:text-blue-600 transition-colors duration-150">{_name}</a>'
         if pd.notna(r["author.affiliation"]):
-            author += f"<br/>{r['author.affiliation']}"
-        author = {"mimetype": "text/html", "data": author}
+            author_html += f"<br/>{r['author.affiliation']}"
+        author_cell = {"mimetype": "text/html", "data": author_html}
 
         wandb = r.wandb_link if pd.notna(r.wandb_link) else "N/A"
         experiment_file = "https://github.com/marin-community/marin/tree/main/" + (
@@ -955,6 +998,14 @@ def render_speedrun_leaderboard_table(
             else r["run_name"].split("/")[0].strip()
         )
 
+        # For scaling track, determine quality of fit
+        low_r2_row = False
+        r2_value = None
+        if track_id == "scaling" and group_scaling is not None and _run_name in group_scaling:
+            r2_value = group_scaling[_run_name].get("r2")
+            if r2_value is not None:
+                low_r2_row = r2_value < R2_THRESHOLD
+
         if track_id != "scaling":
             perf = {
                 "Model Size*": fmt_model_size(r.model_size),
@@ -966,33 +1017,64 @@ def render_speedrun_leaderboard_table(
             perf = {
                 "Scaling Law Intercept": f"{group_scaling[_run_name]['intercept']:.3f}",
                 "Scaling Law Slope": f"{group_scaling[_run_name]['slope']:.3f}",
+                "R^2 of Fit": f"{r2_value:.3f}" if r2_value is not None else "N/A",
                 (
                     f"Projected BPB @ {FLOPS_BUDGET:.0e}".replace("e+", "e") + " FLOPs"
                 ): f"{group_scaling[_run_name]['projected']:.3f}",
             }
 
+        # Apply gray styling to low-R² scaling rows
+        if track_id == "scaling" and low_r2_row:
+            author_cell = gray_html(author_cell)
+            wandb_cell = {
+                "mimetype": "text/html",
+                "data": f'<a href="{wandb}" title="{wandb}" target="_blank" rel="noopener" class="text-marin-blue hover:text-blue-600 transition-colors duration-150">View Run</a>',
+            }
+            wandb_cell = gray_html(wandb_cell)
+
+            perf = {k: gray_text(v) for k, v in perf.items()}
+            date_added = gray_text(fmt_date(r.run_completion_timestamp))
+            run_name_cell = gray_html(
+                {
+                    "mimetype": "text/html",
+                    "data": f'<a href="{experiment_file}" title="{experiment_file}" target="_blank" rel="noopener" class="text-marin-blue hover:text-blue-600 transition-colors duration-150">{_run_name}</a>',
+                }
+            )
+        else:
+            wandb_cell = {
+                "mimetype": "text/html",
+                "data": f'<a href="{wandb}" title="{wandb}" target="_blank" rel="noopener" class="text-marin-blue hover:text-blue-600 transition-colors duration-150">View Run</a>',
+            }
+            date_added = fmt_date(r.run_completion_timestamp)
+            run_name_cell = {
+                "mimetype": "text/html",
+                "data": f'<a href="{experiment_file}" title="{experiment_file}" target="_blank" rel="noopener" class="text-marin-blue hover:text-blue-600 transition-colors duration-150">{_run_name}</a>',
+            }
+
+        # Numeric sort key used to avoid sorting on rich dict cells
+        sort_key = (
+            group_scaling[_run_name]["projected"]
+            if track_id == "scaling" and group_scaling is not None and _run_name in group_scaling
+            else rank
+        )
+
         rows.append(
             {
                 "Rank": rank,
-                "Run Name": {
-                    "mimetype": "text/html",
-                    "data": f'<a href="{experiment_file}" title="{experiment_file}" target="_blank" rel="noopener" class="text-marin-blue hover:text-blue-600 transition-colors duration-150">{_run_name}</a>',
-                },
-                "Author": author,
-                "Date Added": fmt_date(r.run_completion_timestamp),
+                "Run Name": run_name_cell,
+                "Author": author_cell,
+                "Date Added": date_added,
                 **perf,
-                "W&B Run": {
-                    "mimetype": "text/html",
-                    "data": f'<a href="{wandb}" title="{wandb}" target="_blank" rel="noopener" class="text-marin-blue hover:text-blue-600 transition-colors duration-150">View Run</a>',
-                },
+                "W&B Run": wandb_cell,
+                "SortKey": sort_key,
             }
         )
 
-    df_disp = (
-        pd.DataFrame(rows)
-        .drop_duplicates(subset=["Run Name"])
-        .sort_values(by=[f"Projected BPB @ {FLOPS_BUDGET:.0e}".replace("e+", "e") + " FLOPs"] if track_id == "scaling" else ["Rank"])
-    )
+    df_disp = pd.DataFrame(rows).drop_duplicates(subset=["Run Name"])
+    if track_id == "scaling":
+        df_disp = df_disp.sort_values(by=["SortKey"])
+    else:
+        df_disp = df_disp.sort_values(by=["Rank"])
 
     # ──────────────────────────── headers ──────────────────────────────
     if track_id == "scaling":
@@ -1034,6 +1116,8 @@ def render_speedrun_leaderboard_table(
 
     # ──────────────────────────── assemble ─────────────────────────────
     df_disp["Rank"] = df_disp.reset_index().index + 1
+    if "SortKey" in df_disp.columns:
+        df_disp = df_disp.drop(columns=["SortKey"])
     table = mo.ui.table(
         df_disp.set_index("Rank").sort_values(by="Rank"),
         label="Leaderboard",
