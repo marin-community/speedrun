@@ -1,5 +1,4 @@
 import { useMemo } from 'react';
-import marinLogo from 'figma:asset/c50ff30aae7d4e504c6176c6fd540903d04b93f5.png';
 
 interface Run {
   run_name: string;
@@ -152,7 +151,7 @@ export function LeaderboardTable({ runs, trackId, currentTrack }: LeaderboardTab
                 )}
                 {trackId === 'scaling' && (
                   <img 
-                    src={marinLogo}
+                    src="https://raw.githubusercontent.com/marin-community/speedrun/refs/heads/main/website/src/assets/marin-logo.png"
                     alt="Scaling track"
                     className="w-6 h-6 flex-shrink-0"
                   />

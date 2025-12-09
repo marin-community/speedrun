@@ -1,7 +1,6 @@
 import { useMemo, useState, useEffect, useRef } from 'react';
 import { ScatterChart, Scatter, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Line, LineChart, ReferenceArea, ReferenceLine } from 'recharts';
 import domtoimage from 'dom-to-image-more';
-import marinLogo from 'figma:asset/c50ff30aae7d4e504c6176c6fd540903d04b93f5.png';
 
 interface Run {
   run_name: string;
@@ -630,7 +629,7 @@ export function SpeedrunChart({ runs, filteredRuns, trackId, currentTrack, track
             opacity: 0.85
           }}>
             <img 
-              src="https://raw.githubusercontent.com/marin-community/speedrun/refs/heads/website/src/assets/c50ff30aae7d4e504c6176c6fd540903d04b93f5.png"  
+              src="https://raw.githubusercontent.com/marin-community/speedrun/refs/heads/main/website/src/assets/marin-logo.png"  
               alt="" 
               style={{
                 width: isMobile ? '24px' : '36px',

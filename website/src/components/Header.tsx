@@ -4,7 +4,7 @@ export function Header() {
       <div className="container mx-auto px-4 py-6">
         <div className="flex items-center gap-5 group hover:opacity-90 transition-opacity duration-150">
           <img 
-            src="https://raw.githubusercontent.com/marin-community/speedrun/refs/heads/website/src/assets/c50ff30aae7d4e504c6176c6fd540903d04b93f5.png" 
+            src="https://raw.githubusercontent.com/marin-community/speedrun/refs/heads/main/website/src/assets/marin-logo.png" 
             alt="Marin Logo" 
             className="h-14 w-14 object-contain"
           />
