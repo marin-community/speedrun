@@ -628,8 +628,8 @@ export function SpeedrunChart({ runs, filteredRuns, trackId, currentTrack, track
             pointerEvents: 'none',
             opacity: 0.85
           }}>
-            <img 
-              src="https://raw.githubusercontent.com/marin-community/speedrun/refs/heads/main/website/src/assets/marin-logo.png"  
+            <img
+	    src="https://raw.githubusercontent.com/marin-community/speedrun/refs/heads/main/website/src/assets/marin-logo.png"  
               alt="" 
               style={{
                 width: isMobile ? '24px' : '36px',

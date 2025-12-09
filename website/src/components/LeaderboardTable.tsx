@@ -121,7 +121,7 @@ export function LeaderboardTable({ runs, trackId, currentTrack }: LeaderboardTab
       <div className="flex items-center gap-2 mb-4">
         {currentTrack && trackId !== 'all' && (
           <img 
-            src="https://raw.githubusercontent.com/marin-community/speedrun/refs/heads/website/src/assets/c50ff30aae7d4e504c6176c6fd540903d04b93f5.png" 
+	    src="https://raw.githubusercontent.com/marin-community/speedrun/refs/heads/main/website/src/assets/marin-logo.png"
             alt="Marin logo"
             className="w-8 h-8"
           />
@@ -150,8 +150,8 @@ export function LeaderboardTable({ runs, trackId, currentTrack }: LeaderboardTab
                   </div>
                 )}
                 {trackId === 'scaling' && (
-                  <img 
-                    src="https://raw.githubusercontent.com/marin-community/speedrun/refs/heads/main/website/src/assets/marin-logo.png"
+                  <img
+		    src="https://raw.githubusercontent.com/marin-community/speedrun/refs/heads/main/website/src/assets/marin-logo.png"
                     alt="Scaling track"
                     className="w-6 h-6 flex-shrink-0"
                   />
