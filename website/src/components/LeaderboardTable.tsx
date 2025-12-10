@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+import { getScalingGroupName } from '../utils/scaling';
 
 interface Run {
   run_name: string;
@@ -37,7 +38,7 @@ export function LeaderboardTable({ runs, trackId, currentTrack }: LeaderboardTab
     if (trackId === 'scaling') {
       const groups: Record<string, Run[]> = {};
       sorted.forEach(run => {
-        const folder = run.run_name.split('/')[0];
+        const folder = getScalingGroupName(run.run_name);
         if (!groups[folder]) groups[folder] = [];
         groups[folder].push(run);
       });

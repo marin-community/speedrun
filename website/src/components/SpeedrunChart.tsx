@@ -1,6 +1,7 @@
 import { useMemo, useState, useEffect, useRef } from 'react';
 import { ScatterChart, Scatter, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Line, LineChart, ReferenceArea, ReferenceLine } from 'recharts';
 import domtoimage from 'dom-to-image-more';
+import { getScalingGroupName } from '../utils/scaling';
 
 interface Run {
   run_name: string;
@@ -218,7 +219,7 @@ export function SpeedrunChart({ runs, filteredRuns, trackId, currentTrack, track
     if (trackId === 'scaling') {
       const groups: Record<string, Run[]> = {};
       filteredRuns.forEach(run => {
-        const folder = run.run_name.split('/')[0];
+        const folder = getScalingGroupName(run.run_name);
         if (!groups[folder]) groups[folder] = [];
         groups[folder].push(run);
       });

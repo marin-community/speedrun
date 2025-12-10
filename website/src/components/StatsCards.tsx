@@ -1,3 +1,5 @@
+import { getScalingGroupName } from '../utils/scaling';
+
 interface Run {
   run_name: string;
   eval_paloma_c4_en_bpb: number;
@@ -21,7 +23,7 @@ export function StatsCards({ runs, trackId, allRuns }: StatsCardsProps) {
   
   if (trackId === 'scaling') {
     const groupedRuns = runs.reduce((acc, run) => {
-      const folder = run.run_name.split('/')[0];
+      const folder = getScalingGroupName(run.run_name);
       if (!acc[folder]) acc[folder] = [];
       acc[folder].push(run);
       return acc;
