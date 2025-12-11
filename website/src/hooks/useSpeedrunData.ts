@@ -59,6 +59,7 @@ interface ScalingGroup {
     DataPoint & {
       logX: number;
       logAbsoluteY: number;
+      logRelativeY?: number;
     }
   >;
   regression: Array<{ x: number; y: number; name: string }>;
@@ -175,6 +176,15 @@ export function useSpeedrunData({
       }))
       .sort((a, b) => a.x - b.x);
 
+    const baselineRegressionData = baselinePoints
+      .filter(point => point.x > 0 && point.y > 0)
+      .map(point => ({
+        x: Math.log(point.x),
+        y: Math.log(point.y)
+      }));
+    const baselineRegression =
+      baselineRegressionData.length >= 2 ? computeLinearRegression(baselineRegressionData) : null;
+
     const paretoPoints: typeof allPoints = [];
     const sorted = [...allPoints].sort((a, b) => a.x - b.x);
     let minY = Infinity;
@@ -194,11 +204,12 @@ export function useSpeedrunData({
       const firstBaseline = baselinePoints[0];
       const lastBaseline = baselinePoints[baselinePoints.length - 1];
 
-      if (x <= firstBaseline.x) {
-        return firstBaseline.y;
-      }
-      if (x >= lastBaseline.x) {
-        return lastBaseline.y;
+      if (x <= firstBaseline.x || x >= lastBaseline.x) {
+        if (baselineRegression && x > 0) {
+          const logX = Math.log(x);
+          return Math.exp(baselineRegression.intercept + baselineRegression.slope * logX);
+        }
+        return x <= firstBaseline.x ? firstBaseline.y : lastBaseline.y;
       }
 
       for (let i = 0; i < baselinePoints.length - 1; i++) {
@@ -216,10 +227,20 @@ export function useSpeedrunData({
       return fallback;
     };
 
-    const convertToRelative = (value: number, x: number) => {
+    const getRelativeMetrics = (value: number, x: number) => {
       const baselineBPB = getBaselineValue(x, value);
-      if (baselineBPB === 0) return 0;
-      return ((value - baselineBPB) / baselineBPB) * 100;
+      if (baselineBPB <= 0 || value <= 0) {
+        return { percent: 0, logRatio: undefined };
+      }
+      const ratio = value / baselineBPB;
+      return {
+        percent: (ratio - 1) * 100,
+        logRatio: Math.log(ratio)
+      };
+    };
+
+    const convertToRelative = (value: number, x: number) => {
+      return getRelativeMetrics(value, x).percent;
     };
 
     const processedPoints =
@@ -250,12 +271,12 @@ export function useSpeedrunData({
 
       const scalingGroups: ScalingGroup[] = Object.entries(groups)
         .map(([folder, groupRuns]) => {
-          const dataPoints = groupRuns
-            .map(r => {
+        const dataPoints = groupRuns
+          .map(r => {
             const absoluteY = r.eval_paloma_c4_en_bpb;
             const xValue = r[xAxis];
-            const yValue =
-              yAxis === 'relative' ? convertToRelative(absoluteY, xValue) : absoluteY;
+            const relativeMetrics = getRelativeMetrics(absoluteY, xValue);
+            const yValue = yAxis === 'relative' ? relativeMetrics.percent : absoluteY;
 
             const tokens =
               r.training_hardware_flops && r.model_flops
@@ -268,6 +289,7 @@ export function useSpeedrunData({
               name: r.run_name,
               logX: Math.log(r[xAxis]),
               logAbsoluteY: Math.log(absoluteY),
+              logRelativeY: relativeMetrics.logRatio,
               trainingFlops: r.training_hardware_flops,
               modelFlops: r.model_flops,
               modelSize: r.model_size,
@@ -277,13 +299,31 @@ export function useSpeedrunData({
           })
           .sort((a, b) => a.x - b.x);
 
-        const regressionInput = dataPoints.map(point => ({
+        const regressionInputAbsolute = dataPoints.map(point => ({
           x: point.logX,
           y: point.logAbsoluteY
         }));
 
-        const regressionResult = computeLinearRegression(regressionInput);
-        if (!regressionResult || dataPoints.length < 2) {
+        const regressionInputRelative =
+          yAxis === 'relative'
+            ? dataPoints
+                .filter(point => point.logRelativeY !== undefined)
+                .map(point => ({
+                  x: point.logX,
+                  y: point.logRelativeY as number
+                }))
+            : [];
+
+        const absoluteRegression =
+          regressionInputAbsolute.length >= 2 ? computeLinearRegression(regressionInputAbsolute) : null;
+        const relativeRegression =
+          yAxis === 'relative' && regressionInputRelative.length >= 2
+            ? computeLinearRegression(regressionInputRelative)
+            : null;
+
+        const displayRegression = yAxis === 'relative' ? relativeRegression ?? absoluteRegression : absoluteRegression;
+
+        if (!displayRegression) {
           return {
             name: folder,
             data: dataPoints,
@@ -293,7 +333,21 @@ export function useSpeedrunData({
           };
         }
 
-        const { slope, intercept } = regressionResult;
+        const { slope, intercept } = displayRegression;
+        let displaySlope = slope;
+        let displayIntercept = intercept;
+
+        if (yAxis === 'relative' && baselineRegression && dataPoints.length > 0) {
+          const averageDelta =
+            dataPoints.reduce((sum, point) => {
+              const baselineLog =
+                baselineRegression.intercept + baselineRegression.slope * point.logX;
+              return sum + (point.logAbsoluteY - baselineLog);
+            }, 0) / dataPoints.length;
+
+          displaySlope = baselineRegression.slope;
+          displayIntercept = baselineRegression.intercept + averageDelta;
+        }
 
         const logX1e22 = Math.log(1e22);
 
@@ -318,13 +372,22 @@ export function useSpeedrunData({
         for (let i = 0; i < numPoints; i++) {
           const logX = Math.log(minX) + ((Math.log(maxX) - Math.log(minX)) * i) / (numPoints - 1);
           const x = Math.exp(logX);
-          const logY = intercept + slope * logX;
-          const absoluteY = Math.exp(logY);
-          const y = yAxis === 'relative' ? convertToRelative(absoluteY, x) : absoluteY;
-          regressionPoints.push({ x, y, name: folder });
+          if (yAxis === 'relative' && relativeRegression) {
+            const logRatio = intercept + slope * logX;
+            const ratio = Math.exp(logRatio);
+            const y = (ratio - 1) * 100;
+            regressionPoints.push({ x, y, name: folder });
+          } else {
+            const logY = intercept + slope * logX;
+            const absoluteY = Math.exp(logY);
+            const y = absoluteY;
+            regressionPoints.push({ x, y, name: folder });
+          }
         }
 
         const firstRun = groupRuns[0];
+        const leaderboardRegression = absoluteRegression;
+
         const leaderboard: ScalingGroupMeta | null = firstRun
           ? {
               author: firstRun.author.name,
@@ -333,9 +396,9 @@ export function useSpeedrunData({
               wandb: firstRun.wandb_link,
               filepath: firstRun.results_filepath.split('/').slice(0, -1).join('/'),
               date: firstRun.run_completion_timestamp,
-              intercept: regressionResult.intercept,
-              slope: regressionResult.slope,
-              r2: regressionResult.r2,
+              intercept: leaderboardRegression?.intercept ?? null,
+              slope: leaderboardRegression?.slope ?? null,
+              r2: leaderboardRegression?.r2 ?? null,
               projected: projected ?? null
             }
           : null;
