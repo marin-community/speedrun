@@ -2,6 +2,8 @@ import { useMemo } from 'react';
 import { getScalingGroupName } from '../utils/scaling';
 import { computeLinearRegression } from '../utils/regression';
 
+const MIN_SCALING_LEADERBOARD_FLOPS = 3e20; // Require at least this much compute to appear in the scaling leaderboard
+
 interface Run {
   run_name: string;
   author: {
@@ -56,7 +58,7 @@ interface ScalingGroup {
   data: Array<
     DataPoint & {
       logX: number;
-      logY: number;
+      logAbsoluteY: number;
     }
   >;
   regression: Array<{ x: number; y: number; name: string }>;
@@ -184,34 +186,48 @@ export function useSpeedrunData({
       }
     }
 
+    const getBaselineValue = (x: number, fallback: number) => {
+      if (baselinePoints.length === 0) {
+        return fallback;
+      }
+
+      const firstBaseline = baselinePoints[0];
+      const lastBaseline = baselinePoints[baselinePoints.length - 1];
+
+      if (x <= firstBaseline.x) {
+        return firstBaseline.y;
+      }
+      if (x >= lastBaseline.x) {
+        return lastBaseline.y;
+      }
+
+      for (let i = 0; i < baselinePoints.length - 1; i++) {
+        const p1 = baselinePoints[i];
+        const p2 = baselinePoints[i + 1];
+        if (x >= p1.x && x <= p2.x) {
+          const logX = Math.log(x);
+          const logX1 = Math.log(p1.x);
+          const logX2 = Math.log(p2.x);
+          const t = (logX - logX1) / (logX2 - logX1);
+          return p1.y + t * (p2.y - p1.y);
+        }
+      }
+
+      return fallback;
+    };
+
+    const convertToRelative = (value: number, x: number) => {
+      const baselineBPB = getBaselineValue(x, value);
+      if (baselineBPB === 0) return 0;
+      return ((value - baselineBPB) / baselineBPB) * 100;
+    };
+
     const processedPoints =
       yAxis === 'relative'
-        ? allPoints.map(point => {
-            let baselineBPB = point.y;
-
-            if (baselinePoints.length > 0) {
-              for (let i = 0; i < baselinePoints.length - 1; i++) {
-                const p1 = baselinePoints[i];
-                const p2 = baselinePoints[i + 1];
-                if (point.x >= p1.x && point.x <= p2.x) {
-                  const logX = Math.log(point.x);
-                  const logX1 = Math.log(p1.x);
-                  const logX2 = Math.log(p2.x);
-                  const t = (logX - logX1) / (logX2 - logX1);
-                  baselineBPB = p1.y + t * (p2.y - p1.y);
-                  break;
-                }
-              }
-              if (point.x < baselinePoints[0].x) baselineBPB = baselinePoints[0].y;
-              if (point.x > baselinePoints[baselinePoints.length - 1].x)
-                baselineBPB = baselinePoints[baselinePoints.length - 1].y;
-            }
-
-            return {
-              ...point,
-              y: ((point.y - baselineBPB) / baselineBPB) * 100
-            };
-          })
+        ? allPoints.map(point => ({
+            ...point,
+            y: convertToRelative(point.y, point.x)
+          }))
         : allPoints;
 
     let yDomain: [number | string, number | string] = ['auto', 'auto'];
@@ -232,33 +248,14 @@ export function useSpeedrunData({
         groups[folder].push(run);
       });
 
-      const scalingGroups: ScalingGroup[] = Object.entries(groups).map(([folder, groupRuns]) => {
-        const dataPoints = groupRuns
-          .map(r => {
-            let yValue = r.eval_paloma_c4_en_bpb;
-
-            if (yAxis === 'relative' && baselinePoints.length > 0) {
-              let baselineBPB = yValue;
-              const xValue = r[xAxis];
-
-              for (let i = 0; i < baselinePoints.length - 1; i++) {
-                const p1 = baselinePoints[i];
-                const p2 = baselinePoints[i + 1];
-                if (xValue >= p1.x && xValue <= p2.x) {
-                  const logX = Math.log(xValue);
-                  const logX1 = Math.log(p1.x);
-                  const logX2 = Math.log(p2.x);
-                  const t = (logX - logX1) / (logX2 - logX1);
-                  baselineBPB = p1.y + t * (p2.y - p1.y);
-                  break;
-                }
-              }
-              if (xValue < baselinePoints[0].x) baselineBPB = baselinePoints[0].y;
-              if (xValue > baselinePoints[baselinePoints.length - 1].x)
-                baselineBPB = baselinePoints[baselinePoints.length - 1].y;
-
-              yValue = ((yValue - baselineBPB) / baselineBPB) * 100;
-            }
+      const scalingGroups: ScalingGroup[] = Object.entries(groups)
+        .map(([folder, groupRuns]) => {
+          const dataPoints = groupRuns
+            .map(r => {
+            const absoluteY = r.eval_paloma_c4_en_bpb;
+            const xValue = r[xAxis];
+            const yValue =
+              yAxis === 'relative' ? convertToRelative(absoluteY, xValue) : absoluteY;
 
             const tokens =
               r.training_hardware_flops && r.model_flops
@@ -270,7 +267,7 @@ export function useSpeedrunData({
               y: yValue,
               name: r.run_name,
               logX: Math.log(r[xAxis]),
-              logY: yAxis === 'relative' ? yValue : Math.log(yValue),
+              logAbsoluteY: Math.log(absoluteY),
               trainingFlops: r.training_hardware_flops,
               modelFlops: r.model_flops,
               modelSize: r.model_size,
@@ -282,7 +279,7 @@ export function useSpeedrunData({
 
         const regressionInput = dataPoints.map(point => ({
           x: point.logX,
-          y: point.logY
+          y: point.logAbsoluteY
         }));
 
         const regressionResult = computeLinearRegression(regressionInput);
@@ -301,9 +298,9 @@ export function useSpeedrunData({
         const logX1e22 = Math.log(1e22);
 
         const forecastDataPoints = groupRuns
-          .filter(r => r.training_hardware_flops > 0 && r.eval_paloma_c4_en_bpb > 0)
+          .filter(r => r.model_flops > 0 && r.eval_paloma_c4_en_bpb > 0)
           .map(r => ({
-            x: Math.log(r.training_hardware_flops),
+            x: Math.log(r.model_flops),
             y: Math.log(r.eval_paloma_c4_en_bpb)
           }));
 
@@ -322,7 +319,8 @@ export function useSpeedrunData({
           const logX = Math.log(minX) + ((Math.log(maxX) - Math.log(minX)) * i) / (numPoints - 1);
           const x = Math.exp(logX);
           const logY = intercept + slope * logX;
-          const y = yAxis === 'relative' ? logY : Math.exp(logY);
+          const absoluteY = Math.exp(logY);
+          const y = yAxis === 'relative' ? convertToRelative(absoluteY, x) : absoluteY;
           regressionPoints.push({ x, y, name: folder });
         }
 
@@ -351,7 +349,11 @@ export function useSpeedrunData({
         };
       });
 
-      const sortedByForecast = [...scalingGroups].sort(
+      const qualifiedScalingGroups = scalingGroups.filter(group =>
+        group.data.some(point => (point.trainingFlops ?? 0) > MIN_SCALING_LEADERBOARD_FLOPS)
+      );
+
+      const sortedByForecast = [...qualifiedScalingGroups].sort(
         (a, b) => a.forecastedBpbAt1e22 - b.forecastedBpbAt1e22
       );
       const top3Groups = new Set(sortedByForecast.slice(0, 3).map(g => g.name));
@@ -410,6 +412,12 @@ export function useSpeedrunData({
       return chartData.groups
         .map(group => {
           if (!group.leaderboard) return null;
+
+          const hasHighFlopsRun = group.data.some(
+            point => (point.trainingFlops ?? 0) > MIN_SCALING_LEADERBOARD_FLOPS
+          );
+          if (!hasHighFlopsRun) return null;
+
           return {
             type: 'scaling' as const,
             name: group.name,

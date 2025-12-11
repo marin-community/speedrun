@@ -1,4 +1,5 @@
 import { getScalingGroupName } from '../utils/scaling';
+import type { ChartData } from '../hooks/useSpeedrunData';
 
 interface Run {
   run_name: string;
@@ -10,9 +11,10 @@ interface StatsCardsProps {
   runs: Run[];
   trackId: string;
   allRuns: Run[];
+  chartData: ChartData;
 }
 
-export function StatsCards({ runs, trackId, allRuns }: StatsCardsProps) {
+export function StatsCards({ runs, trackId, allRuns, chartData }: StatsCardsProps) {
   const FLOPS_BUDGET = 1e22;
   
   let numRuns = 0;
@@ -31,33 +33,19 @@ export function StatsCards({ runs, trackId, allRuns }: StatsCardsProps) {
     
     numRuns = Object.keys(groupedRuns).length;
     
-    const projections: number[] = [];
-    const slopes: number[] = [];
-    for (const group of Object.values(groupedRuns)) {
-      if (group.length >= 2) {
-        const x = group.map(r => Math.log(r.training_hardware_flops));
-        const y = group.map(r => Math.log(r.eval_paloma_c4_en_bpb));
-        
-        const n = x.length;
-        const sumX = x.reduce((a, b) => a + b, 0);
-        const sumY = y.reduce((a, b) => a + b, 0);
-        const sumXY = x.reduce((a, b, i) => a + b * y[i], 0);
-        const sumXX = x.reduce((a, b) => a + b * b, 0);
-        
-        const slope = (n * sumXY - sumX * sumY) / (n * sumXX - sumX * sumX);
-        const intercept = (sumY - slope * sumX) / n;
-        
-        const projected = Math.exp(intercept + slope * Math.log(FLOPS_BUDGET));
-        projections.push(projected);
-        slopes.push(slope);
-      }
+    const scalingGroups = chartData?.type === 'scaling' ? chartData.groups : [];
+    const finiteProjections = scalingGroups
+      .map(group => group.forecastedBpbAt1e22)
+      .filter(value => Number.isFinite(value));
+    if (finiteProjections.length > 0) {
+      bestBpbValue = Math.min(...finiteProjections).toFixed(4);
     }
-    
-    if (projections.length > 0) {
-      bestBpbValue = Math.min(...projections).toFixed(4);
-    }
-    if (slopes.length > 0) {
-      const bestSlope = Math.min(...slopes);
+
+    const finiteSlopes = scalingGroups
+      .map(group => group.leaderboard?.slope)
+      .filter((s): s is number => typeof s === 'number' && Number.isFinite(s));
+    if (finiteSlopes.length > 0) {
+      const bestSlope = Math.min(...finiteSlopes);
       bestFlopsValue = bestSlope.toFixed(4);
     }
     bestBpbHeader = `Best Projected BPB @ ${FLOPS_BUDGET.toExponential(0)} FLOPs`;

@@ -157,6 +157,7 @@ export default function App() {
           runs={filteredRuns}
           trackId={selectedTrack}
           allRuns={runs}
+          chartData={processedData.chartData}
         />
         
         <SpeedrunChart
