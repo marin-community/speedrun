@@ -1,21 +1,4 @@
-import { useMemo } from 'react';
-import { getScalingGroupName } from '../utils/scaling';
-
-interface Run {
-  run_name: string;
-  author: {
-    name: string;
-    url: string;
-    affiliation?: string;
-  };
-  eval_paloma_c4_en_bpb: number;
-  training_hardware_flops: number;
-  model_size: number;
-  training_time: number;
-  wandb_link?: string;
-  results_filepath: string;
-  run_completion_timestamp: string;
-}
+import { LeaderboardRow, ScalingLeaderboardRow, StandardLeaderboardRow } from '../hooks/useSpeedrunData';
 
 interface Track {
   id: string;
@@ -25,82 +8,17 @@ interface Track {
 }
 
 interface LeaderboardTableProps {
-  runs: Run[];
   trackId: string;
   currentTrack?: Track;
-  allRuns: Run[];
+  rows: LeaderboardRow[];
 }
 
-export function LeaderboardTable({ runs, trackId, currentTrack }: LeaderboardTableProps) {
-  const tableData = useMemo(() => {
-    const sorted = [...runs].sort((a, b) => a.eval_paloma_c4_en_bpb - b.eval_paloma_c4_en_bpb);
-    
-    if (trackId === 'scaling') {
-      const groups: Record<string, Run[]> = {};
-      sorted.forEach(run => {
-        const folder = getScalingGroupName(run.run_name);
-        if (!groups[folder]) groups[folder] = [];
-        groups[folder].push(run);
-      });
-      
-      return Object.entries(groups).map(([folder, groupRuns]) => {
-        // Calculate scaling law
-        if (groupRuns.length >= 2) {
-          const x = groupRuns.map(r => Math.log(r.training_hardware_flops));
-          const y = groupRuns.map(r => Math.log(r.eval_paloma_c4_en_bpb));
-          
-          const n = x.length;
-          const sumX = x.reduce((a, b) => a + b, 0);
-          const sumY = y.reduce((a, b) => a + b, 0);
-          const sumXY = x.reduce((a, b, i) => a + b * y[i], 0);
-          const sumXX = x.reduce((a, b) => a + b * b, 0);
-          
-          const slope = (n * sumXY - sumX * sumY) / (n * sumXX - sumX * sumX);
-          const intercept = (sumY - slope * sumX) / n;
-          
-          // Calculate R²
-          const yMean = sumY / n;
-          const yPred = x.map(xi => intercept + slope * xi);
-          const ssRes = y.reduce((a, yi, i) => a + Math.pow(yi - yPred[i], 2), 0);
-          const ssTot = y.reduce((a, yi) => a + Math.pow(yi - yMean, 2), 0);
-          const r2 = 1 - ssRes / ssTot;
-          
-          const FLOPS_BUDGET = 1e22;
-          const projected = Math.exp(intercept + slope * Math.log(FLOPS_BUDGET));
-          
-          return {
-            name: folder,
-            author: groupRuns[0].author.name,
-            authorUrl: groupRuns[0].author.url,
-            affiliation: groupRuns[0].author.affiliation,
-            intercept,
-            slope,
-            r2,
-            projected,
-            wandb: groupRuns[0].wandb_link,
-            filepath: groupRuns[0].results_filepath.split('/').slice(0, -1).join('/'),
-            date: groupRuns[0].run_completion_timestamp
-          };
-        }
-        return null;
-      }).filter(Boolean).sort((a, b) => (a?.projected || 0) - (b?.projected || 0));
-    }
-    
-    return sorted.map((run, idx) => ({
-      rank: idx + 1,
-      name: run.run_name,
-      author: run.author.name,
-      authorUrl: run.author.url,
-      affiliation: run.author.affiliation,
-      modelSize: run.model_size,
-      trainingTime: run.training_time,
-      flops: run.training_hardware_flops,
-      bpb: run.eval_paloma_c4_en_bpb,
-      wandb: run.wandb_link,
-      filepath: run.results_filepath,
-      date: run.run_completion_timestamp
-    }));
-  }, [runs, trackId]);
+const isScalingRow = (row: LeaderboardRow): row is ScalingLeaderboardRow => row.type === 'scaling';
+const isStandardRow = (row: LeaderboardRow): row is StandardLeaderboardRow => row.type === 'standard';
+
+export function LeaderboardTable({ trackId, currentTrack, rows }: LeaderboardTableProps) {
+  const tableData =
+    trackId === 'scaling' ? rows.filter(isScalingRow) : rows.filter(isStandardRow);
 
   const formatModelSize = (size: number) => {
     if (!size) return 'N/A';

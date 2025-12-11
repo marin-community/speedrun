@@ -5,6 +5,7 @@ import { TrackTabs } from './components/TrackTabs';
 import { StatsCards } from './components/StatsCards';
 import { SpeedrunChart } from './components/SpeedrunChart';
 import { LeaderboardTable } from './components/LeaderboardTable';
+import { useSpeedrunData } from './hooks/useSpeedrunData';
 
 interface Run {
   run_name: string;
@@ -42,12 +43,31 @@ export default function App() {
     return params.get('track') || 'scaling';
   });
 
+  const [xAxis, setXAxis] = useState<'training_hardware_flops' | 'model_flops'>(() => {
+    const params = new URLSearchParams(window.location.search);
+    const xParam = params.get('xAxis');
+    return xParam === 'training_hardware_flops' ? 'training_hardware_flops' : 'model_flops';
+  });
+
+  const [yAxis, setYAxis] = useState<'absolute' | 'relative'>(() => {
+    const params = new URLSearchParams(window.location.search);
+    const yParam = params.get('yAxis');
+    return yParam === 'absolute' ? 'absolute' : 'relative';
+  });
+
   // Update URL when track changes
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     params.set('track', selectedTrack);
     window.history.replaceState({}, '', `${window.location.pathname}?${params.toString()}`);
   }, [selectedTrack]);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    params.set('xAxis', xAxis);
+    params.set('yAxis', yAxis);
+    window.history.replaceState({}, '', `${window.location.pathname}?${params.toString()}`);
+  }, [xAxis, yAxis]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -102,6 +122,16 @@ export default function App() {
     );
   }, [runs, selectedTrack, currentTrack, tracks]);
 
+  const processedData = useSpeedrunData({
+    runs,
+    filteredRuns,
+    trackId: selectedTrack,
+    currentTrack,
+    tracks,
+    xAxis,
+    yAxis
+  });
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -130,18 +160,21 @@ export default function App() {
         />
         
         <SpeedrunChart
-          runs={runs}
-          filteredRuns={filteredRuns}
           trackId={selectedTrack}
           currentTrack={currentTrack}
-          tracks={tracks}
+          chartData={processedData.chartData}
+          nextLower={processedData.nextLower}
+          xTicks={processedData.xTicks}
+          xAxis={xAxis}
+          yAxis={yAxis}
+          setXAxis={setXAxis}
+          setYAxis={setYAxis}
         />
         
         <LeaderboardTable
-          runs={filteredRuns}
           trackId={selectedTrack}
           currentTrack={currentTrack}
-          allRuns={runs}
+          rows={processedData.leaderboardRows}
         />
       </div>
     </div>
