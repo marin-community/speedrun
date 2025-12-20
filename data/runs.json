@@ -1241,6 +1241,23 @@
     "description": "Qwen3 ~1.2B (LLaMA-geometry-matched) with MuonH."
   },
   {
+    "run_name": "muonh_qwen3_scaling/200m",
+    "results_filepath": "experiments/speedrun/muonh_qwen3_scaling/200m",
+    "author": {
+      "name": "Kaiyue Wen",
+      "affiliation": "Stanford University",
+      "url": "https://whenwen.github.io"
+    },
+    "model_size": 210061440,
+    "training_hardware_flops": 1.5826533123346866e+19,
+    "training_time": 1255.2770561030193,
+    "model_flops": 4.1559385496459674e+18,
+    "eval_paloma_c4_en_bpb": 1.110611081123352,
+    "wandb_link": "https://wandb.ai/marin-community/marin/runs/qwen3_200m_muonh_4096_lr_0.02_adam_lr_0.008-d9469d",
+    "run_completion_timestamp": "2025-12-18 19:49:30 UTC",
+    "description": "Qwen3 ~200M (isoflop-inspired geometry) with MuonH."
+  },
+  {
     "run_name": "muonh_qwen3_scaling/300m",
     "results_filepath": "experiments/speedrun/muonh_qwen3_scaling/300m",
     "author": {
@@ -1258,6 +1275,23 @@
     "description": "Qwen3 ~300M (LLaMA-geometry-matched) with MuonH."
   },
   {
+    "run_name": "muonh_qwen3_scaling/400m",
+    "results_filepath": "experiments/speedrun/muonh_qwen3_scaling/400m",
+    "author": {
+      "name": "Kaiyue Wen",
+      "affiliation": "Stanford University",
+      "url": "https://whenwen.github.io"
+    },
+    "model_size": 358322048,
+    "training_hardware_flops": 3.785234327756769e+19,
+    "training_time": 3002.2480391471836,
+    "model_flops": 1.3638199483400454e+19,
+    "eval_paloma_c4_en_bpb": 1.0430655479431152,
+    "wandb_link": "https://wandb.ai/marin-community/marin/runs/qwen3_400m_muonh_4096_lr_0.01-3acb88",
+    "run_completion_timestamp": "2025-12-18 20:15:27 UTC",
+    "description": "Qwen3 ~400M (isoflop-inspired geometry) with MuonH."
+  },
+  {
     "run_name": "muonh_qwen3_scaling/520m",
     "results_filepath": "experiments/speedrun/muonh_qwen3_scaling/520m",
     "author": {
@@ -1273,6 +1307,23 @@
     "wandb_link": "https://wandb.ai/marin-community/marin/runs/qwen3_520m_muonh_4096_lr_0.01-cb97ec",
     "run_completion_timestamp": "2025-10-12 22:45:20 UTC",
     "description": "Qwen3 ~520M (LLaMA-geometry-matched) with MuonH."
+  },
+  {
+    "run_name": "muonh_qwen3_scaling/800m",
+    "results_filepath": "experiments/speedrun/muonh_qwen3_scaling/800m",
+    "author": {
+      "name": "Kaiyue Wen",
+      "affiliation": "Stanford University",
+      "url": "https://whenwen.github.io"
+    },
+    "model_size": 837046144,
+    "training_hardware_flops": 2.2375201022490496e+20,
+    "training_time": 17746.828222152995,
+    "model_flops": 8.340840896299794e+19,
+    "eval_paloma_c4_en_bpb": 0.9594760537147522,
+    "wandb_link": "https://wandb.ai/marin-community/marin/runs/qwen3_800m_muonh_4096_low_lr-04af13",
+    "run_completion_timestamp": "2025-12-20 16:05:57 UTC",
+    "description": "Qwen3 ~800M (isoflop-inspired geometry) with MuonH."
   },
   {
     "run_name": "olmo_50m_h200",
@@ -1295,9 +1346,9 @@
     "run_name": "parallel_llama/130m",
     "results_filepath": "experiments/speedrun/parallel_llama/130m",
     "author": {
-      "name": "Harry Shin",
-      "affiliation": "Independent",
-      "url": "https://www.linkedin.com/in/harry-shin-34743216a/"
+      "name": "Calvin Xu",
+      "affiliation": "Stanford University",
+      "url": "https://pinlinxu.com"
     },
     "model_size": 154147328,
     "training_hardware_flops": 1.1183816505882425e+19,
@@ -1312,9 +1363,9 @@
     "run_name": "parallel_llama/1_2b",
     "results_filepath": "experiments/speedrun/parallel_llama/1_2b",
     "author": {
-      "name": "Harry Shin",
-      "affiliation": "Independent",
-      "url": "https://www.linkedin.com/in/harry-shin-34743216a/"
+      "name": "Calvin Xu",
+      "affiliation": "Stanford University",
+      "url": "https://pinlinxu.com"
     },
     "model_size": 1431373824,
     "training_hardware_flops": 5.185995127207614e+20,
@@ -1329,9 +1380,9 @@
     "run_name": "parallel_llama/300m",
     "results_filepath": "experiments/speedrun/parallel_llama/300m",
     "author": {
-      "name": "Harry Shin",
-      "affiliation": "Independent",
-      "url": "https://www.linkedin.com/in/harry-shin-34743216a/"
+      "name": "Calvin Xu",
+      "affiliation": "Stanford University",
+      "url": "https://pinlinxu.com"
     },
     "model_size": 299649792,
     "training_hardware_flops": 4.92631987470051e+19,
@@ -1346,9 +1397,9 @@
     "run_name": "parallel_llama/520m",
     "results_filepath": "experiments/speedrun/parallel_llama/520m",
     "author": {
-      "name": "Harry Shin",
-      "affiliation": "Independent",
-      "url": "https://www.linkedin.com/in/harry-shin-34743216a/"
+      "name": "Calvin Xu",
+      "affiliation": "Stanford University",
+      "url": "https://pinlinxu.com"
     },
     "model_size": 602457088,
     "training_hardware_flops": 2.084976674323945e+20,
