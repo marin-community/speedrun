@@ -238,6 +238,23 @@
     "description": "1.2B parameter model trained with the C-AdamC optimizer."
   },
   {
+    "run_name": "c-adamc_llama_scaling/200m",
+    "results_filepath": "experiments/speedrun/c-adamc_llama_scaling/200m",
+    "author": {
+      "name": "William Held",
+      "affiliation": "Georgia Tech",
+      "url": "https://WilliamHeld.com"
+    },
+    "model_size": 210052480,
+    "training_hardware_flops": 1.4060965198476575e+19,
+    "training_time": 1914.6194442370063,
+    "model_flops": 4.1554199001327206e+18,
+    "eval_paloma_c4_en_bpb": 1.1326158046722412,
+    "wandb_link": "https://wandb.ai/marin-community/marin/runs/llama_200m_c_adamc_4096-e128b5",
+    "run_completion_timestamp": "2025-12-20 22:49:19 UTC",
+    "description": "200M parameter model trained with the C-AdamC optimizer."
+  },
+  {
     "run_name": "c-adamc_llama_scaling/300m",
     "results_filepath": "experiments/speedrun/c-adamc_llama_scaling/300m",
     "author": {
@@ -255,6 +272,23 @@
     "description": "300M parameter model trained with the C-AdamC optimizer."
   },
   {
+    "run_name": "c-adamc_llama_scaling/400m",
+    "results_filepath": "experiments/speedrun/c-adamc_llama_scaling/400m",
+    "author": {
+      "name": "William Held",
+      "affiliation": "Georgia Tech",
+      "url": "https://WilliamHeld.com"
+    },
+    "model_size": 358304128,
+    "training_hardware_flops": 3.6171028440020554e+19,
+    "training_time": 4925.248970591034,
+    "model_flops": 1.3638199483400454e+19,
+    "eval_paloma_c4_en_bpb": 1.060500979423523,
+    "wandb_link": "https://wandb.ai/marin-community/marin/runs/llama_400m_c_adamc_4096-18fa59",
+    "run_completion_timestamp": "2025-12-20 23:19:04 UTC",
+    "description": "400M parameter model trained with the C-AdamC optimizer."
+  },
+  {
     "run_name": "c-adamc_llama_scaling/520m",
     "results_filepath": "experiments/speedrun/c-adamc_llama_scaling/520m",
     "author": {
@@ -270,6 +304,23 @@
     "wandb_link": "https://wandb.ai/marin-community/marin/runs/llama_520m_c_adamc_4096-42dcc9",
     "run_completion_timestamp": "2025-07-04 04:34:42 UTC",
     "description": "520M parameter model trained with the C-AdamC optimizer."
+  },
+  {
+    "run_name": "c-adamc_llama_scaling/800m",
+    "results_filepath": "experiments/speedrun/c-adamc_llama_scaling/800m",
+    "author": {
+      "name": "William Held",
+      "affiliation": "Georgia Tech",
+      "url": "https://WilliamHeld.com"
+    },
+    "model_size": 837003904,
+    "training_hardware_flops": 1.879562277249996e+20,
+    "training_time": 25593.168263208005,
+    "model_flops": 8.340318450894452e+19,
+    "eval_paloma_c4_en_bpb": 0.971510648727417,
+    "wandb_link": "https://wandb.ai/marin-community/marin/runs/llama_800m_c_adamc_4096-87dee6",
+    "run_completion_timestamp": "2025-12-21 05:24:54 UTC",
+    "description": "800M parameter model trained with the C-AdamC optimizer."
   },
   {
     "run_name": "cautious_llama_scaling/130m",
