@@ -130,7 +130,7 @@ export function SpeedrunChart({
               <span className="font-medium">{(data.modelSize / 1e6).toFixed(1)}M params</span>
             </p>
           )}
-          {data.tokens !== undefined && (
+          {data.tokens !== undefined && data.tokens > 0 && (
             <p>
               <span className="text-gray-600">Tokens:</span>{' '}
               <span className="font-medium">{data.tokens.toExponential(2)}</span>
