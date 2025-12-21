@@ -39,8 +39,8 @@ export function LeaderboardTable({ trackId, currentTrack, rows }: LeaderboardTab
     <div className="bg-white rounded-lg shadow p-4 md:p-6">
       <div className="flex items-center gap-2 mb-4">
         {currentTrack && trackId !== 'all' && (
-          <img 
-	    src="https://raw.githubusercontent.com/marin-community/speedrun/refs/heads/main/website/src/assets/marin-logo.png"
+          <img
+            src="https://raw.githubusercontent.com/marin-community/speedrun/refs/heads/main/website/src/assets/marin-logo.png"
             alt="Marin logo"
             className="w-8 h-8"
           />
@@ -50,9 +50,9 @@ export function LeaderboardTable({ trackId, currentTrack, rows }: LeaderboardTab
         </h3>
       </div>
 
-      {trackId !== 'all' && currentTrack?.target_bpb && (
+      {trackId === 'scaling' && (
         <p className="text-gray-600 mb-4">
-          Runs achieving ≤ {currentTrack.target_bpb.toFixed(4)} C4-EN BPB, ranked by training efficiency
+          Fit on <code className="bg-gray-100 px-1 rounded text-sm">exp(intercept) × compute<sup>slope</sup> + asymptote</code>, ranked by projected BPB @ 1e22 FLOPs
         </p>
       )}
 
@@ -61,7 +61,7 @@ export function LeaderboardTable({ trackId, currentTrack, rows }: LeaderboardTab
         {tableData.map((row: any, idx) => (
           <div key={idx} className="border border-gray-200 rounded-lg overflow-hidden bg-white shadow-sm">
             {/* Card Header */}
-            <div className="bg-gray-50 px-4 py-3 border-b border-gray-200">
+            <div className="bg-gray-50 px-4 py-3 border-b border-grayimage.png-200">
               <div className="flex items-center gap-2">
                 {trackId !== 'scaling' && (
                   <div className="flex-shrink-0 w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center text-sm font-semibold">
@@ -70,12 +70,12 @@ export function LeaderboardTable({ trackId, currentTrack, rows }: LeaderboardTab
                 )}
                 {trackId === 'scaling' && (
                   <img
-		    src="https://raw.githubusercontent.com/marin-community/speedrun/refs/heads/main/website/src/assets/marin-logo.png"
+                    src="https://raw.githubusercontent.com/marin-community/speedrun/refs/heads/main/website/src/assets/marin-logo.png"
                     alt="Scaling track"
                     className="w-6 h-6 flex-shrink-0"
                   />
                 )}
-                <a 
+                <a
                   href={`https://github.com/marin-community/marin/tree/main/${row.filepath}`}
                   target="_blank"
                   rel="noopener noreferrer"
@@ -88,7 +88,7 @@ export function LeaderboardTable({ trackId, currentTrack, rows }: LeaderboardTab
 
             {/* Author Section */}
             <div className="px-4 py-2 bg-gray-25">
-              <a 
+              <a
                 href={row.authorUrl}
                 target="_blank"
                 rel="noopener noreferrer"
@@ -116,7 +116,7 @@ export function LeaderboardTable({ trackId, currentTrack, rows }: LeaderboardTab
                     <span className="text-gray-500">Intercept:</span>
                   </div>
                   <div className="text-gray-900 font-medium">
-                    {row.intercept?.toFixed(3)}
+                    {row.intercept ? Math.log(row.intercept).toFixed(3) : 'N/A'}
                   </div>
 
                   <div>
@@ -124,6 +124,13 @@ export function LeaderboardTable({ trackId, currentTrack, rows }: LeaderboardTab
                   </div>
                   <div className="text-gray-900 font-medium">
                     {row.slope?.toFixed(3)}
+                  </div>
+
+                  <div>
+                    <span className="text-gray-500">Asymptote:</span>
+                  </div>
+                  <div className="text-gray-900 font-medium">
+                    {row.asymptote?.toFixed(3)}
                   </div>
 
                   <div>
@@ -175,7 +182,7 @@ export function LeaderboardTable({ trackId, currentTrack, rows }: LeaderboardTab
 
             {/* Links Footer */}
             <div className="px-4 py-3 bg-gray-50 border-t border-gray-200 flex gap-3 justify-center">
-              <a 
+              <a
                 href={`https://github.com/marin-community/marin/tree/main/${row.filepath}`}
                 target="_blank"
                 rel="noopener noreferrer"
@@ -186,9 +193,9 @@ export function LeaderboardTable({ trackId, currentTrack, rows }: LeaderboardTab
                 </svg>
                 GitHub
               </a>
-              
+
               {row.wandb ? (
-                <a 
+                <a
                   href={row.wandb}
                   target="_blank"
                   rel="noopener noreferrer"
@@ -225,6 +232,7 @@ export function LeaderboardTable({ trackId, currentTrack, rows }: LeaderboardTab
                 <>
                   <th className="px-4 py-3 text-left text-xs text-gray-500 uppercase tracking-wider">Intercept</th>
                   <th className="px-4 py-3 text-left text-xs text-gray-500 uppercase tracking-wider">Slope</th>
+                  <th className="px-4 py-3 text-left text-xs text-gray-500 uppercase tracking-wider">Asymptote</th>
                   <th className="px-4 py-3 text-left text-xs text-gray-500 uppercase tracking-wider">R²</th>
                   <th className="px-4 py-3 text-left text-xs text-gray-500 uppercase tracking-wider">Projected BPB</th>
                 </>
@@ -244,7 +252,7 @@ export function LeaderboardTable({ trackId, currentTrack, rows }: LeaderboardTab
               <tr key={idx} className="hover:bg-gray-50">
                 {trackId !== 'scaling' && <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">{row.rank}</td>}
                 <td className="px-4 py-4 whitespace-nowrap text-sm">
-                  <a 
+                  <a
                     href={`https://github.com/marin-community/marin/tree/main/${row.filepath}`}
                     target="_blank"
                     rel="noopener noreferrer"
@@ -254,7 +262,7 @@ export function LeaderboardTable({ trackId, currentTrack, rows }: LeaderboardTab
                   </a>
                 </td>
                 <td className="px-4 py-4 text-sm">
-                  <a 
+                  <a
                     href={row.authorUrl}
                     target="_blank"
                     rel="noopener noreferrer"
@@ -269,8 +277,9 @@ export function LeaderboardTable({ trackId, currentTrack, rows }: LeaderboardTab
                 <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">{formatDate(row.date)}</td>
                 {trackId === 'scaling' ? (
                   <>
-                    <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">{row.intercept?.toFixed(3)}</td>
+                    <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">{row.intercept ? Math.log(row.intercept).toFixed(3) : 'N/A'}</td>
                     <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">{row.slope?.toFixed(3)}</td>
+                    <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">{row.asymptote?.toFixed(3)}</td>
                     <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">{row.r2?.toFixed(3)}</td>
                     <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">{row.projected?.toFixed(3)}</td>
                   </>
@@ -284,7 +293,7 @@ export function LeaderboardTable({ trackId, currentTrack, rows }: LeaderboardTab
                 )}
                 <td className="px-4 py-4 whitespace-nowrap text-sm">
                   {row.wandb ? (
-                    <a 
+                    <a
                       href={row.wandb}
                       target="_blank"
                       rel="noopener noreferrer"

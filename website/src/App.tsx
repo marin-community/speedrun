@@ -52,7 +52,7 @@ export default function App() {
   const [yAxis, setYAxis] = useState<'absolute' | 'relative'>(() => {
     const params = new URLSearchParams(window.location.search);
     const yParam = params.get('yAxis');
-    return yParam === 'absolute' ? 'absolute' : 'relative';
+    return yParam === 'absolute' ? 'absolute' : 'absolute';
   });
 
   // Update URL when track changes
@@ -76,13 +76,13 @@ export default function App() {
           fetch('https://raw.githubusercontent.com/marin-community/speedrun/refs/heads/main/data/runs.json'),
           fetch('https://raw.githubusercontent.com/marin-community/speedrun/refs/heads/main/data/tracks.json')
         ]);
-        
+
         const runsData = await runsRes.json();
         const tracksData = await tracksRes.json();
-        
+
         // Only keep "all" and "scaling" tracks
         const filteredTracks = tracksData.filter((t: Track) => t.id === 'all' || t.id === 'scaling');
-        
+
         setRuns(runsData);
         setTracks(filteredTracks);
       } catch (error) {
@@ -95,7 +95,7 @@ export default function App() {
     fetchData();
   }, []);
 
-  const currentTrack = useMemo(() => 
+  const currentTrack = useMemo(() =>
     tracks.find(t => t.id === selectedTrack),
     [tracks, selectedTrack]
   );
@@ -105,17 +105,17 @@ export default function App() {
     if (selectedTrack === 'scaling') {
       return runs.filter(r => r.run_name.includes('/'));
     }
-    
+
     if (!currentTrack?.target_bpb) return runs;
-    
+
     const sortedTracks = tracks
       .filter(t => t.id !== 'all' && t.target_bpb)
       .sort((a, b) => (b.target_bpb || 0) - (a.target_bpb || 0));
-    
+
     const idx = sortedTracks.findIndex(t => t.id === selectedTrack);
     const nextLower = idx < sortedTracks.length - 1 ? sortedTracks[idx + 1].target_bpb || 0 : 0;
-    
-    return runs.filter(r => 
+
+    return runs.filter(r =>
       r.eval_paloma_c4_en_bpb !== null &&
       r.eval_paloma_c4_en_bpb <= currentTrack.target_bpb! &&
       r.eval_paloma_c4_en_bpb > nextLower
@@ -143,23 +143,23 @@ export default function App() {
   return (
     <div className="min-h-screen bg-gray-50">
       <Header />
-      
+
       <div className="container mx-auto px-4 py-8 max-w-7xl">
         <Introduction />
-        
+
         <TrackTabs
           tracks={tracks}
           selectedTrack={selectedTrack}
           onSelectTrack={setSelectedTrack}
         />
-        
+
         <StatsCards
           runs={filteredRuns}
           trackId={selectedTrack}
           allRuns={runs}
           chartData={processedData.chartData}
         />
-        
+
         <SpeedrunChart
           trackId={selectedTrack}
           currentTrack={currentTrack}
@@ -171,7 +171,7 @@ export default function App() {
           setXAxis={setXAxis}
           setYAxis={setYAxis}
         />
-        
+
         <LeaderboardTable
           trackId={selectedTrack}
           currentTrack={currentTrack}

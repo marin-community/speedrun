@@ -48,6 +48,29 @@ export function SpeedrunChart({
   const [isMobile, setIsMobile] = useState(false);
   const chartRef = useRef<HTMLDivElement>(null);
   const [isDownloading, setIsDownloading] = useState(false);
+  const prevTrackIdRef = useRef<string | null>(null);
+  const groupColorMapRef = useRef<Map<string, string>>(new Map());
+
+  const colors = ['#1877F2', '#F0701A', '#5A24C7', '#E42C97', '#00487C', '#0EAC96', '#AB76FF', '#B50550', '#0099E6', '#22085F', '#783301'];
+
+  // Get a stable color for a group name - once assigned, a group keeps its color
+  const getGroupColor = (groupName: string): string => {
+    if (groupColorMapRef.current.has(groupName)) {
+      return groupColorMapRef.current.get(groupName)!;
+    }
+    // Assign the next available color
+    const usedColors = new Set(groupColorMapRef.current.values());
+    const availableColor = colors.find(c => !usedColors.has(c)) || colors[groupColorMapRef.current.size % colors.length];
+    groupColorMapRef.current.set(groupName, availableColor);
+    return availableColor;
+  };
+
+  // Reset color mapping when track changes
+  useEffect(() => {
+    if (prevTrackIdRef.current !== trackId) {
+      groupColorMapRef.current.clear();
+    }
+  }, [trackId]);
 
   useEffect(() => {
     const checkMobile = () => {
@@ -59,14 +82,18 @@ export function SpeedrunChart({
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
+  // Only reset hidden legend items when trackId changes, not when chartData changes (e.g., axis changes)
   useEffect(() => {
-    if (trackId === 'scaling' && chartData.type === 'scaling') {
-      const groupsToHide = chartData.groups
-        .filter(g => !chartData.top3Groups.has(g.name))
-        .map(g => g.name);
-      setHiddenLegendItems(new Set([...groupsToHide, 'All Runs']));
-    } else {
-      setHiddenLegendItems(new Set());
+    if (prevTrackIdRef.current !== trackId) {
+      prevTrackIdRef.current = trackId;
+      if (trackId === 'scaling' && chartData.type === 'scaling') {
+        const groupsToHide = chartData.groups
+          .filter(g => !chartData.top3Groups.has(g.name))
+          .map(g => g.name);
+        setHiddenLegendItems(new Set([...groupsToHide, 'All Runs']));
+      } else {
+        setHiddenLegendItems(new Set());
+      }
     }
   }, [trackId, chartData]);
 
@@ -116,7 +143,6 @@ export function SpeedrunChart({
 
   const xAxisLabel = xAxis === 'training_hardware_flops' ? 'Training Hardware FLOPs' : 'Model FLOPs';
   const yAxisLabel = yAxis === 'absolute' ? 'C4-EN BPB' : '% Difference from Baseline';
-  const colors = ['#1877F2', '#F0701A', '#5A24C7', '#E42C97', '#00487C', '#0EAC96', '#AB76FF', '#B50550', '#0099E6', '#22085F', '#783301'];
 
   const handleLegendClick = (data: any) => {
     const itemName = data.value || data.dataKey;
@@ -412,21 +438,21 @@ export function SpeedrunChart({
                   fill="#000000"
                 />
               )}
-              {chartData.groups.map((group, idx) => (
+              {chartData.groups.map((group) => (
                 <Scatter
                   key={group.name}
                   name={group.name}
                   data={hiddenLegendItems.has(group.name) ? [] : group.data}
-                  fill={colors[idx % colors.length]}
+                  fill={getGroupColor(group.name)}
                 />
               ))}
-              {chartData.groups.map((group, idx) => (
+              {chartData.groups.map((group) => (
                 <Scatter
                   key={`${group.name}-fit`}
                   name={group.name}
                   data={hiddenLegendItems.has(group.name) ? [] : group.regression}
                   fill="none"
-                  line={{ stroke: colors[idx % colors.length], strokeWidth: 2, strokeDasharray: '5 5' }}
+                  line={{ stroke: getGroupColor(group.name), strokeWidth: 2, strokeDasharray: '5 5' }}
                   shape={() => null}
                   legendType="none"
                 />

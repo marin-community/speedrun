@@ -1,6 +1,12 @@
-import { useMemo } from 'react';
-import { getScalingGroupName } from '../utils/scaling';
-import { computeLinearRegression } from '../utils/regression';
+import { useMemo } from "react";
+import { getScalingGroupName } from "../utils/scaling";
+import {
+  computeLinearRegression,
+  computePowerLawWithOffset,
+  predictWithPowerLaw,
+  type PowerLawResult,
+  type RegressionResult,
+} from "../utils/regression";
 
 const MIN_SCALING_LEADERBOARD_FLOPS = 3e20;
 const FORECAST_TARGET_FLOPS = 1e22;
@@ -17,9 +23,8 @@ function flopCountsMatch(a: number, b: number) {
   return Math.abs(a - b) <= scale * FLOP_MATCH_REL_EPS;
 }
 
-type AxisX = 'training_hardware_flops' | 'model_flops';
-type AxisY = 'absolute' | 'relative';
-type RegressionResult = ReturnType<typeof computeLinearRegression> | null;
+type AxisX = "training_hardware_flops" | "model_flops";
+type AxisY = "absolute" | "relative";
 
 interface Run {
   run_name: string;
@@ -64,8 +69,10 @@ interface ScalingGroupMeta {
   wandb?: string;
   filepath: string;
   date: string;
-  intercept?: number | null;
-  slope?: number | null;
+  // Power law parameters: L = intercept * x^(-slope) + asymptote
+  intercept?: number | null; // scaling coefficient
+  slope?: number | null; // scaling exponent
+  asymptote?: number | null; // irreducible loss floor
   r2?: number | null;
   projected?: number | null;
 }
@@ -79,7 +86,7 @@ interface ScalingGroup {
 }
 
 interface StandardChartData {
-  type: 'standard';
+  type: "standard";
   all: DataPoint[];
   highlighted: DataPoint[];
   pareto: DataPoint[];
@@ -87,7 +94,7 @@ interface StandardChartData {
 }
 
 interface ScalingChartData {
-  type: 'scaling';
+  type: "scaling";
   background: DataPoint[];
   groups: ScalingGroup[];
   yDomain: [number | string, number | string];
@@ -97,7 +104,7 @@ interface ScalingChartData {
 export type ChartData = StandardChartData | ScalingChartData;
 
 export interface StandardLeaderboardRow {
-  type: 'standard';
+  type: "standard";
   rank: number;
   name: string;
   author: string;
@@ -113,7 +120,7 @@ export interface StandardLeaderboardRow {
 }
 
 export interface ScalingLeaderboardRow extends ScalingGroupMeta {
-  type: 'scaling';
+  type: "scaling";
   name: string;
 }
 
@@ -138,21 +145,18 @@ interface SpeedrunDataResult {
 
 interface BaselineModel {
   predict: (x: number) => number | null;
-  regression: RegressionResult;
+  regression: PowerLawResult | null;
 }
 
 interface FormattedRun {
   run: Run;
   absolutePoint: DataPoint;
   relativePoint: DataPoint;
-  logX?: number;
-  logAbsoluteY?: number;
-  logRelativeY?: number;
 }
 
 const NO_BASELINE: BaselineModel = {
   predict: () => null,
-  regression: null
+  regression: null,
 };
 
 export function useSpeedrunData({
@@ -162,81 +166,97 @@ export function useSpeedrunData({
   currentTrack,
   tracks,
   xAxis,
-  yAxis
+  yAxis,
 }: UseSpeedrunDataParams): SpeedrunDataResult {
-  const baseline = useMemo(() => buildBaselineModel(runs, xAxis), [runs, xAxis]);
+  const baseline = useMemo(
+    () => buildBaselineModel(runs, xAxis),
+    [runs, xAxis]
+  );
 
   const formattedRuns = useMemo(
-    () => filteredRuns.map(run => formatRunMetrics(run, xAxis, baseline.predict)),
+    () =>
+      filteredRuns.map((run) => formatRunMetrics(run, xAxis, baseline.predict)),
     [baseline, filteredRuns, xAxis]
   );
 
-  const absolutePoints = useMemo(() => formattedRuns.map(entry => entry.absolutePoint), [formattedRuns]);
+  const absolutePoints = useMemo(
+    () => formattedRuns.map((entry) => entry.absolutePoint),
+    [formattedRuns]
+  );
 
   const processedPoints = useMemo(() => {
-    if (yAxis === 'absolute') return absolutePoints;
-    return formattedRuns.map(entry => entry.relativePoint);
+    if (yAxis === "absolute") return absolutePoints;
+    return formattedRuns.map((entry) => entry.relativePoint);
   }, [absolutePoints, formattedRuns, yAxis]);
 
-  const paretoPoints = useMemo(() => computeParetoFront(absolutePoints), [absolutePoints]);
-  const yDomain = useMemo(() => computeYDomain(processedPoints, yAxis), [processedPoints, yAxis]);
+  const paretoPoints = useMemo(
+    () => computeParetoFront(absolutePoints),
+    [absolutePoints]
+  );
+  const yDomain = useMemo(
+    () => computeYDomain(processedPoints, yAxis),
+    [processedPoints, yAxis]
+  );
 
   const chartData = useMemo<ChartData>(() => {
-    if (trackId === 'scaling') {
+    if (trackId === "scaling") {
       return buildScalingChart({
         formattedRuns,
         yAxis,
         background: processedPoints,
-        yDomain
+        yDomain,
       });
     }
 
     return {
-      type: 'standard',
+      type: "standard",
       all: processedPoints,
       highlighted: processedPoints,
-      pareto: yAxis === 'relative' ? paretoPoints.map(p => ({ ...p, y: 0 })) : paretoPoints,
-      yDomain
+      pareto:
+        yAxis === "relative"
+          ? paretoPoints.map((p) => ({ ...p, y: 0 }))
+          : paretoPoints,
+      yDomain,
     };
-  }, [
-    paretoPoints,
-    processedPoints,
-    formattedRuns,
-    trackId,
-    yAxis,
-    yDomain
-  ]);
+  }, [paretoPoints, processedPoints, formattedRuns, trackId, yAxis, yDomain]);
 
   const nextLower = useMemo(() => {
-    if (trackId === 'all' || trackId === 'scaling' || !currentTrack?.target_bpb) {
+    if (
+      trackId === "all" ||
+      trackId === "scaling" ||
+      !currentTrack?.target_bpb
+    ) {
       return null;
     }
 
     const sortedTracks = tracks
-      .filter(t => t.id !== 'all' && t.target_bpb)
+      .filter((t) => t.id !== "all" && t.target_bpb)
       .sort((a, b) => (b.target_bpb || 0) - (a.target_bpb || 0));
 
-    const idx = sortedTracks.findIndex(t => t.id === trackId);
-    return idx < sortedTracks.length - 1 ? sortedTracks[idx + 1].target_bpb || 0 : 0;
+    const idx = sortedTracks.findIndex((t) => t.id === trackId);
+    return idx < sortedTracks.length - 1
+      ? sortedTracks[idx + 1].target_bpb || 0
+      : 0;
   }, [trackId, currentTrack, tracks]);
 
   const xTicks = useMemo(() => buildXTicks(chartData), [chartData]);
 
   const leaderboardRows = useMemo<LeaderboardRow[]>(() => {
-    if (trackId === 'scaling' && chartData.type === 'scaling') {
+    if (trackId === "scaling" && chartData.type === "scaling") {
       return chartData.groups
-        .map(group => {
+        .map((group) => {
           if (!group.leaderboard) return null;
 
           const hasQualifyingRun = group.data.some(
-            point => (point.trainingFlops ?? 0) > MIN_SCALING_LEADERBOARD_FLOPS
+            (point) =>
+              (point.trainingFlops ?? 0) > MIN_SCALING_LEADERBOARD_FLOPS
           );
           if (!hasQualifyingRun) return null;
 
           return {
-            type: 'scaling' as const,
+            type: "scaling" as const,
             name: group.name,
-            ...group.leaderboard
+            ...group.leaderboard,
           };
         })
         .filter((row): row is ScalingLeaderboardRow => Boolean(row));
@@ -245,7 +265,7 @@ export function useSpeedrunData({
     return [...filteredRuns]
       .sort((a, b) => a.eval_paloma_c4_en_bpb - b.eval_paloma_c4_en_bpb)
       .map((run, idx) => ({
-        type: 'standard' as const,
+        type: "standard" as const,
         rank: idx + 1,
         name: run.run_name,
         author: run.author.name,
@@ -257,7 +277,7 @@ export function useSpeedrunData({
         bpb: run.eval_paloma_c4_en_bpb,
         wandb: run.wandb_link,
         filepath: run.results_filepath,
-        date: run.run_completion_timestamp
+        date: run.run_completion_timestamp,
       }));
   }, [chartData, filteredRuns, trackId]);
 
@@ -265,7 +285,7 @@ export function useSpeedrunData({
     chartData,
     nextLower,
     xTicks,
-    leaderboardRows
+    leaderboardRows,
   };
 }
 
@@ -284,29 +304,26 @@ function createBasePoint(run: Run, xAxis: AxisX): DataPoint {
     modelFlops: run.model_flops,
     modelSize: run.model_size,
     tokens,
-    bpb: run.eval_paloma_c4_en_bpb
+    bpb: run.eval_paloma_c4_en_bpb,
   };
 }
 
 function buildBaselineModel(runs: Run[], xAxis: AxisX): BaselineModel {
   const baselineRuns = runs
-    .filter(r => r.run_name.toLowerCase().includes('adamw_llama_scaling'))
-    .map(r => ({ x: r[xAxis], y: r.eval_paloma_c4_en_bpb }))
-    .filter(point => point.x > 0 && point.y > 0)
+    .filter((r) => r.run_name.toLowerCase().includes("adamw_llama_scaling"))
+    .map((r) => ({ x: r[xAxis], y: r.eval_paloma_c4_en_bpb }))
+    .filter((point) => point.x > 0 && point.y > 0)
     .sort((a, b) => a.x - b.x);
 
   if (baselineRuns.length === 0) {
     return NO_BASELINE;
   }
 
-  const logSamples = baselineRuns.map(point => ({
-    x: Math.log(point.x),
-    y: Math.log(point.y)
-  }));
-  const regression = logSamples.length >= 2 ? computeLinearRegression(logSamples) : null;
+  // Fit power law with irreducible loss: L = a * x^(-b) + c
+  const regression = computePowerLawWithOffset(baselineRuns);
 
   const findBaselineMatch = (x: number) =>
-    baselineRuns.find(point => flopCountsMatch(point.x, x)) ?? null;
+    baselineRuns.find((point) => flopCountsMatch(point.x, x)) ?? null;
 
   return {
     regression,
@@ -319,67 +336,68 @@ function buildBaselineModel(runs: Run[], xAxis: AxisX): BaselineModel {
       const first = baselineRuns[0];
       const last = baselineRuns[baselineRuns.length - 1];
 
-      if (x <= first.x) return first.y;
-      if (x >= last.x) {
-        if (regression) {
-          const logX = Math.log(x);
-          return Math.exp(regression.intercept + regression.slope * logX);
-        }
-        return last.y;
-      }
-
-      for (let i = 0; i < baselineRuns.length - 1; i++) {
-        const left = baselineRuns[i];
-        const right = baselineRuns[i + 1];
-        if (x >= left.x && x <= right.x) {
-          const logX = Math.log(x);
-          const logLeft = Math.log(left.x);
-          const logRight = Math.log(right.x);
-          const t = (logX - logLeft) / (logRight - logLeft);
-          return left.y + t * (right.y - left.y);
+      // For values within the observed range, interpolate
+      if (x >= first.x && x <= last.x) {
+        for (let i = 0; i < baselineRuns.length - 1; i++) {
+          const left = baselineRuns[i];
+          const right = baselineRuns[i + 1];
+          if (x >= left.x && x <= right.x) {
+            // Log-space interpolation for smoother results
+            const logX = Math.log(x);
+            const logLeft = Math.log(left.x);
+            const logRight = Math.log(right.x);
+            const t = (logX - logLeft) / (logRight - logLeft);
+            return left.y + t * (right.y - left.y);
+          }
         }
       }
 
+      // For extrapolation (beyond observed range), use the power law fit
       if (regression) {
-        const logX = Math.log(x);
-        return Math.exp(regression.intercept + regression.slope * logX);
+        return predictWithPowerLaw(regression, x);
       }
 
+      // Fallback: clamp to nearest observed value
+      if (x < first.x) return first.y;
       return last.y;
-    }
+    },
   };
 }
 
-function getRelativeStats(value: number, x: number, predictBaseline: (x: number) => number | null) {
+function getRelativePercent(
+  value: number,
+  x: number,
+  predictBaseline: (x: number) => number | null
+): number {
   const baselineValue = predictBaseline(x);
   if (!baselineValue || baselineValue <= 0 || value <= 0) {
-    return { percent: 0, logRatio: undefined as number | undefined };
+    return 0;
   }
 
   const ratio = value / baselineValue;
   const normalizedRatio = Math.abs(1 - ratio) < RELATIVE_RATIO_EPS ? 1 : ratio;
-  return {
-    percent: (normalizedRatio - 1) * 100,
-    logRatio: normalizedRatio === 1 ? 0 : Math.log(normalizedRatio)
-  };
+  return (normalizedRatio - 1) * 100;
 }
 
-function formatRunMetrics(run: Run, xAxis: AxisX, predictBaseline: (x: number) => number | null): FormattedRun {
+function formatRunMetrics(
+  run: Run,
+  xAxis: AxisX,
+  predictBaseline: (x: number) => number | null
+): FormattedRun {
   const absolutePoint = createBasePoint(run, xAxis);
-  const relative = getRelativeStats(absolutePoint.y, absolutePoint.x, predictBaseline);
-  const logX = absolutePoint.x > 0 ? Math.log(absolutePoint.x) : undefined;
-  const logAbsoluteY = absolutePoint.y > 0 ? Math.log(absolutePoint.y) : undefined;
+  const relativePercent = getRelativePercent(
+    absolutePoint.y,
+    absolutePoint.x,
+    predictBaseline
+  );
 
   return {
     run,
     absolutePoint,
     relativePoint: {
       ...absolutePoint,
-      y: relative.percent
+      y: relativePercent,
     },
-    logX,
-    logAbsoluteY,
-    logRelativeY: relative.logRatio
   };
 }
 
@@ -398,16 +416,19 @@ function computeParetoFront(points: DataPoint[]) {
   return pareto;
 }
 
-function computeYDomain(points: DataPoint[], yAxis: AxisY): [number | string, number | string] {
-  if (yAxis === 'relative' || points.length === 0) {
-    return ['auto', 'auto'];
+function computeYDomain(
+  points: DataPoint[],
+  yAxis: AxisY
+): [number | string, number | string] {
+  if (yAxis === "relative" || points.length === 0) {
+    return ["auto", "auto"];
   }
 
-  const values = points.map(point => point.y);
+  const values = points.map((point) => point.y);
   const min = Math.min(...values);
   const max = Math.max(...values);
   if (!Number.isFinite(min) || !Number.isFinite(max)) {
-    return ['auto', 'auto'];
+    return ["auto", "auto"];
   }
 
   const range = Math.max(max - min, Math.abs(max) * 0.1);
@@ -419,7 +440,7 @@ function buildScalingChart({
   formattedRuns,
   yAxis,
   background,
-  yDomain
+  yDomain,
 }: {
   formattedRuns: FormattedRun[];
   yAxis: AxisY;
@@ -427,7 +448,7 @@ function buildScalingChart({
   yDomain: [number | string, number | string];
 }): ScalingChartData {
   const groupsByName = new Map<string, FormattedRun[]>();
-  formattedRuns.forEach(entry => {
+  formattedRuns.forEach((entry) => {
     const name = getScalingGroupName(entry.run.run_name);
     if (!groupsByName.has(name)) {
       groupsByName.set(name, []);
@@ -436,59 +457,97 @@ function buildScalingChart({
   });
 
   const groups = Array.from(groupsByName.entries())
-    .map(([name, groupEntries]) => createScalingGroup(name, groupEntries, yAxis))
+    .map(([name, groupEntries]) =>
+      createScalingGroup(name, groupEntries, yAxis)
+    )
     .filter((group): group is ScalingGroup => Boolean(group));
 
-  const qualified = groups.filter(group =>
-    group.data.some(point => (point.trainingFlops ?? 0) > MIN_SCALING_LEADERBOARD_FLOPS)
+  const qualified = groups.filter((group) =>
+    group.data.some(
+      (point) => (point.trainingFlops ?? 0) > MIN_SCALING_LEADERBOARD_FLOPS
+    )
   );
 
   const sorted = qualified.sort(
     (a, b) => a.forecastedBpbAt1e22 - b.forecastedBpbAt1e22
   );
 
-  const top3Groups = new Set(sorted.slice(0, 3).map(group => group.name));
-  const backgroundPoints = background.filter(point => point.inTrack);
+  const top3Groups = new Set(sorted.slice(0, 3).map((group) => group.name));
+  const backgroundPoints = background.filter((point) => point.inTrack);
 
   return {
-    type: 'scaling',
+    type: "scaling",
     background: backgroundPoints,
     groups: sorted,
     yDomain,
-    top3Groups
+    top3Groups,
   };
 }
 
-function createScalingGroup(name: string, entries: FormattedRun[], yAxis: AxisY): ScalingGroup | null {
+function createScalingGroup(
+  name: string,
+  entries: FormattedRun[],
+  yAxis: AxisY
+): ScalingGroup | null {
   const data = entries
-    .map(entry => (yAxis === 'relative' ? entry.relativePoint : entry.absolutePoint))
+    .map((entry) =>
+      yAxis === "relative" ? entry.relativePoint : entry.absolutePoint
+    )
     .sort((a, b) => a.x - b.x);
 
   if (data.length === 0) {
     return null;
   }
 
+  // Prepare samples for power law fitting (need raw x,y values)
   const absoluteSamples = entries
-    .filter(entry => entry.logX !== undefined && entry.logAbsoluteY !== undefined)
-    .map(entry => ({ x: entry.logX as number, y: entry.logAbsoluteY as number }));
+    .filter((entry) => entry.absolutePoint.x > 0 && entry.absolutePoint.y > 0)
+    .map((entry) => ({ x: entry.absolutePoint.x, y: entry.absolutePoint.y }));
 
+  // Fit power law with offset: L = intercept * x^(-slope) + asymptote
+  const absoluteRegression = computePowerLawWithOffset(absoluteSamples);
+
+  // For relative view, fit a linear regression in log-log space on relative values
   const relativeSamples = entries
-    .filter(entry => entry.logX !== undefined && entry.logRelativeY !== undefined)
-    .map(entry => ({ x: entry.logX as number, y: entry.logRelativeY as number }));
+    .filter(
+      (entry) =>
+        entry.relativePoint.x > 0 && Number.isFinite(entry.relativePoint.y)
+    )
+    .map((entry) => ({
+      x: Math.log(entry.relativePoint.x),
+      y: entry.relativePoint.y, // Already in percent, keep as-is for linear fit
+    }));
+  const relativeRegression =
+    relativeSamples.length >= 2
+      ? computeLinearRegression(relativeSamples)
+      : null;
 
-  const absoluteRegression = logRegression(absoluteSamples);
-  const relativeRegression = logRegression(relativeSamples);
-  const regressionForDisplay =
-    yAxis === 'relative' ? relativeRegression ?? absoluteRegression : absoluteRegression;
+  const firstPositive = data.find((point) => point.x > 0);
+  let regression: Array<{ x: number; y: number; name: string }>;
 
-  const firstPositive = data.find(point => point.x > 0);
-  const regression =
-    regressionForDisplay && firstPositive
-      ? buildRegressionLine(regressionForDisplay, firstPositive.x, FORECAST_TARGET_FLOPS, yAxis, name)
-      : data;
+  if (yAxis === "relative" && relativeRegression && firstPositive) {
+    // Use linear regression for relative view
+    regression = buildLinearRegressionLine(
+      relativeRegression,
+      firstPositive.x,
+      FORECAST_TARGET_FLOPS,
+      name
+    );
+  } else if (absoluteRegression && firstPositive) {
+    // Use power law for absolute view
+    regression = buildPowerLawRegressionLine(
+      absoluteRegression,
+      firstPositive.x,
+      FORECAST_TARGET_FLOPS,
+      name
+    );
+  } else {
+    regression = data.map((p) => ({ x: p.x, y: p.y, name }));
+  }
 
+  // Forecast at target FLOPs using the power law
   const forecasted = absoluteRegression
-    ? Math.exp(absoluteRegression.intercept + absoluteRegression.slope * LOG_FORECAST_TARGET)
+    ? predictWithPowerLaw(absoluteRegression, FORECAST_TARGET_FLOPS)
     : Infinity;
 
   const firstRun = entries[0].run;
@@ -498,12 +557,13 @@ function createScalingGroup(name: string, entries: FormattedRun[], yAxis: AxisY)
         authorUrl: firstRun.author.url,
         affiliation: firstRun.author.affiliation,
         wandb: firstRun.wandb_link,
-        filepath: firstRun.results_filepath.split('/').slice(0, -1).join('/'),
+        filepath: firstRun.results_filepath.split("/").slice(0, -1).join("/"),
         date: firstRun.run_completion_timestamp,
         intercept: absoluteRegression?.intercept ?? null,
         slope: absoluteRegression?.slope ?? null,
+        asymptote: absoluteRegression?.asymptote ?? null,
         r2: absoluteRegression?.r2 ?? null,
-        projected: Number.isFinite(forecasted) ? forecasted : null
+        projected: Number.isFinite(forecasted) ? forecasted : null,
       }
     : null;
 
@@ -512,22 +572,17 @@ function createScalingGroup(name: string, entries: FormattedRun[], yAxis: AxisY)
     data,
     regression,
     forecastedBpbAt1e22: forecasted,
-    leaderboard
+    leaderboard,
   };
 }
 
-function logRegression(samples: { x: number; y: number }[]): RegressionResult {
-  const cleanSamples = samples.filter(
-    sample => Number.isFinite(sample.x) && Number.isFinite(sample.y)
-  );
-  return cleanSamples.length >= 2 ? computeLinearRegression(cleanSamples) : null;
-}
-
-function buildRegressionLine(
-  regression: NonNullable<RegressionResult>,
+/**
+ * Build regression line for power law fit (absolute view)
+ */
+function buildPowerLawRegressionLine(
+  regression: PowerLawResult,
   minX: number,
   maxX: number,
-  yAxis: AxisY,
   name: string
 ) {
   const safeMin = Math.max(minX, 1);
@@ -539,8 +594,34 @@ function buildRegressionLine(
     const t = i / (REGRESSION_POINTS - 1);
     const logX = start + t * (end - start);
     const x = Math.exp(logX);
-    const logY = regression.intercept + regression.slope * logX;
-    const y = yAxis === 'relative' ? (Math.exp(logY) - 1) * 100 : Math.exp(logY);
+    // Use power law: L = intercept * x^(-slope) + asymptote
+    const y = predictWithPowerLaw(regression, x);
+    points.push({ x, y, name });
+  }
+
+  return points;
+}
+
+/**
+ * Build regression line for linear fit in log-x space (relative view)
+ */
+function buildLinearRegressionLine(
+  regression: RegressionResult,
+  minX: number,
+  maxX: number,
+  name: string
+) {
+  const safeMin = Math.max(minX, 1);
+  const start = Math.log(safeMin);
+  const end = Math.log(Math.max(maxX, safeMin * 1.01));
+  const points: Array<{ x: number; y: number; name: string }> = [];
+
+  for (let i = 0; i < REGRESSION_POINTS; i++) {
+    const t = i / (REGRESSION_POINTS - 1);
+    const logX = start + t * (end - start);
+    const x = Math.exp(logX);
+    // Linear regression: y = intercept + slope * log(x)
+    const y = regression.intercept + regression.slope * logX;
     points.push({ x, y, name });
   }
 
@@ -549,12 +630,12 @@ function buildRegressionLine(
 
 function buildXTicks(chartData: ChartData) {
   const xValues: number[] = [];
-  if (chartData.type === 'scaling') {
-    chartData.groups.forEach(group => {
-      group.data.forEach(point => xValues.push(point.x));
+  if (chartData.type === "scaling") {
+    chartData.groups.forEach((group) => {
+      group.data.forEach((point) => xValues.push(point.x));
     });
   } else {
-    chartData.all.forEach(point => xValues.push(point.x));
+    chartData.all.forEach((point) => xValues.push(point.x));
   }
 
   if (xValues.length === 0) return [];
@@ -570,5 +651,5 @@ function buildXTicks(chartData: ChartData) {
     ticks.push(Math.pow(10, exp + 0.5));
   }
 
-  return ticks.filter(tick => tick >= minX * 0.8 && tick <= maxX * 1.2);
+  return ticks.filter((tick) => tick >= minX * 0.8 && tick <= maxX * 1.2);
 }
