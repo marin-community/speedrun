@@ -4,7 +4,7 @@ export function Introduction() {
       <div className="flex flex-col md:flex-row justify-between items-start gap-4 mb-6">
         <h2 className="text-3xl text-gray-900">What is Speedrun?</h2>
         <a 
-          href="https://github.com/marin-community/marin/blob/main/docs/tutorials/submitting-speedrun.md" 
+          href="https://marin.readthedocs.io/en/latest/tutorials/submitting-speedrun/" 
           target="_blank" 
           rel="noopener noreferrer"
           className="inline-flex items-center px-6 py-3 border border-transparent rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-150 whitespace-nowrap"
