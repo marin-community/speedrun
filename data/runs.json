@@ -238,23 +238,6 @@
     "description": "1.2B parameter model trained with the C-AdamC optimizer."
   },
   {
-    "run_name": "c-adamc_llama_scaling/200m",
-    "results_filepath": "experiments/speedrun/c-adamc_llama_scaling/200m",
-    "author": {
-      "name": "William Held",
-      "affiliation": "Georgia Tech",
-      "url": "https://WilliamHeld.com"
-    },
-    "model_size": 210052480,
-    "training_hardware_flops": 1.4060965198476575e+19,
-    "training_time": 1914.6194442370063,
-    "model_flops": 4.1554199001327206e+18,
-    "eval_paloma_c4_en_bpb": 1.1326158046722412,
-    "wandb_link": "https://wandb.ai/marin-community/marin/runs/llama_200m_c_adamc_4096-e128b5",
-    "run_completion_timestamp": "2025-12-20 22:49:19 UTC",
-    "description": "200M parameter model trained with the C-AdamC optimizer."
-  },
-  {
     "run_name": "c-adamc_llama_scaling/300m",
     "results_filepath": "experiments/speedrun/c-adamc_llama_scaling/300m",
     "author": {
@@ -272,23 +255,6 @@
     "description": "300M parameter model trained with the C-AdamC optimizer."
   },
   {
-    "run_name": "c-adamc_llama_scaling/400m",
-    "results_filepath": "experiments/speedrun/c-adamc_llama_scaling/400m",
-    "author": {
-      "name": "William Held",
-      "affiliation": "Georgia Tech",
-      "url": "https://WilliamHeld.com"
-    },
-    "model_size": 358304128,
-    "training_hardware_flops": 3.6171028440020554e+19,
-    "training_time": 4925.248970591034,
-    "model_flops": 1.3638199483400454e+19,
-    "eval_paloma_c4_en_bpb": 1.060500979423523,
-    "wandb_link": "https://wandb.ai/marin-community/marin/runs/llama_400m_c_adamc_4096-18fa59",
-    "run_completion_timestamp": "2025-12-20 23:19:04 UTC",
-    "description": "400M parameter model trained with the C-AdamC optimizer."
-  },
-  {
     "run_name": "c-adamc_llama_scaling/520m",
     "results_filepath": "experiments/speedrun/c-adamc_llama_scaling/520m",
     "author": {
@@ -304,23 +270,6 @@
     "wandb_link": "https://wandb.ai/marin-community/marin/runs/llama_520m_c_adamc_4096-42dcc9",
     "run_completion_timestamp": "2025-07-04 04:34:42 UTC",
     "description": "520M parameter model trained with the C-AdamC optimizer."
-  },
-  {
-    "run_name": "c-adamc_llama_scaling/800m",
-    "results_filepath": "experiments/speedrun/c-adamc_llama_scaling/800m",
-    "author": {
-      "name": "William Held",
-      "affiliation": "Georgia Tech",
-      "url": "https://WilliamHeld.com"
-    },
-    "model_size": 837003904,
-    "training_hardware_flops": 1.879562277249996e+20,
-    "training_time": 25593.168263208005,
-    "model_flops": 8.340318450894452e+19,
-    "eval_paloma_c4_en_bpb": 0.971510648727417,
-    "wandb_link": "https://wandb.ai/marin-community/marin/runs/llama_800m_c_adamc_4096-87dee6",
-    "run_completion_timestamp": "2025-12-21 05:24:54 UTC",
-    "description": "800M parameter model trained with the C-AdamC optimizer."
   },
   {
     "run_name": "cautious_llama_scaling/130m",
@@ -357,23 +306,6 @@
     "description": "1.2B parameter model trained with the Cautious optimizer."
   },
   {
-    "run_name": "cautious_llama_scaling/200m",
-    "results_filepath": "experiments/speedrun/cautious_llama_scaling/200m",
-    "author": {
-      "name": "William Held",
-      "affiliation": "Georgia Tech",
-      "url": "https://WilliamHeld.com"
-    },
-    "model_size": 210052480,
-    "training_hardware_flops": 1.3929127096869489e+19,
-    "training_time": 1896.667633015998,
-    "model_flops": 4.1554199001327206e+18,
-    "eval_paloma_c4_en_bpb": 1.1292215585708618,
-    "wandb_link": "https://wandb.ai/marin-community/marin/runs/llama_200m_cautious_4096-77f121",
-    "run_completion_timestamp": "2025-12-20 22:42:28 UTC",
-    "description": "200M parameter model trained with the Cautious optimizer."
-  },
-  {
     "run_name": "cautious_llama_scaling/300m",
     "results_filepath": "experiments/speedrun/cautious_llama_scaling/300m",
     "author": {
@@ -389,23 +321,6 @@
     "wandb_link": "https://wandb.ai/marin-community/marin/runs/llama_300m_cautious_4096-ce2f5f",
     "run_completion_timestamp": "2025-07-04 00:43:54 UTC",
     "description": "300M parameter model trained with the Cautious optimizer."
-  },
-  {
-    "run_name": "cautious_llama_scaling/400m",
-    "results_filepath": "experiments/speedrun/cautious_llama_scaling/400m",
-    "author": {
-      "name": "William Held",
-      "affiliation": "Georgia Tech",
-      "url": "https://WilliamHeld.com"
-    },
-    "model_size": 358304128,
-    "training_hardware_flops": 3.6278730119102812e+19,
-    "training_time": 4939.914231903977,
-    "model_flops": 1.3638199483400454e+19,
-    "eval_paloma_c4_en_bpb": 1.060286045074463,
-    "wandb_link": "https://wandb.ai/marin-community/marin/runs/llama_400m_cautious_4096-c1dea0",
-    "run_completion_timestamp": "2025-12-20 23:25:19 UTC",
-    "description": "400M parameter model trained with the Cautious optimizer."
   },
   {
     "run_name": "cautious_llama_scaling/520m",
@@ -425,25 +340,212 @@
     "description": "520M parameter model trained with the Cautious optimizer."
   },
   {
-    "run_name": "cautious_llama_scaling/800m",
-    "results_filepath": "experiments/speedrun/cautious_llama_scaling/800m",
+    "run_name": "hackable_transformer_attn_gate/lr_x1/130m",
+    "results_filepath": "experiments/speedrun/hackable_transformer_attn_gate/lr_x1/130m",
     "author": {
-      "name": "William Held",
-      "affiliation": "Georgia Tech",
-      "url": "https://WilliamHeld.com"
+      "name": "Calvin Xu",
+      "affiliation": "Stanford University",
+      "url": "https://pinlinxu.com"
     },
-    "model_size": 837003904,
-    "training_hardware_flops": 1.8846068173725463e+20,
-    "training_time": 25661.857535029227,
-    "model_flops": 8.340318450894452e+19,
-    "eval_paloma_c4_en_bpb": 0.9716079235076904,
-    "wandb_link": "https://wandb.ai/marin-community/marin/runs/llama_800m_cautious_4096-2ba3fd",
-    "run_completion_timestamp": "2025-12-21 05:26:41 UTC",
-    "description": "800M parameter model trained with the Cautious optimizer."
+    "model_size": 155720192,
+    "training_hardware_flops": 1.2199985674433722e+19,
+    "training_time": 1661.2180929239819,
+    "model_flops": 2.1289341996446515e+18,
+    "eval_paloma_c4_en_bpb": 1.1564404964447021,
+    "wandb_link": "https://wandb.ai/marin-community/marin/runs/hacktx_130m_attngate_4096_splash-3c6cbd",
+    "run_completion_timestamp": "2025-12-06 16:35:18 UTC",
+    "description": "Hackable Transformer (130m); Gated Attention (Splash)"
   },
   {
-    "run_name": "hackable_transformer_starter/attnsink/jax/130m",
-    "results_filepath": "experiments/speedrun/hackable_transformer_starter/attnsink/jax/130m",
+    "run_name": "hackable_transformer_attn_gate/lr_x1/1_2b",
+    "results_filepath": "experiments/speedrun/hackable_transformer_attn_gate/lr_x1/1_2b",
+    "author": {
+      "name": "Calvin Xu",
+      "affiliation": "Stanford University",
+      "url": "https://pinlinxu.com"
+    },
+    "model_size": 1498482688,
+    "training_hardware_flops": 5.928678262278687e+20,
+    "training_time": 80728.18984584269,
+    "model_flops": 2.5869176757309093e+20,
+    "eval_paloma_c4_en_bpb": 0.9263789653778076,
+    "wandb_link": "https://wandb.ai/marin-community/marin/runs/hacktx_1_2b_attngate_4096_splash-1544b5",
+    "run_completion_timestamp": "2025-12-07 15:35:49 UTC",
+    "description": "Hackable Transformer (1_2b); Gated Attention (Splash)"
+  },
+  {
+    "run_name": "hackable_transformer_attn_gate/lr_x1/300m",
+    "results_filepath": "experiments/speedrun/hackable_transformer_attn_gate/lr_x1/300m",
+    "author": {
+      "name": "Calvin Xu",
+      "affiliation": "Stanford University",
+      "url": "https://pinlinxu.com"
+    },
+    "model_size": 306727680,
+    "training_hardware_flops": 5.2696079184663675e+19,
+    "training_time": 7175.392045842003,
+    "model_flops": 1.021384111077458e+19,
+    "eval_paloma_c4_en_bpb": 1.0539624691009521,
+    "wandb_link": "https://wandb.ai/marin-community/marin/runs/hacktx_300m_attngate_4096_splash-a5e290",
+    "run_completion_timestamp": "2025-12-06 18:26:07 UTC",
+    "description": "Hackable Transformer (300m); Gated Attention (Splash)"
+  },
+  {
+    "run_name": "hackable_transformer_attn_gate/lr_x1/520m",
+    "results_filepath": "experiments/speedrun/hackable_transformer_attn_gate/lr_x1/520m",
+    "author": {
+      "name": "Calvin Xu",
+      "affiliation": "Stanford University",
+      "url": "https://pinlinxu.com"
+    },
+    "model_size": 627622912,
+    "training_hardware_flops": 2.2878030460560127e+20,
+    "training_time": 31152.002261111284,
+    "model_flops": 5.081733891346976e+19,
+    "eval_paloma_c4_en_bpb": 0.9801320433616638,
+    "wandb_link": "https://wandb.ai/marin-community/marin/runs/hacktx_520m_attngate_4096_splash-5794f3",
+    "run_completion_timestamp": "2025-12-07 01:18:57 UTC",
+    "description": "Hackable Transformer (520m); Gated Attention (Splash)"
+  },
+  {
+    "run_name": "hackable_transformer_attn_gate/lr_x2/130m",
+    "results_filepath": "experiments/speedrun/hackable_transformer_attn_gate/lr_x2/130m",
+    "author": {
+      "name": "Calvin Xu",
+      "affiliation": "Stanford University",
+      "url": "https://pinlinxu.com"
+    },
+    "model_size": 155720192,
+    "training_hardware_flops": 1.2747506224210549e+19,
+    "training_time": 1735.7715446909788,
+    "model_flops": 2.1289341996446515e+18,
+    "eval_paloma_c4_en_bpb": 1.1578547954559326,
+    "wandb_link": "https://wandb.ai/marin-community/marin/runs/hacktx_130m_attngate_sep_4096_splash_lr_x2-3e9450",
+    "run_completion_timestamp": "2026-02-03 04:25:18 UTC",
+    "description": "Hackable Transformer (130m); Gated Attention Sep (Splash); LR multiplier=2"
+  },
+  {
+    "run_name": "hackable_transformer_attn_gate/lr_x2/1_2b",
+    "results_filepath": "experiments/speedrun/hackable_transformer_attn_gate/lr_x2/1_2b",
+    "author": {
+      "name": "Calvin Xu",
+      "affiliation": "Stanford University",
+      "url": "https://pinlinxu.com"
+    },
+    "model_size": 1498482688,
+    "training_hardware_flops": 6.031498263690678e+20,
+    "training_time": 82128.24433130008,
+    "model_flops": 2.5869176757309093e+20,
+    "eval_paloma_c4_en_bpb": 0.9224110245704651,
+    "wandb_link": "https://wandb.ai/marin-community/marin/runs/hacktx_1_2b_attngate_sep_4096_splash_lr_x2-28a381",
+    "run_completion_timestamp": "2026-02-04 04:24:23 UTC",
+    "description": "Hackable Transformer (1_2b); Gated Attention Sep (Splash); LR multiplier=2"
+  },
+  {
+    "run_name": "hackable_transformer_attn_gate/lr_x2/300m",
+    "results_filepath": "experiments/speedrun/hackable_transformer_attn_gate/lr_x2/300m",
+    "author": {
+      "name": "Calvin Xu",
+      "affiliation": "Stanford University",
+      "url": "https://pinlinxu.com"
+    },
+    "model_size": 306727680,
+    "training_hardware_flops": 4.817257888698038e+19,
+    "training_time": 6559.447016201032,
+    "model_flops": 1.021384111077458e+19,
+    "eval_paloma_c4_en_bpb": 1.0543352365493774,
+    "wandb_link": "https://wandb.ai/marin-community/marin/runs/hacktx_300m_attngate_sep_4096_splash_lr_x2-4af1df",
+    "run_completion_timestamp": "2026-02-03 05:08:00 UTC",
+    "description": "Hackable Transformer (300m); Gated Attention Sep (Splash); LR multiplier=2"
+  },
+  {
+    "run_name": "hackable_transformer_attn_gate/lr_x2/520m",
+    "results_filepath": "experiments/speedrun/hackable_transformer_attn_gate/lr_x2/520m",
+    "author": {
+      "name": "Calvin Xu",
+      "affiliation": "Stanford University",
+      "url": "https://pinlinxu.com"
+    },
+    "model_size": 627622912,
+    "training_hardware_flops": 1.9894955378675224e+20,
+    "training_time": 27090.080853315936,
+    "model_flops": 5.081733891346976e+19,
+    "eval_paloma_c4_en_bpb": 0.985991895198822,
+    "wandb_link": "https://wandb.ai/marin-community/marin/runs/hacktx_520m_attngate_sep_4096_splash_lr_x2-742145",
+    "run_completion_timestamp": "2026-02-03 12:01:35 UTC",
+    "description": "Hackable Transformer (520m); Gated Attention Sep (Splash); LR multiplier=2"
+  },
+  {
+    "run_name": "hackable_transformer_attn_gate/lr_x2_5/130m",
+    "results_filepath": "experiments/speedrun/hackable_transformer_attn_gate/lr_x2_5/130m",
+    "author": {
+      "name": "Calvin Xu",
+      "affiliation": "Stanford University",
+      "url": "https://pinlinxu.com"
+    },
+    "model_size": 155720192,
+    "training_hardware_flops": 1.2118004087898094e+19,
+    "training_time": 1650.0550228619409,
+    "model_flops": 2.1289341996446515e+18,
+    "eval_paloma_c4_en_bpb": 1.1611920595169067,
+    "wandb_link": "https://wandb.ai/marin-community/marin/runs/hacktx_130m_attngate_sep_4096_splash_lr_x2_5-fdb366",
+    "run_completion_timestamp": "2026-02-03 04:19:55 UTC",
+    "description": "Hackable Transformer (130m); Gated Attention Sep (Splash); LR multiplier=2.5"
+  },
+  {
+    "run_name": "hackable_transformer_attn_gate/lr_x2_5/1_2b",
+    "results_filepath": "experiments/speedrun/hackable_transformer_attn_gate/lr_x2_5/1_2b",
+    "author": {
+      "name": "Calvin Xu",
+      "affiliation": "Stanford University",
+      "url": "https://pinlinxu.com"
+    },
+    "model_size": 1498482688,
+    "training_hardware_flops": 5.995929288871001e+20,
+    "training_time": 81643.91733212148,
+    "model_flops": 2.5869176757309093e+20,
+    "eval_paloma_c4_en_bpb": 0.9225159287452698,
+    "wandb_link": "https://wandb.ai/marin-community/marin/runs/hacktx_1_2b_attngate_sep_4096_splash_lr_x2_5-9d0c16",
+    "run_completion_timestamp": "2026-02-04 03:45:59 UTC",
+    "description": "Hackable Transformer (1_2b); Gated Attention Sep (Splash); LR multiplier=2.5"
+  },
+  {
+    "run_name": "hackable_transformer_attn_gate/lr_x2_5/300m",
+    "results_filepath": "experiments/speedrun/hackable_transformer_attn_gate/lr_x2_5/300m",
+    "author": {
+      "name": "Calvin Xu",
+      "affiliation": "Stanford University",
+      "url": "https://pinlinxu.com"
+    },
+    "model_size": 306727680,
+    "training_hardware_flops": 4.688449773118716e+19,
+    "training_time": 6384.054701959037,
+    "model_flops": 1.021384111077458e+19,
+    "eval_paloma_c4_en_bpb": 1.057967185974121,
+    "wandb_link": "https://wandb.ai/marin-community/marin/runs/hacktx_300m_attngate_sep_4096_splash_lr_x2_5-ee1500",
+    "run_completion_timestamp": "2026-02-03 05:57:43 UTC",
+    "description": "Hackable Transformer (300m); Gated Attention Sep (Splash); LR multiplier=2.5"
+  },
+  {
+    "run_name": "hackable_transformer_attn_gate/lr_x2_5/520m",
+    "results_filepath": "experiments/speedrun/hackable_transformer_attn_gate/lr_x2_5/520m",
+    "author": {
+      "name": "Calvin Xu",
+      "affiliation": "Stanford University",
+      "url": "https://pinlinxu.com"
+    },
+    "model_size": 627622912,
+    "training_hardware_flops": 1.9935348481763947e+20,
+    "training_time": 27145.082355343067,
+    "model_flops": 5.081733891346976e+19,
+    "eval_paloma_c4_en_bpb": 0.990183413028717,
+    "wandb_link": "https://wandb.ai/marin-community/marin/runs/hacktx_520m_attngate_sep_4096_splash_lr_x2_5-cbef47",
+    "run_completion_timestamp": "2026-02-03 12:01:29 UTC",
+    "description": "Hackable Transformer (520m); Gated Attention Sep (Splash); LR multiplier=2.5"
+  },
+  {
+    "run_name": "hackable_transformer_attn_sink/attnsink/jax/130m",
+    "results_filepath": "experiments/speedrun/hackable_transformer_attn_sink/attnsink/jax/130m",
     "author": {
       "name": "Calvin Xu",
       "affiliation": "Stanford University",
@@ -459,8 +561,8 @@
     "description": "Hackable Transformer (130m); AttentionWithSink (Muon)"
   },
   {
-    "run_name": "hackable_transformer_starter/attnsink/jax/1_2b",
-    "results_filepath": "experiments/speedrun/hackable_transformer_starter/attnsink/jax/1_2b",
+    "run_name": "hackable_transformer_attn_sink/attnsink/jax/1_2b",
+    "results_filepath": "experiments/speedrun/hackable_transformer_attn_sink/attnsink/jax/1_2b",
     "author": {
       "name": "Calvin Xu",
       "affiliation": "Stanford University",
@@ -476,8 +578,8 @@
     "description": "Hackable Transformer (1_2b); AttentionWithSink (Muon)"
   },
   {
-    "run_name": "hackable_transformer_starter/attnsink/jax/300m",
-    "results_filepath": "experiments/speedrun/hackable_transformer_starter/attnsink/jax/300m",
+    "run_name": "hackable_transformer_attn_sink/attnsink/jax/300m",
+    "results_filepath": "experiments/speedrun/hackable_transformer_attn_sink/attnsink/jax/300m",
     "author": {
       "name": "Calvin Xu",
       "affiliation": "Stanford University",
@@ -493,8 +595,8 @@
     "description": "Hackable Transformer (300m); AttentionWithSink (Muon)"
   },
   {
-    "run_name": "hackable_transformer_starter/attnsink/jax/520m",
-    "results_filepath": "experiments/speedrun/hackable_transformer_starter/attnsink/jax/520m",
+    "run_name": "hackable_transformer_attn_sink/attnsink/jax/520m",
+    "results_filepath": "experiments/speedrun/hackable_transformer_attn_sink/attnsink/jax/520m",
     "author": {
       "name": "Calvin Xu",
       "affiliation": "Stanford University",
@@ -510,8 +612,8 @@
     "description": "Hackable Transformer (520m); AttentionWithSink (Muon)"
   },
   {
-    "run_name": "hackable_transformer_starter/attnsink/splash/130m",
-    "results_filepath": "experiments/speedrun/hackable_transformer_starter/attnsink/splash/130m",
+    "run_name": "hackable_transformer_attn_sink/attnsink/splash/130m",
+    "results_filepath": "experiments/speedrun/hackable_transformer_attn_sink/attnsink/splash/130m",
     "author": {
       "name": "Calvin Xu",
       "affiliation": "Stanford University",
@@ -527,8 +629,8 @@
     "description": "Hackable Transformer (130m); AttentionWithSink (Muon) (Splash)"
   },
   {
-    "run_name": "hackable_transformer_starter/attnsink/splash/1_2b",
-    "results_filepath": "experiments/speedrun/hackable_transformer_starter/attnsink/splash/1_2b",
+    "run_name": "hackable_transformer_attn_sink/attnsink/splash/1_2b",
+    "results_filepath": "experiments/speedrun/hackable_transformer_attn_sink/attnsink/splash/1_2b",
     "author": {
       "name": "Calvin Xu",
       "affiliation": "Stanford University",
@@ -544,8 +646,8 @@
     "description": "Hackable Transformer (1_2b); AttentionWithSink (Muon) (Splash)"
   },
   {
-    "run_name": "hackable_transformer_starter/attnsink/splash/300m",
-    "results_filepath": "experiments/speedrun/hackable_transformer_starter/attnsink/splash/300m",
+    "run_name": "hackable_transformer_attn_sink/attnsink/splash/300m",
+    "results_filepath": "experiments/speedrun/hackable_transformer_attn_sink/attnsink/splash/300m",
     "author": {
       "name": "Calvin Xu",
       "affiliation": "Stanford University",
@@ -561,8 +663,8 @@
     "description": "Hackable Transformer (300m); AttentionWithSink (Muon) (Splash)"
   },
   {
-    "run_name": "hackable_transformer_starter/attnsink/splash/520m",
-    "results_filepath": "experiments/speedrun/hackable_transformer_starter/attnsink/splash/520m",
+    "run_name": "hackable_transformer_attn_sink/attnsink/splash/520m",
+    "results_filepath": "experiments/speedrun/hackable_transformer_attn_sink/attnsink/splash/520m",
     "author": {
       "name": "Calvin Xu",
       "affiliation": "Stanford University",
@@ -578,8 +680,8 @@
     "description": "Hackable Transformer (520m); AttentionWithSink (Muon) (Splash)"
   },
   {
-    "run_name": "hackable_transformer_starter/attnsink/splash/default_lr/130m",
-    "results_filepath": "experiments/speedrun/hackable_transformer_starter/attnsink/splash/default_lr/130m",
+    "run_name": "hackable_transformer_attn_sink/attnsink/splash/default_lr/130m",
+    "results_filepath": "experiments/speedrun/hackable_transformer_attn_sink/attnsink/splash/default_lr/130m",
     "author": {
       "name": "Calvin Xu",
       "affiliation": "Stanford University",
@@ -595,8 +697,8 @@
     "description": "Hackable Transformer (130m); AttentionWithSink (Muon) (Splash)"
   },
   {
-    "run_name": "hackable_transformer_starter/attnsink/splash/default_lr/1_2b",
-    "results_filepath": "experiments/speedrun/hackable_transformer_starter/attnsink/splash/default_lr/1_2b",
+    "run_name": "hackable_transformer_attn_sink/attnsink/splash/default_lr/1_2b",
+    "results_filepath": "experiments/speedrun/hackable_transformer_attn_sink/attnsink/splash/default_lr/1_2b",
     "author": {
       "name": "Calvin Xu",
       "affiliation": "Stanford University",
@@ -612,8 +714,8 @@
     "description": "Hackable Transformer (1_2b); AttentionWithSink (Muon) (Splash)"
   },
   {
-    "run_name": "hackable_transformer_starter/attnsink/splash/default_lr/300m",
-    "results_filepath": "experiments/speedrun/hackable_transformer_starter/attnsink/splash/default_lr/300m",
+    "run_name": "hackable_transformer_attn_sink/attnsink/splash/default_lr/300m",
+    "results_filepath": "experiments/speedrun/hackable_transformer_attn_sink/attnsink/splash/default_lr/300m",
     "author": {
       "name": "Calvin Xu",
       "affiliation": "Stanford University",
@@ -629,8 +731,8 @@
     "description": "Hackable Transformer (300m); AttentionWithSink (Muon) (Splash)"
   },
   {
-    "run_name": "hackable_transformer_starter/attnsink/splash/default_lr/520m",
-    "results_filepath": "experiments/speedrun/hackable_transformer_starter/attnsink/splash/default_lr/520m",
+    "run_name": "hackable_transformer_attn_sink/attnsink/splash/default_lr/520m",
+    "results_filepath": "experiments/speedrun/hackable_transformer_attn_sink/attnsink/splash/default_lr/520m",
     "author": {
       "name": "Calvin Xu",
       "affiliation": "Stanford University",
@@ -646,8 +748,8 @@
     "description": "Hackable Transformer (520m); AttentionWithSink (Muon) (Splash)"
   },
   {
-    "run_name": "hackable_transformer_starter/attnsink/splash/default_x0.25/130m",
-    "results_filepath": "experiments/speedrun/hackable_transformer_starter/attnsink/splash/default_x0.25/130m",
+    "run_name": "hackable_transformer_attn_sink/attnsink/splash/default_x0.25/130m",
+    "results_filepath": "experiments/speedrun/hackable_transformer_attn_sink/attnsink/splash/default_x0.25/130m",
     "author": {
       "name": "Calvin Xu",
       "affiliation": "Stanford University",
@@ -663,8 +765,8 @@
     "description": "Hackable Transformer (130m); AttentionWithSink (Splash); LR sweep multiplier=0.25"
   },
   {
-    "run_name": "hackable_transformer_starter/attnsink/splash/default_x0.25/1_2b",
-    "results_filepath": "experiments/speedrun/hackable_transformer_starter/attnsink/splash/default_x0.25/1_2b",
+    "run_name": "hackable_transformer_attn_sink/attnsink/splash/default_x0.25/1_2b",
+    "results_filepath": "experiments/speedrun/hackable_transformer_attn_sink/attnsink/splash/default_x0.25/1_2b",
     "author": {
       "name": "Calvin Xu",
       "affiliation": "Stanford University",
@@ -680,8 +782,8 @@
     "description": "Hackable Transformer (1_2b); AttentionWithSink (Splash); LR sweep multiplier=0.25"
   },
   {
-    "run_name": "hackable_transformer_starter/attnsink/splash/default_x0.25/300m",
-    "results_filepath": "experiments/speedrun/hackable_transformer_starter/attnsink/splash/default_x0.25/300m",
+    "run_name": "hackable_transformer_attn_sink/attnsink/splash/default_x0.25/300m",
+    "results_filepath": "experiments/speedrun/hackable_transformer_attn_sink/attnsink/splash/default_x0.25/300m",
     "author": {
       "name": "Calvin Xu",
       "affiliation": "Stanford University",
@@ -697,8 +799,8 @@
     "description": "Hackable Transformer (300m); AttentionWithSink (Splash); LR sweep multiplier=0.25"
   },
   {
-    "run_name": "hackable_transformer_starter/attnsink/splash/default_x0.25/520m",
-    "results_filepath": "experiments/speedrun/hackable_transformer_starter/attnsink/splash/default_x0.25/520m",
+    "run_name": "hackable_transformer_attn_sink/attnsink/splash/default_x0.25/520m",
+    "results_filepath": "experiments/speedrun/hackable_transformer_attn_sink/attnsink/splash/default_x0.25/520m",
     "author": {
       "name": "Calvin Xu",
       "affiliation": "Stanford University",
@@ -714,8 +816,8 @@
     "description": "Hackable Transformer (520m); AttentionWithSink (Splash); LR sweep multiplier=0.25"
   },
   {
-    "run_name": "hackable_transformer_starter/attnsink/splash/default_x0.5/130m",
-    "results_filepath": "experiments/speedrun/hackable_transformer_starter/attnsink/splash/default_x0.5/130m",
+    "run_name": "hackable_transformer_attn_sink/attnsink/splash/default_x0.5/130m",
+    "results_filepath": "experiments/speedrun/hackable_transformer_attn_sink/attnsink/splash/default_x0.5/130m",
     "author": {
       "name": "Calvin Xu",
       "affiliation": "Stanford University",
@@ -731,8 +833,8 @@
     "description": "Hackable Transformer (130m); AttentionWithSink (Splash); LR sweep multiplier=0.5"
   },
   {
-    "run_name": "hackable_transformer_starter/attnsink/splash/default_x0.5/1_2b",
-    "results_filepath": "experiments/speedrun/hackable_transformer_starter/attnsink/splash/default_x0.5/1_2b",
+    "run_name": "hackable_transformer_attn_sink/attnsink/splash/default_x0.5/1_2b",
+    "results_filepath": "experiments/speedrun/hackable_transformer_attn_sink/attnsink/splash/default_x0.5/1_2b",
     "author": {
       "name": "Calvin Xu",
       "affiliation": "Stanford University",
@@ -748,8 +850,8 @@
     "description": "Hackable Transformer (1_2b); AttentionWithSink (Splash); LR sweep multiplier=0.5"
   },
   {
-    "run_name": "hackable_transformer_starter/attnsink/splash/default_x0.5/300m",
-    "results_filepath": "experiments/speedrun/hackable_transformer_starter/attnsink/splash/default_x0.5/300m",
+    "run_name": "hackable_transformer_attn_sink/attnsink/splash/default_x0.5/300m",
+    "results_filepath": "experiments/speedrun/hackable_transformer_attn_sink/attnsink/splash/default_x0.5/300m",
     "author": {
       "name": "Calvin Xu",
       "affiliation": "Stanford University",
@@ -765,8 +867,8 @@
     "description": "Hackable Transformer (300m); AttentionWithSink (Splash); LR sweep multiplier=0.5"
   },
   {
-    "run_name": "hackable_transformer_starter/attnsink/splash/default_x0.5/520m",
-    "results_filepath": "experiments/speedrun/hackable_transformer_starter/attnsink/splash/default_x0.5/520m",
+    "run_name": "hackable_transformer_attn_sink/attnsink/splash/default_x0.5/520m",
+    "results_filepath": "experiments/speedrun/hackable_transformer_attn_sink/attnsink/splash/default_x0.5/520m",
     "author": {
       "name": "Calvin Xu",
       "affiliation": "Stanford University",
@@ -782,8 +884,8 @@
     "description": "Hackable Transformer (520m); AttentionWithSink (Splash); LR sweep multiplier=0.5"
   },
   {
-    "run_name": "hackable_transformer_starter/attnsink/splash/default_x2/130m",
-    "results_filepath": "experiments/speedrun/hackable_transformer_starter/attnsink/splash/default_x2/130m",
+    "run_name": "hackable_transformer_attn_sink/attnsink/splash/default_x2/130m",
+    "results_filepath": "experiments/speedrun/hackable_transformer_attn_sink/attnsink/splash/default_x2/130m",
     "author": {
       "name": "Calvin Xu",
       "affiliation": "Stanford University",
@@ -799,8 +901,8 @@
     "description": "Hackable Transformer (130m); AttentionWithSink (Muon) (Splash) (Higher Learning Rate)"
   },
   {
-    "run_name": "hackable_transformer_starter/attnsink/splash/default_x2/1_2b",
-    "results_filepath": "experiments/speedrun/hackable_transformer_starter/attnsink/splash/default_x2/1_2b",
+    "run_name": "hackable_transformer_attn_sink/attnsink/splash/default_x2/1_2b",
+    "results_filepath": "experiments/speedrun/hackable_transformer_attn_sink/attnsink/splash/default_x2/1_2b",
     "author": {
       "name": "Calvin Xu",
       "affiliation": "Stanford University",
@@ -816,8 +918,8 @@
     "description": "Hackable Transformer (1_2b); AttentionWithSink (Muon) (Splash) (Higher Learning Rate)"
   },
   {
-    "run_name": "hackable_transformer_starter/attnsink/splash/default_x2/300m",
-    "results_filepath": "experiments/speedrun/hackable_transformer_starter/attnsink/splash/default_x2/300m",
+    "run_name": "hackable_transformer_attn_sink/attnsink/splash/default_x2/300m",
+    "results_filepath": "experiments/speedrun/hackable_transformer_attn_sink/attnsink/splash/default_x2/300m",
     "author": {
       "name": "Calvin Xu",
       "affiliation": "Stanford University",
@@ -833,8 +935,8 @@
     "description": "Hackable Transformer (300m); AttentionWithSink (Muon) (Splash) (Higher Learning Rate)"
   },
   {
-    "run_name": "hackable_transformer_starter/attnsink/splash/default_x2/520m",
-    "results_filepath": "experiments/speedrun/hackable_transformer_starter/attnsink/splash/default_x2/520m",
+    "run_name": "hackable_transformer_attn_sink/attnsink/splash/default_x2/520m",
+    "results_filepath": "experiments/speedrun/hackable_transformer_attn_sink/attnsink/splash/default_x2/520m",
     "author": {
       "name": "Calvin Xu",
       "affiliation": "Stanford University",
@@ -850,8 +952,8 @@
     "description": "Hackable Transformer (520m); AttentionWithSink (Muon) (Splash) (Higher Learning Rate)"
   },
   {
-    "run_name": "hackable_transformer_starter/attnsink/splash/default_x4/130m",
-    "results_filepath": "experiments/speedrun/hackable_transformer_starter/attnsink/splash/default_x4/130m",
+    "run_name": "hackable_transformer_attn_sink/attnsink/splash/default_x4/130m",
+    "results_filepath": "experiments/speedrun/hackable_transformer_attn_sink/attnsink/splash/default_x4/130m",
     "author": {
       "name": "Calvin Xu",
       "affiliation": "Stanford University",
@@ -867,8 +969,8 @@
     "description": "Hackable Transformer (130m); AttentionWithSink (Splash); LR sweep multiplier=4"
   },
   {
-    "run_name": "hackable_transformer_starter/attnsink/splash/default_x4/1_2b",
-    "results_filepath": "experiments/speedrun/hackable_transformer_starter/attnsink/splash/default_x4/1_2b",
+    "run_name": "hackable_transformer_attn_sink/attnsink/splash/default_x4/1_2b",
+    "results_filepath": "experiments/speedrun/hackable_transformer_attn_sink/attnsink/splash/default_x4/1_2b",
     "author": {
       "name": "Calvin Xu",
       "affiliation": "Stanford University",
@@ -884,8 +986,8 @@
     "description": "Hackable Transformer (1_2b); AttentionWithSink (Splash); LR sweep multiplier=4"
   },
   {
-    "run_name": "hackable_transformer_starter/attnsink/splash/default_x4/300m",
-    "results_filepath": "experiments/speedrun/hackable_transformer_starter/attnsink/splash/default_x4/300m",
+    "run_name": "hackable_transformer_attn_sink/attnsink/splash/default_x4/300m",
+    "results_filepath": "experiments/speedrun/hackable_transformer_attn_sink/attnsink/splash/default_x4/300m",
     "author": {
       "name": "Calvin Xu",
       "affiliation": "Stanford University",
@@ -901,8 +1003,8 @@
     "description": "Hackable Transformer (300m); AttentionWithSink (Splash); LR sweep multiplier=4"
   },
   {
-    "run_name": "hackable_transformer_starter/attnsink/splash/default_x4/520m",
-    "results_filepath": "experiments/speedrun/hackable_transformer_starter/attnsink/splash/default_x4/520m",
+    "run_name": "hackable_transformer_attn_sink/attnsink/splash/default_x4/520m",
+    "results_filepath": "experiments/speedrun/hackable_transformer_attn_sink/attnsink/splash/default_x4/520m",
     "author": {
       "name": "Calvin Xu",
       "affiliation": "Stanford University",
@@ -918,8 +1020,8 @@
     "description": "Hackable Transformer (520m); AttentionWithSink (Splash); LR sweep multiplier=4"
   },
   {
-    "run_name": "hackable_transformer_starter/std_attn/1.2b",
-    "results_filepath": "experiments/speedrun/hackable_transformer_starter/std_attn/1.2b",
+    "run_name": "hackable_transformer_attn_sink/std_attn/1.2b",
+    "results_filepath": "experiments/speedrun/hackable_transformer_attn_sink/std_attn/1.2b",
     "author": {
       "name": "Calvin Xu",
       "affiliation": "Stanford University",
@@ -935,8 +1037,8 @@
     "description": "Hackable Transformer (1_2b); Attention (Muon)"
   },
   {
-    "run_name": "hackable_transformer_starter/std_attn/130m",
-    "results_filepath": "experiments/speedrun/hackable_transformer_starter/std_attn/130m",
+    "run_name": "hackable_transformer_attn_sink/std_attn/130m",
+    "results_filepath": "experiments/speedrun/hackable_transformer_attn_sink/std_attn/130m",
     "author": {
       "name": "Calvin Xu",
       "affiliation": "Stanford University",
@@ -952,8 +1054,8 @@
     "description": "Hackable Transformer (130m); Attention (Muon)"
   },
   {
-    "run_name": "hackable_transformer_starter/std_attn/300m",
-    "results_filepath": "experiments/speedrun/hackable_transformer_starter/std_attn/300m",
+    "run_name": "hackable_transformer_attn_sink/std_attn/300m",
+    "results_filepath": "experiments/speedrun/hackable_transformer_attn_sink/std_attn/300m",
     "author": {
       "name": "Calvin Xu",
       "affiliation": "Stanford University",
@@ -969,8 +1071,8 @@
     "description": "Hackable Transformer (300m); Attention (Muon)"
   },
   {
-    "run_name": "hackable_transformer_starter/std_attn/520m",
-    "results_filepath": "experiments/speedrun/hackable_transformer_starter/std_attn/520m",
+    "run_name": "hackable_transformer_attn_sink/std_attn/520m",
+    "results_filepath": "experiments/speedrun/hackable_transformer_attn_sink/std_attn/520m",
     "author": {
       "name": "Calvin Xu",
       "affiliation": "Stanford University",
@@ -1343,23 +1445,6 @@
     "description": "Qwen3 ~1.2B (LLaMA-geometry-matched) with MuonH."
   },
   {
-    "run_name": "muonh_qwen3_scaling/200m",
-    "results_filepath": "experiments/speedrun/muonh_qwen3_scaling/200m",
-    "author": {
-      "name": "Kaiyue Wen",
-      "affiliation": "Stanford University",
-      "url": "https://whenwen.github.io"
-    },
-    "model_size": 210061440,
-    "training_hardware_flops": 1.5826533123346866e+19,
-    "training_time": 1255.2770561030193,
-    "model_flops": 4.1559385496459674e+18,
-    "eval_paloma_c4_en_bpb": 1.110611081123352,
-    "wandb_link": "https://wandb.ai/marin-community/marin/runs/qwen3_200m_muonh_4096_lr_0.02_adam_lr_0.008-d9469d",
-    "run_completion_timestamp": "2025-12-18 19:49:30 UTC",
-    "description": "Qwen3 ~200M (isoflop-inspired geometry) with MuonH."
-  },
-  {
     "run_name": "muonh_qwen3_scaling/300m",
     "results_filepath": "experiments/speedrun/muonh_qwen3_scaling/300m",
     "author": {
@@ -1375,23 +1460,6 @@
     "wandb_link": "https://wandb.ai/marin-community/marin/runs/qwen3_300m_muonh_4096_lr_0.01-f5ae20",
     "run_completion_timestamp": "2025-10-12 19:55:41 UTC",
     "description": "Qwen3 ~300M (LLaMA-geometry-matched) with MuonH."
-  },
-  {
-    "run_name": "muonh_qwen3_scaling/400m",
-    "results_filepath": "experiments/speedrun/muonh_qwen3_scaling/400m",
-    "author": {
-      "name": "Kaiyue Wen",
-      "affiliation": "Stanford University",
-      "url": "https://whenwen.github.io"
-    },
-    "model_size": 358322048,
-    "training_hardware_flops": 3.785234327756769e+19,
-    "training_time": 3002.2480391471836,
-    "model_flops": 1.3638199483400454e+19,
-    "eval_paloma_c4_en_bpb": 1.0430655479431152,
-    "wandb_link": "https://wandb.ai/marin-community/marin/runs/qwen3_400m_muonh_4096_lr_0.01-3acb88",
-    "run_completion_timestamp": "2025-12-18 20:15:27 UTC",
-    "description": "Qwen3 ~400M (isoflop-inspired geometry) with MuonH."
   },
   {
     "run_name": "muonh_qwen3_scaling/520m",
@@ -1411,21 +1479,191 @@
     "description": "Qwen3 ~520M (LLaMA-geometry-matched) with MuonH."
   },
   {
-    "run_name": "muonh_qwen3_scaling/800m",
-    "results_filepath": "experiments/speedrun/muonh_qwen3_scaling/800m",
+    "run_name": "nano_arch_ablations/00_baseline",
+    "results_filepath": "experiments/speedrun/nano_arch_ablations/00_baseline",
     "author": {
-      "name": "Kaiyue Wen",
-      "affiliation": "Stanford University",
-      "url": "https://whenwen.github.io"
+      "name": "Larry Dial",
+      "affiliation": "OpenAthena",
+      "url": "https://github.com/ClassicLarry"
     },
-    "model_size": 837046144,
-    "training_hardware_flops": 2.2375201022490496e+20,
-    "training_time": 17746.828222152995,
-    "model_flops": 8.340840896299794e+19,
-    "eval_paloma_c4_en_bpb": 0.9594760537147522,
-    "wandb_link": "https://wandb.ai/marin-community/marin/runs/qwen3_800m_muonh_4096_low_lr-04af13",
-    "run_completion_timestamp": "2025-12-20 16:05:57 UTC",
-    "description": "Qwen3 ~800M (isoflop-inspired geometry) with MuonH."
+    "model_size": 150215168,
+    "training_hardware_flops": 6.404593527277582e+17,
+    "training_time": 582.2357752070529,
+    "model_flops": 1.52995325018112e+17,
+    "eval_paloma_c4_en_bpb": 1.3159953355789185,
+    "wandb_link": "https://wandb.ai/marin-community/marin/runs/nano_ablations_00_baseline-c93b1c",
+    "run_completion_timestamp": "2026-02-18 03:45:10 UTC",
+    "description": "Baseline Transformer with Muon"
+  },
+  {
+    "run_name": "nano_arch_ablations/01_qk_norm",
+    "results_filepath": "experiments/speedrun/nano_arch_ablations/01_qk_norm",
+    "author": {
+      "name": "Larry Dial",
+      "affiliation": "OpenAthena",
+      "url": "https://github.com/ClassicLarry"
+    },
+    "model_size": 150215168,
+    "training_hardware_flops": 6.812836652747821e+17,
+    "training_time": 619.3487866134383,
+    "model_flops": 1.52995325018112e+17,
+    "eval_paloma_c4_en_bpb": 1.3155632019042969,
+    "wandb_link": "https://wandb.ai/marin-community/marin/runs/nano_ablations_01_qk_norm-52dd4c",
+    "run_completion_timestamp": "2026-02-18 04:01:01 UTC",
+    "description": "Baseline Transformer + QK Norm (non-parametric RMS norm on Q/K before RoPE)"
+  },
+  {
+    "run_name": "nano_arch_ablations/02_relu_squared",
+    "results_filepath": "experiments/speedrun/nano_arch_ablations/02_relu_squared",
+    "author": {
+      "name": "Larry Dial",
+      "affiliation": "OpenAthena",
+      "url": "https://github.com/ClassicLarry"
+    },
+    "model_size": 150215168,
+    "training_hardware_flops": 6.75860571161582e+17,
+    "training_time": 614.4187010559835,
+    "model_flops": 1.52995325018112e+17,
+    "eval_paloma_c4_en_bpb": 1.3156267404556274,
+    "wandb_link": "https://wandb.ai/marin-community/marin/runs/nano_ablations_02_relu_squared-9b2316",
+    "run_completion_timestamp": "2026-02-18 04:16:44 UTC",
+    "description": "01_qk_norm + ReluSquared MLP activation"
+  },
+  {
+    "run_name": "nano_arch_ablations/03_resid_lambdas",
+    "results_filepath": "experiments/speedrun/nano_arch_ablations/03_resid_lambdas",
+    "author": {
+      "name": "Larry Dial",
+      "affiliation": "OpenAthena",
+      "url": "https://github.com/ClassicLarry"
+    },
+    "model_size": 150215174,
+    "training_hardware_flops": 6.83167378604447e+17,
+    "training_time": 621.06125327677,
+    "model_flops": 1.52995325018112e+17,
+    "eval_paloma_c4_en_bpb": 1.3123219013214111,
+    "wandb_link": "https://wandb.ai/marin-community/marin/runs/nano_ablations_03_resid_lambdas-3b070a",
+    "run_completion_timestamp": "2026-02-18 04:51:01 UTC",
+    "description": "02_relu_squared + learnable residual lambdas scaling the stream before each block"
+  },
+  {
+    "run_name": "nano_arch_ablations/04_x0_skips",
+    "results_filepath": "experiments/speedrun/nano_arch_ablations/04_x0_skips",
+    "author": {
+      "name": "Larry Dial",
+      "affiliation": "OpenAthena",
+      "url": "https://github.com/ClassicLarry"
+    },
+    "model_size": 150215180,
+    "training_hardware_flops": 6.857230006090772e+17,
+    "training_time": 623.3845460082521,
+    "model_flops": 1.52995325018112e+17,
+    "eval_paloma_c4_en_bpb": 1.3111789226531982,
+    "wandb_link": "https://wandb.ai/marin-community/marin/runs/nano_ablations_04_x0_skips-47d298",
+    "run_completion_timestamp": "2026-02-18 05:05:09 UTC",
+    "description": "03_resid_lambdas + x0 skip connections (zero-initialized)"
+  },
+  {
+    "run_name": "nano_arch_ablations/05_value_embeds",
+    "results_filepath": "experiments/speedrun/nano_arch_ablations/05_value_embeds",
+    "author": {
+      "name": "Larry Dial",
+      "affiliation": "OpenAthena",
+      "url": "https://github.com/ClassicLarry"
+    },
+    "model_size": 281549336,
+    "training_hardware_flops": 7.165233473063621e+17,
+    "training_time": 651.3848611876019,
+    "model_flops": 1.52995325018112e+17,
+    "eval_paloma_c4_en_bpb": 1.3007071018218994,
+    "wandb_link": "https://wandb.ai/marin-community/marin/runs/nano_ablations_05_value_embeds-e19a23",
+    "run_completion_timestamp": "2026-02-18 05:19:39 UTC",
+    "description": "04_x0_skips + value embeddings with learnable mixing lambdas"
+  },
+  {
+    "run_name": "nano_arch_ablations/06_gated_value_embeds",
+    "results_filepath": "experiments/speedrun/nano_arch_ablations/06_gated_value_embeds",
+    "author": {
+      "name": "Larry Dial",
+      "affiliation": "OpenAthena",
+      "url": "https://github.com/ClassicLarry"
+    },
+    "model_size": 281549912,
+    "training_hardware_flops": 7.306332426858949e+17,
+    "training_time": 664.212038805359,
+    "model_flops": 1.52995325018112e+17,
+    "eval_paloma_c4_en_bpb": 1.2961934804916382,
+    "wandb_link": "https://wandb.ai/marin-community/marin/runs/nano_ablations_06_gated_value_embeds-e1ab28",
+    "run_completion_timestamp": "2026-02-18 05:35:27 UTC",
+    "description": "05_value_embeds + per-head gating on value embeddings (zero-init gate)"
+  },
+  {
+    "run_name": "nano_arch_ablations/07_head_dim_128",
+    "results_filepath": "experiments/speedrun/nano_arch_ablations/07_head_dim_128",
+    "author": {
+      "name": "Larry Dial",
+      "affiliation": "OpenAthena",
+      "url": "https://github.com/ClassicLarry"
+    },
+    "model_size": 281549624,
+    "training_hardware_flops": 6.013770263893763e+17,
+    "training_time": 546.7063876267057,
+    "model_flops": 1.5287936090112e+17,
+    "eval_paloma_c4_en_bpb": 1.2838261127471924,
+    "wandb_link": "https://wandb.ai/marin-community/marin/runs/nano_ablations_07_head_dim_128-599d46",
+    "run_completion_timestamp": "2026-02-18 05:48:03 UTC",
+    "description": "06_gated_value_embeds + head_dim=128 (6 heads instead of 12)"
+  },
+  {
+    "run_name": "nano_arch_ablations/08_partial_rope",
+    "results_filepath": "experiments/speedrun/nano_arch_ablations/08_partial_rope",
+    "author": {
+      "name": "Larry Dial",
+      "affiliation": "OpenAthena",
+      "url": "https://github.com/ClassicLarry"
+    },
+    "model_size": 281549624,
+    "training_hardware_flops": 6.204738888185937e+17,
+    "training_time": 564.067171653267,
+    "model_flops": 1.5287936090112e+17,
+    "eval_paloma_c4_en_bpb": 1.282686471939087,
+    "wandb_link": "https://wandb.ai/marin-community/marin/runs/nano_ablations_08_partial_rope-a2a7ee",
+    "run_completion_timestamp": "2026-02-18 06:01:00 UTC",
+    "description": "07_head_dim_128 + partial RoPE (rotate first half of head dims only)"
+  },
+  {
+    "run_name": "nano_arch_ablations/09_attn_gate",
+    "results_filepath": "experiments/speedrun/nano_arch_ablations/09_attn_gate",
+    "author": {
+      "name": "Larry Dial",
+      "affiliation": "OpenAthena",
+      "url": "https://github.com/ClassicLarry"
+    },
+    "model_size": 281549912,
+    "training_hardware_flops": 6.242145492019889e+17,
+    "training_time": 567.467772001808,
+    "model_flops": 1.5287936090112e+17,
+    "eval_paloma_c4_en_bpb": 1.2786505222320557,
+    "wandb_link": "https://wandb.ai/marin-community/marin/runs/nano_ablations_09_attn_gate-55750b",
+    "run_completion_timestamp": "2026-02-18 06:14:00 UTC",
+    "description": "08_partial_rope + per-head attention output gate (zero-init)"
+  },
+  {
+    "run_name": "nano_arch_ablations/10_bigram_hash_embedding",
+    "results_filepath": "experiments/speedrun/nano_arch_ablations/10_bigram_hash_embedding",
+    "author": {
+      "name": "Larry Dial",
+      "affiliation": "OpenAthena",
+      "url": "https://github.com/ClassicLarry"
+    },
+    "model_size": 347216990,
+    "training_hardware_flops": 6.384534127727501e+17,
+    "training_time": 580.4121934297727,
+    "model_flops": 1.5287936090112e+17,
+    "eval_paloma_c4_en_bpb": 1.275705099105835,
+    "wandb_link": "https://wandb.ai/marin-community/marin/runs/nano_ablations_10_bigram_hash_embedding-fa50b7",
+    "run_completion_timestamp": "2026-02-18 06:27:21 UTC",
+    "description": "09_attn_gate + bigram hash embedding mixed into residual stream"
   },
   {
     "run_name": "olmo_50m_h200",
@@ -1448,9 +1686,9 @@
     "run_name": "parallel_llama/130m",
     "results_filepath": "experiments/speedrun/parallel_llama/130m",
     "author": {
-      "name": "Calvin Xu",
-      "affiliation": "Stanford University",
-      "url": "https://pinlinxu.com"
+      "name": "Harry Shin",
+      "affiliation": "Independent",
+      "url": "https://www.linkedin.com/in/harry-shin-34743216a/"
     },
     "model_size": 154147328,
     "training_hardware_flops": 1.1183816505882425e+19,
@@ -1465,9 +1703,9 @@
     "run_name": "parallel_llama/1_2b",
     "results_filepath": "experiments/speedrun/parallel_llama/1_2b",
     "author": {
-      "name": "Calvin Xu",
-      "affiliation": "Stanford University",
-      "url": "https://pinlinxu.com"
+      "name": "Harry Shin",
+      "affiliation": "Independent",
+      "url": "https://www.linkedin.com/in/harry-shin-34743216a/"
     },
     "model_size": 1431373824,
     "training_hardware_flops": 5.185995127207614e+20,
@@ -1482,9 +1720,9 @@
     "run_name": "parallel_llama/300m",
     "results_filepath": "experiments/speedrun/parallel_llama/300m",
     "author": {
-      "name": "Calvin Xu",
-      "affiliation": "Stanford University",
-      "url": "https://pinlinxu.com"
+      "name": "Harry Shin",
+      "affiliation": "Independent",
+      "url": "https://www.linkedin.com/in/harry-shin-34743216a/"
     },
     "model_size": 299649792,
     "training_hardware_flops": 4.92631987470051e+19,
@@ -1499,9 +1737,9 @@
     "run_name": "parallel_llama/520m",
     "results_filepath": "experiments/speedrun/parallel_llama/520m",
     "author": {
-      "name": "Calvin Xu",
-      "affiliation": "Stanford University",
-      "url": "https://pinlinxu.com"
+      "name": "Harry Shin",
+      "affiliation": "Independent",
+      "url": "https://www.linkedin.com/in/harry-shin-34743216a/"
     },
     "model_size": 602457088,
     "training_hardware_flops": 2.084976674323945e+20,
