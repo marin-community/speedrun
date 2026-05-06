@@ -1868,5 +1868,141 @@
     "wandb_link": "https://wandb.ai/marin-community/marin/runs/parallel_llama_75m_tpu_20250930_001036-9212b5",
     "run_completion_timestamp": "2025-09-30 10:49:43 UTC",
     "description": "Parallel Llama ~75M with parallel attention/MLP computation on TPU."
+  },
+  {
+    "run_name": "prism_berkeley_qwen3_scaling/130m",
+    "results_filepath": "experiments/speedrun/prism_berkeley_qwen3_scaling/130m",
+    "author": {
+      "name": "Kaiyue Wen",
+      "affiliation": "Stanford University",
+      "url": "https://whenwen.github.io"
+    },
+    "model_size": 154147328,
+    "training_hardware_flops": 8.485001046657521e+18,
+    "training_time": 4621.460265064009,
+    "model_flops": 1.777337490915459e+18,
+    "eval_paloma_c4_en_bpb": 1.1702665090560913,
+    "wandb_link": "https://wandb.ai/marin-community/marin/runs/qwen3_130m_prism_berkeley_o5_4096_lrx1-2fd229",
+    "run_completion_timestamp": "2026-04-11 22:45:49 UTC",
+    "description": "Qwen3 ~130m LR sweep with PRISM-Berkeley order 5 centered on Muon-style lr=1.60e-2 and Adam lr=3.20e-3."
+  },
+  {
+    "run_name": "prism_berkeley_qwen3_scaling/1_2b",
+    "results_filepath": "experiments/speedrun/prism_berkeley_qwen3_scaling/1_2b",
+    "author": {
+      "name": "Kaiyue Wen",
+      "affiliation": "Stanford University",
+      "url": "https://whenwen.github.io"
+    },
+    "model_size": 1431373824,
+    "training_hardware_flops": 5.173677722224288e+20,
+    "training_time": 70447.68140283617,
+    "model_flops": 2.071634014279733e+20,
+    "eval_paloma_c4_en_bpb": 0.9522125720977784,
+    "wandb_link": "https://wandb.ai/marin-community/marin/runs/qwen3_1_2b_prism_berkeley_o5_4096_lrx0_75-3c6dda",
+    "run_completion_timestamp": "2026-04-17 19:39:01 UTC",
+    "description": "Qwen3 ~1_2b LR sweep with PRISM-Berkeley order 5 centered on Muon-style lr=3.00e-3 and Adam lr=9.00e-4."
+  },
+  {
+    "run_name": "prism_berkeley_qwen3_scaling/300m",
+    "results_filepath": "experiments/speedrun/prism_berkeley_qwen3_scaling/300m",
+    "author": {
+      "name": "Kaiyue Wen",
+      "affiliation": "Stanford University",
+      "url": "https://whenwen.github.io"
+    },
+    "model_size": 299649792,
+    "training_hardware_flops": 3.587901746901421e+19,
+    "training_time": 19541.94851253497,
+    "model_flops": 9.99035877535934e+18,
+    "eval_paloma_c4_en_bpb": 1.0632001161575315,
+    "wandb_link": "https://wandb.ai/marin-community/marin/runs/qwen3_300m_prism_berkeley_o5_4096_lrx0_75-01eb1c",
+    "run_completion_timestamp": "2026-04-12 04:11:06 UTC",
+    "description": "Qwen3 ~300m LR sweep with PRISM-Berkeley order 5 centered on Muon-style lr=6.00e-3 and Adam lr=1.80e-3."
+  },
+  {
+    "run_name": "prism_berkeley_qwen3_scaling/520m",
+    "results_filepath": "experiments/speedrun/prism_berkeley_qwen3_scaling/520m",
+    "author": {
+      "name": "Kaiyue Wen",
+      "affiliation": "Stanford University",
+      "url": "https://whenwen.github.io"
+    },
+    "model_size": 602457088,
+    "training_hardware_flops": 1.4316251851733385e+20,
+    "training_time": 38987.613975308785,
+    "model_flops": 4.210403636805422e+19,
+    "eval_paloma_c4_en_bpb": 1.0090235471725464,
+    "wandb_link": "https://wandb.ai/marin-community/marin/runs/qwen3_520m_prism_berkeley_o5_4096_lrx0_5-a3c9fd",
+    "run_completion_timestamp": "2026-04-12 22:16:16 UTC",
+    "description": "Qwen3 ~520m LR sweep with PRISM-Berkeley order 5 centered on Muon-style lr=4.00e-3 and Adam lr=1.20e-3."
+  },
+  {
+    "run_name": "muonremez_qwen3_scaling/130m",
+    "results_filepath": "experiments/speedrun/muonremez_qwen3_scaling/130m",
+    "author": {
+      "name": "Kaiyue Wen",
+      "affiliation": "Stanford University",
+      "url": "https://whenwen.github.io"
+    },
+    "model_size": 154147328,
+    "training_hardware_flops": 8.365619668319792e+18,
+    "training_time": 4556.437727843024,
+    "model_flops": 1.777337490915459e+18,
+    "eval_paloma_c4_en_bpb": 1.1761422157287598,
+    "wandb_link": "https://wandb.ai/marin-community/marin/runs/qwen3_130m_muonremez_4096_lrx1_5-2509f6",
+    "run_completion_timestamp": "2026-04-11 23:52:18 UTC",
+    "description": "Qwen3 ~130m LR sweep with MuonRemez centered on Muon-style lr=2.40e-2 and Adam lr=4.80e-3."
+  },
+  {
+    "run_name": "muonremez_qwen3_scaling/1_2b",
+    "results_filepath": "experiments/speedrun/muonremez_qwen3_scaling/1_2b",
+    "author": {
+      "name": "Kaiyue Wen",
+      "affiliation": "Stanford University",
+      "url": "https://whenwen.github.io"
+    },
+    "model_size": 1431373824,
+    "training_hardware_flops": 5.0150885764394294e+20,
+    "training_time": 68288.24314323842,
+    "model_flops": 2.071634014279733e+20,
+    "eval_paloma_c4_en_bpb": 0.9491097331047058,
+    "wandb_link": "https://wandb.ai/marin-community/marin/runs/qwen3_1_2b_muonremez_4096_lrx1_5-31ebb4-b200-f97d99",
+    "run_completion_timestamp": "2026-04-22 00:33:03 UTC",
+    "description": "Qwen3 ~1_2b LR sweep with MuonRemez centered on Muon-style lr=8.00e-3 and Adam lr=1.80e-3."
+  },
+  {
+    "run_name": "muonremez_qwen3_scaling/300m",
+    "results_filepath": "experiments/speedrun/muonremez_qwen3_scaling/300m",
+    "author": {
+      "name": "Kaiyue Wen",
+      "affiliation": "Stanford University",
+      "url": "https://whenwen.github.io"
+    },
+    "model_size": 299649792,
+    "training_hardware_flops": 3.6219559180619325e+19,
+    "training_time": 19727.428747614013,
+    "model_flops": 9.99035877535934e+18,
+    "eval_paloma_c4_en_bpb": 1.0654246807098389,
+    "wandb_link": "https://wandb.ai/marin-community/marin/runs/qwen3_300m_muonremez_4096_lrx1_5-79a89e",
+    "run_completion_timestamp": "2026-04-12 14:46:08 UTC",
+    "description": "Qwen3 ~300m LR sweep with MuonRemez centered on Muon-style lr=1.20e-2 and Adam lr=3.60e-3."
+  },
+  {
+    "run_name": "muonremez_qwen3_scaling/520m",
+    "results_filepath": "experiments/speedrun/muonremez_qwen3_scaling/520m",
+    "author": {
+      "name": "Kaiyue Wen",
+      "affiliation": "Stanford University",
+      "url": "https://whenwen.github.io"
+    },
+    "model_size": 602457088,
+    "training_hardware_flops": 1.4031769395582771e+20,
+    "training_time": 38212.87961760014,
+    "model_flops": 4.210403636805422e+19,
+    "eval_paloma_c4_en_bpb": 1.0036576986312866,
+    "wandb_link": "https://wandb.ai/marin-community/marin/runs/qwen3_520m_muonremez_4096_lrx1_5-7e7df4-b200-d178e4",
+    "run_completion_timestamp": "2026-04-21 15:45:07 UTC",
+    "description": "Qwen3 ~520m LR sweep with MuonRemez centered on Muon-style lr=1.60e-2 and Adam lr=3.60e-3."
   }
 ]
